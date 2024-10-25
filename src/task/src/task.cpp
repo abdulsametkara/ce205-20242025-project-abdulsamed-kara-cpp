@@ -411,6 +411,22 @@ int assign_deadline(Assignment* assignment) {
 }
 
 
+int view_deadlines(const Assignment assignments[], int count) {
+    if (count == 0) {
+        printf("No assignments available.\n");
+        return -1;  // Hata: Görev listesi boş
+    }
+
+    printf("Assignments and Deadlines:\n");
+    for (int i = 0; i < count; i++) {
+        printf("%d. %s - %02d/%02d/%04d\n", 
+               i + 1, assignments[i].name, 
+               assignments[i].day, assignments[i].month, assignments[i].year);
+    }
+
+    return 0;  // Başarıyla listelendi
+}
+
 int reminderSystemMenu() {
     int choice;
 
