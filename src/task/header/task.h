@@ -14,6 +14,14 @@ typedef struct User {
     struct User* next;  // Zincirleme için baðlý liste yapýsý
 } User;
 
+typedef struct Task {
+    int id;
+    char name[100];
+    char description[255];
+    char category[50];
+    char dueDate[20];  // YYYY-MM-DD formatýnda son tarih
+} Task;
+
 void clearScreen();
 
 int enterToContinue();
@@ -21,6 +29,8 @@ int enterToContinue();
 int handleInputError();
 
 int getInput();
+
+
 
 
 int openingScreenMenu();
@@ -33,8 +43,7 @@ int printDeadlineSettingsMenu();
 
 int printTaskPrioritizationMenu();
 
-int createTaskMenu();
-
+int createTaskMenu(Task taskList[], int* taskCount);
 int deadlineSettingsMenu();
 
 int reminderSystemMenu();
@@ -47,15 +56,27 @@ int mainMenu(const char* pathFileUsers);
 
 
 
+
+
 int registerUser(User user, const char* pathFileUser);
 
 int registerUserMenu(const char* pathFileUsers);
 
 
 
+
+
 int loginUser(User loginUser, const char* pathFileUsers);
 
 int loginUserMenu(const char* pathFileUsers);
+
+
+
+
+int addTask(Task taskList[], int* taskCount, int maxTasks);
+void viewTask(const Task taskList[], int taskCount);
+void categorizeTask(const Task taskList[], int taskCount);
+
 
 
 

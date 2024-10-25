@@ -13,8 +13,11 @@
 #include <cstring>
 
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
-User* hashTable[TABLE_SIZE];
+#define MAX_TASKS 100  // Maksimum görev sayısı
 
+User* hashTable[TABLE_SIZE];
+Task taskList[MAX_TASKS];  // Görev listesi
+int taskCount = 0;  // Mevcut görev sayısı
 
 
 using namespace std;
@@ -133,7 +136,6 @@ int printCreateTaskMenu() {
 }
 
 
-// Son Tarih Ayarları Menüsü
 int printDeadlineSettingsMenu() {
     clearScreen();
     printf("========================================\n");
@@ -148,7 +150,6 @@ int printDeadlineSettingsMenu() {
 }
 
 
-// Hatırlatma Sistemi Menüsü
 int printReminderSystemMenu() {
     clearScreen();
     printf("========================================\n");
@@ -163,7 +164,6 @@ int printReminderSystemMenu() {
 }
 
 
-// Görev Önceliği Menüsü
 int printTaskPrioritizationMenu() {
     clearScreen();
     printf("========================================\n");
@@ -204,31 +204,33 @@ int loadUsers(const char* pathFileUsers, User** users) {
     return count;
 }
 
-int createTaskMenu() {
+int createTaskMenu(Task taskList[], int* taskCount) {
+    int maxTasks = 100;  // Lokal olarak tanımlanan ve başlangıç değeri atanan değişken
     int choice;
 
     while (1) {
-        printCreateTaskMenu();
-        choice = getInput();
+        printCreateTaskMenu();  // Menü çıktısını ekrana basar
+        choice = getInput();  // Kullanıcıdan giriş alır
 
         if (choice == -2) {
-            handleInputError();
+            handleInputError();  // Hatalı giriş
             enterToContinue();
             continue;
         }
 
         switch (choice) {
         case 1:
-            //addBookMenu(pathFileBooks);
+            addTask(taskList, taskCount, maxTasks);  // Görev ekleme
             break;
         case 2:
-            //deleteBookMenu(pathFileBooks);
+            viewTask(taskList, *taskCount);  // Görevleri görüntüleme
+            enterToContinue();
             break;
         case 3:
-            //updateBookMenu(pathFileBooks);
+            categorizeTask(taskList, *taskCount);  // Kategoriye göre listeleme
             break;
         case 4:
-            return 0;
+            return 0;  // Menüden çıkış
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -237,6 +239,108 @@ int createTaskMenu() {
         }
     }
 }
+
+
+
+
+
+/**
+ * @brief Kullanıcıdan bir görev bilgisi alır ve görev listesine ekler.
+ *
+ * @param taskList Görev listesinin tutulduğu dizi.
+ * @param taskCount Mevcut görev sayısı (pointer ile güncellenecek).
+ * @param maxTasks Maksimum görev sayısı.
+ * @return 1: Başarıyla eklendi, 0: Liste dolu.
+ */
+int addTask(Task taskList[], int* taskCount, int maxTasks) {
+    if (*taskCount >= maxTasks) {
+        printf("Task list is full. Cannot add more tasks.\n");
+        return 0;  // Görev listesi dolu
+    }
+
+    Task newTask;
+    newTask.id = *taskCount + 1;  // Otomatik ID atama
+
+    printf("Enter Task Name: ");
+    fgets(newTask.name, sizeof(newTask.name), stdin);
+    newTask.name[strcspn(newTask.name, "\n")] = 0;
+
+    printf("Enter Task Description: ");
+    fgets(newTask.description, sizeof(newTask.description), stdin);
+    newTask.description[strcspn(newTask.description, "\n")] = 0;
+
+    printf("Enter Task Category: ");
+    fgets(newTask.category, sizeof(newTask.category), stdin);
+    newTask.category[strcspn(newTask.category, "\n")] = 0;
+
+    printf("Enter Due Date (YYYY-MM-DD): ");
+    fgets(newTask.dueDate, sizeof(newTask.dueDate), stdin);
+    newTask.dueDate[strcspn(newTask.dueDate, "\n")] = 0;
+
+    // Görevi listeye ekle
+    taskList[*taskCount] = newTask;
+    (*taskCount)++;
+
+    printf("Task added successfully!\n");
+    return 1;  // Başarıyla eklendi
+}
+
+
+void viewTask(const Task taskList[], int taskCount) {
+    if (taskCount == 0) {
+        printf("No tasks available.\n");
+        return;
+    }
+
+    printf("List of Tasks:\n");
+    for (int i = 0; i < taskCount; i++) {
+        printf("ID: %d\n", taskList[i].id);
+        printf("Name: %s\n", taskList[i].name);
+        printf("Description: %s\n", taskList[i].description);
+        printf("Category: %s\n", taskList[i].category);
+        printf("Due Date: %s\n", taskList[i].dueDate);
+        printf("---------------------------\n");
+    }
+}
+
+
+void categorizeTask(const Task taskList[], int taskCount) {
+    if (taskCount == 0) {
+        printf("No tasks available to categorize.\n");
+        enterToContinue();
+        return;
+    }
+
+    char category[50];
+    printf("Enter category to filter: ");
+    fgets(category, sizeof(category), stdin);
+    category[strcspn(category, "\n")] = 0;  // Yeni satırı sil
+
+    int found = 0;
+    printf("Tasks in category '%s':\n", category);
+    for (int i = 0; i < taskCount; i++) {
+        if (strcmp(taskList[i].category, category) == 0) {
+            printf("ID: %d\n", taskList[i].id);
+            printf("Name: %s\n", taskList[i].name);
+            printf("Description: %s\n", taskList[i].description);
+            printf("Due Date: %s\n", taskList[i].dueDate);
+            printf("---------------------------\n");
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("No tasks found in this category.\n");
+    }
+
+    enterToContinue();  // Kullanıcı devam etmek için bir tuşa basar
+}
+
+
+
+
+
+
 
 int deadlineSettingsMenu() {
     int choice;
@@ -253,10 +357,8 @@ int deadlineSettingsMenu() {
 
         switch (choice) {
         case 1:
-            //addBookMenu(pathFileBooks);
             break;
         case 2:
-            //deleteBookMenu(pathFileBooks);
             break;
         case 3:
             return 0;
@@ -284,10 +386,8 @@ int reminderSystemMenu() {
 
         switch (choice) {
         case 1:
-            //addBookMenu(pathFileBooks);
             break;
         case 2:
-            //deleteBookMenu(pathFileBooks);
             break;
         case 3:
             return 0;
@@ -315,10 +415,8 @@ int taskPrioritizationMenu() {
 
         switch (choice) {
         case 1:
-            //addBookMenu(pathFileBooks);
             break;
         case 2:
-            //deleteBookMenu(pathFileBooks);
             break;
         case 3:
             return 0;
@@ -530,7 +628,7 @@ int userOptionsMenu() {
 
         switch (choice) {
         case 1:
-            createTaskMenu();
+            createTaskMenu(taskList, &taskCount);  
             break;
         case 2:
             deadlineSettingsMenu();
