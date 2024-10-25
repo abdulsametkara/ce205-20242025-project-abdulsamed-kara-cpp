@@ -14,6 +14,8 @@
 
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
 #define MAX_TASKS 100  // Maksimum görev sayısı
+#define MAX_ASSIGNMENT_NAME 50
+
 
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
@@ -341,9 +343,10 @@ void categorizeTask(const Task taskList[], int taskCount) {
 
 
 
-
+// Menü fonksiyonu
 int deadlineSettingsMenu() {
     int choice;
+    Assignment assignment;  // Görev yapısı
 
     while (1) {
         printDeadlineSettingsMenu();
@@ -357,11 +360,16 @@ int deadlineSettingsMenu() {
 
         switch (choice) {
         case 1:
+            // Deadline atama fonksiyonunu çağır
+            assign_deadline(&assignment);
+            enterToContinue();
             break;
         case 2:
+            printf("View Deadlines: Not implemented yet.\n");
+            enterToContinue();
             break;
         case 3:
-            return 0;
+            return 0;  // Menüden çıkış
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -370,6 +378,38 @@ int deadlineSettingsMenu() {
         }
     }
 }
+
+// Kullanıcıdan görev bilgisi alıp deadline atayan fonksiyon
+int assign_deadline(Assignment* assignment) {
+    char taskName[MAX_ASSIGNMENT_NAME];
+    int day, month, year;
+
+    // Kullanıcıdan görev adı ve tarih bilgisi al
+    printf("Enter Task Name: ");
+    while (getchar() != '\n');  // Önceki newline'ı temizle
+    fgets(taskName, MAX_ASSIGNMENT_NAME, stdin);
+    taskName[strcspn(taskName, "\n")] = '\0';  // Yeni satırı sil
+
+    printf("Enter Deadline (day month year): ");
+    if (scanf("%d %d %d", &day, &month, &year) != 3) {
+        printf("Invalid input! Please try again.\n");
+        while (getchar() != '\n');  // stdin temizle
+        return -1;
+    }
+
+    // Görev adını kopyala
+    strncpy(assignment->name, taskName, MAX_ASSIGNMENT_NAME);
+    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  // Güvenlik için null terminator
+
+    // Deadline tarihini ata
+    assignment->day = day;
+    assignment->month = month;
+    assignment->year = year;
+
+    printf("Deadline assigned successfully!\n");
+    return 0;
+}
+
 
 int reminderSystemMenu() {
     int choice;
