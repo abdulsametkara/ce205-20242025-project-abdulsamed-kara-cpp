@@ -12,6 +12,11 @@
 #include <iostream>
 #include <cstring>
 
+#define TABLE_SIZE 10  // Hash tablosunun boyutu
+User* hashTable[TABLE_SIZE];
+
+
+
 using namespace std;
 
 User loggedUser;
@@ -326,51 +331,86 @@ int taskPrioritizationMenu() {
     }
 }
 
+int hashFunction(const char* email) {
+    int hash = 0;
+    while (*email) {
+        hash = (hash + *email) % TABLE_SIZE;
+        email++;
+    }
+    return hash;
+}
+
+void insertUserToHashTable(User* user) {
+    int index = hashFunction(user->email);
+
+    // Yeni kullanıcıyı eklemek için bağlı liste başına yerleştiriyoruz
+    user->next = hashTable[index];
+    hashTable[index] = user;
+}
+
+User* searchUserInHashTable(const char* email, const char* password) {
+    int index = hashFunction(email);
+    User* current = hashTable[index];
+
+    // Bağlı liste üzerinde arama yapıyoruz
+    while (current) {
+        if (strcmp(current->email, email) == 0 && strcmp(current->password, password) == 0) {
+            return current;  // Kullanıcı bulundu
+        }
+        current = current->next;
+    }
+    return NULL;  // Kullanıcı bulunamadı
+}
+
+
 int registerUser(User user, const char* pathFileUser) {
     FILE* file = fopen(pathFileUser, "rb+");
     int userCount = 0;
     User* users = NULL;
 
     if (file) {
-
         fread(&userCount, sizeof(int), 1, file);
-        if (userCount > 0) {
-            users = (User*)malloc(sizeof(User) * userCount);
-            fread(users, sizeof(User), userCount, file);
+        users = (User*)malloc(sizeof(User) * userCount);
+        fread(users, sizeof(User), userCount, file);
 
-            for (int i = 0; i < userCount; ++i) {
-                if (strcmp(users[i].email, user.email) == 0) {
-                    printf("User already exists.\n");
-                    fclose(file);
-                    free(users);
-                    enterToContinue();
-                    return 0;
-                }
-            }
+        // Hash tablosunu doldur
+        for (int i = 0; i < userCount; ++i) {
+            insertUserToHashTable(&users[i]);
         }
-        rewind(file);
+
+        // Kullanıcı zaten var mı kontrol et
+        if (searchUserInHashTable(user.email, user.password)) {
+            printf("User already exists.\n");
+            fclose(file);
+            free(users);
+            enterToContinue();
+            return 0;
+        }
     }
     else {
         file = fopen(pathFileUser, "wb");
     }
 
-    user.id = getNewUserId(users, userCount);
+    user.id = userCount + 1;  // Yeni kullanıcı ID'si
+    insertUserToHashTable(&user);  // Hash tablosuna ekle
+
+    // Kullanıcıyı dosyaya ekle
     userCount++;
     users = (User*)realloc(users, sizeof(User) * userCount);
     users[userCount - 1] = user;
 
+    rewind(file);
     fwrite(&userCount, sizeof(int), 1, file);
     fwrite(users, sizeof(User), userCount, file);
 
     printf("User registered successfully: Welcome %s %s\n", user.name, user.surname);
 
-    if (users != NULL) {
-        free(users);
-    }
+    free(users);
     fclose(file);
     enterToContinue();
     return 1;
 }
+
 
 /**
  * @brief Displays a menu for user registration.
@@ -400,16 +440,9 @@ int registerUserMenu(const char* pathFileUsers) {
     fgets(newUser.password, sizeof(newUser.password), stdin);
     newUser.password[strcspn(newUser.password, "\n")] = 0;
 
-    if (registerUser(newUser, pathFileUsers)) {
-        return 1;
-    }
-    else {
-        printf("Registration failed.\n");
-    }
-
-    enterToContinue();
-    return 1;
+    return registerUser(newUser, pathFileUsers);
 }
+
 
 /**
  * @brief Logs in a user.
@@ -429,30 +462,32 @@ int loginUser(User loginUser, const char* pathFileUsers) {
 
     int userCount = 0;
     fread(&userCount, sizeof(int), 1, file);
-    if (userCount == 0) {
-        printf("No users registered.\n");
+    User* users = (User*)malloc(sizeof(User) * userCount);
+    fread(users, sizeof(User), userCount, file);
+
+    // Hash tablosunu doldur
+    for (int i = 0; i < userCount; ++i) {
+        insertUserToHashTable(&users[i]);
+    }
+
+    User* foundUser = searchUserInHashTable(loginUser.email, loginUser.password);
+    if (foundUser) {
+        printf("Login successful.\n");
+        loggedUser = *foundUser;
+        free(users);
+        fclose(file);
+        enterToContinue();
+        return 1;
+    }
+    else {
+        printf("Incorrect email or password.\n");
+        free(users);
         fclose(file);
         enterToContinue();
         return 0;
     }
-
-    User userFromFile;
-    for (int i = 0; i < userCount; i++) {
-        fread(&userFromFile, sizeof(User), 1, file);
-        if (strcmp(userFromFile.email, loginUser.email) == 0 && strcmp(userFromFile.password, loginUser.password) == 0) {
-            printf("Login successful.\n");
-            fclose(file);
-            enterToContinue();
-            loggedUser = userFromFile;
-            return 1;
-        }
-    }
-
-    printf("Incorrect email or password.\n");
-    fclose(file);
-    enterToContinue();
-    return 0;
 }
+
 
 /**
  * @brief Displays a menu for user login.
@@ -464,18 +499,21 @@ int loginUser(User loginUser, const char* pathFileUsers) {
  */
 int loginUserMenu(const char* pathFileUsers) {
     clearScreen();
-    User loginUsers;
+    User userInput;  // Değişken adını loginUser yerine userInput yaptık.
 
     printf("Enter email: ");
-    fgets(loginUsers.email, sizeof(loginUsers.email), stdin);
-    loginUsers.email[strcspn(loginUsers.email, "\n")] = 0;
+    fgets(userInput.email, sizeof(userInput.email), stdin);
+    userInput.email[strcspn(userInput.email, "\n")] = 0;
 
     printf("Enter password: ");
-    fgets(loginUsers.password, sizeof(loginUsers.password), stdin);
-    loginUsers.password[strcspn(loginUsers.password, "\n")] = 0;
+    fgets(userInput.password, sizeof(userInput.password), stdin);
+    userInput.password[strcspn(userInput.password, "\n")] = 0;
 
-    return loginUser(loginUsers, pathFileUsers);
+    // loginUser fonksiyonunu çağırırken yeni değişkeni kullanıyoruz
+    return loginUser(userInput, pathFileUsers);
 }
+
+
 
 int userOptionsMenu() {
     int choice;

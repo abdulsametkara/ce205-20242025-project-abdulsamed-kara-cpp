@@ -5,12 +5,13 @@
 
 using namespace std;
 
-typedef struct {
-	int id;
-	char name[100];
-	char surname[100];
-	char email[100];
-	char password[100];
+typedef struct User {
+    int id;
+    char name[50];
+    char surname[50];
+    char email[50];
+    char password[50];
+    struct User* next;  // Zincirleme için baðlý liste yapýsý
 } User;
 
 void clearScreen();
