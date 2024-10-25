@@ -15,6 +15,8 @@
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
 #define MAX_TASKS 100  // Maksimum görev sayısı
 #define MAX_ASSIGNMENT_NAME 50
+Assignment assignments[100];
+
 
 
 User* hashTable[TABLE_SIZE];
@@ -365,7 +367,7 @@ int deadlineSettingsMenu() {
             enterToContinue();
             break;
         case 2:
-            printf("View Deadlines: Not implemented yet.\n");
+            viewDeadlines(assignments, taskCount);
             enterToContinue();
             break;
         case 3:
@@ -384,12 +386,16 @@ int assign_deadline(Assignment* assignment) {
     char taskName[MAX_ASSIGNMENT_NAME];
     int day, month, year;
 
-    // Kullanıcıdan görev adı ve tarih bilgisi al
+    // Görev adını kullanıcıdan al
     printf("Enter Task Name: ");
-    while (getchar() != '\n');  // Önceki newline'ı temizle
-    fgets(taskName, MAX_ASSIGNMENT_NAME, stdin);
+    while (getchar() != '\n');  // stdin'deki önceki newline'ı temizle
+    if (fgets(taskName, MAX_ASSIGNMENT_NAME, stdin) == NULL) {
+        printf("Error reading task name.\n");
+        return -1;
+    }
     taskName[strcspn(taskName, "\n")] = '\0';  // Yeni satırı sil
 
+    // Deadline bilgisi al
     printf("Enter Deadline (day month year): ");
     if (scanf("%d %d %d", &day, &month, &year) != 3) {
         printf("Invalid input! Please try again.\n");
@@ -397,9 +403,15 @@ int assign_deadline(Assignment* assignment) {
         return -1;
     }
 
+    // Tarih geçerliliğini kontrol et
+    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
+        printf("Invalid date! Please enter a valid date.\n");
+        return -1;
+    }
+
     // Görev adını kopyala
-    strncpy(assignment->name, taskName, MAX_ASSIGNMENT_NAME);
-    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  // Güvenlik için null terminator
+    strncpy(assignment->name, taskName, MAX_ASSIGNMENT_NAME - 1);
+    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  // Null terminator
 
     // Deadline tarihini ata
     assignment->day = day;
@@ -411,20 +423,26 @@ int assign_deadline(Assignment* assignment) {
 }
 
 
-int view_deadlines(const Assignment assignments[], int count) {
-    if (count == 0) {
-        printf("No assignments available.\n");
-        return -1;  // Hata: Görev listesi boş
+void viewDeadlines(Assignment assignments[], int taskCount) {
+    if (taskCount == 0) {
+        printf("No assignments to display.\n");
+        return;
     }
 
-    printf("Assignments and Deadlines:\n");
-    for (int i = 0; i < count; i++) {
-        printf("%d. %s - %02d/%02d/%04d\n", 
-               i + 1, assignments[i].name, 
-               assignments[i].day, assignments[i].month, assignments[i].year);
+    printf("Upcoming Deadlines:\n");
+    printf("----------------------------\n");
+
+    // Tüm görevleri listele
+    for (int i = 0; i < taskCount; ++i) {
+        printf("%d. %s - Deadline: %02d/%02d/%04d\n",
+            i + 1,
+            assignments[i].name,
+            assignments[i].day,
+            assignments[i].month,
+            assignments[i].year);
     }
 
-    return 0;  // Başarıyla listelendi
+    printf("----------------------------\n");
 }
 
 int reminderSystemMenu() {

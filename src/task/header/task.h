@@ -25,10 +25,11 @@ typedef struct Task {
     char dueDate[20];  // YYYY-MM-DD formatýnda son tarih
 } Task;
 
-typedef struct {
-    char name[MAX_ASSIGNMENT_NAME];  // Görev adý
-    int day, month, year;            // Deadline (Son teslim tarihi)
-} Assignment;
+struct Assignment {
+    char name[100];
+    int day, month, year;
+};
+
 
 void clearScreen();
 
@@ -88,6 +89,5 @@ void categorizeTask(const Task taskList[], int taskCount);
 
 
 int assign_deadline(Assignment* assignment);
-
-
+void viewDeadlines(Assignment assignments[], int count);
 #endif // TASK_H
