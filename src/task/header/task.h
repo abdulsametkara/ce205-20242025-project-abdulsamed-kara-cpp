@@ -5,6 +5,9 @@
 
 using namespace std;
 
+#define MAX_ASSIGNMENT_NAME 50
+
+
 typedef struct User {
     int id;
     char name[50];
@@ -21,6 +24,11 @@ typedef struct Task {
     char category[50];
     char dueDate[20];  // YYYY-MM-DD formatýnda son tarih
 } Task;
+
+typedef struct {
+    char name[MAX_ASSIGNMENT_NAME];  // Görev adý
+    int day, month, year;            // Deadline (Son teslim tarihi)
+} Assignment;
 
 void clearScreen();
 
@@ -78,6 +86,8 @@ void viewTask(const Task taskList[], int taskCount);
 void categorizeTask(const Task taskList[], int taskCount);
 
 
+
+int assign_deadline(Assignment* assignment);
 
 
 #endif // TASK_H
