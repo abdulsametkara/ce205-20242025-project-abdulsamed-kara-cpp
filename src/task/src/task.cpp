@@ -22,6 +22,7 @@ Assignment assignments[100];
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
 int taskCount = 0;  // Mevcut görev sayısı
+TaskInfo tasks[MAX_TASKS]; // Görevler burada tutulur
 
 
 using namespace std;
@@ -489,8 +490,10 @@ int taskPrioritizationMenu() {
 
         switch (choice) {
         case 1:
+            markTaskImportance();
             break;
         case 2:
+            reorderTasks();
             break;
         case 3:
             return 0;
@@ -502,6 +505,101 @@ int taskPrioritizationMenu() {
         }
     }
 }
+
+void markTaskImportance() {
+    int taskIndex, importance;
+
+    if (taskCount == 0) {
+        printf("The task list is empty.\n");
+        enterToContinue();
+        return;
+    }
+
+    clearScreen();
+    printf("Select the task you want to set importance for:\n");
+    for (int i = 0; i < taskCount; i++) {
+        printf("%d. %s (Importance: %s)\n",
+            i + 1,
+            tasks[i].taskName,
+            tasks[i].importance ? "High" : "Low");
+    }
+
+    printf("Enter your choice (1-%d): ", taskCount);
+    taskIndex = getInput() - 1;
+
+    if (taskIndex < 0 || taskIndex >= taskCount) {
+        printf("Invalid selection!\n");
+            enterToContinue();
+        return;
+    }
+
+    printf("Set the new importance (0: Low, 1: High): ");
+    importance = getInput();
+
+    if (importance != 0 && importance != 1) {
+        printf("Invalid importance value!\n");
+    }
+    else {
+        tasks[taskIndex].importance = importance;
+        printf("Importance level updated successfully!\n");
+    }
+
+    enterToContinue();
+}
+
+
+void reorderTasks() {
+    int fromIndex, toIndex;
+
+    if (taskCount < 2) {
+        printf("You need at least two tasks to reorder.\n");
+        enterToContinue();
+        return;
+    }
+
+    clearScreen();
+    printf("Reorder your tasks:\n");
+    for (int i = 0; i < taskCount; i++) {
+        printf("%d. %s (Importance: %s)\n",
+            i + 1,
+            tasks[i].taskName,
+            tasks[i].importance ? "High" : "Low");
+    }
+
+    printf("Which task do you want to move? (1-%d): ", taskCount);
+    fromIndex = getInput() - 1;
+
+    printf("Where do you want to move this task? (1-%d): ", taskCount);
+    toIndex = getInput() - 1;
+
+    if (fromIndex < 0 || fromIndex >= taskCount || toIndex < 0 || toIndex >= taskCount) {
+        printf("Invalid selection!\n");
+        enterToContinue();
+        return;
+    }
+
+    // Görevi geçici olarak kaydet
+    TaskInfo temp = tasks[fromIndex];
+
+    // Taşınan görev sonrası elemanları kaydır
+    if (fromIndex < toIndex) {
+        for (int i = fromIndex; i < toIndex; i++) {
+            tasks[i] = tasks[i + 1];
+        }
+    }
+    else {
+        for (int i = fromIndex; i > toIndex; i--) {
+            tasks[i] = tasks[i - 1];
+        }
+    }
+
+    // Görevi yeni yerine ekle
+    tasks[toIndex] = temp;
+
+    printf("Task moved successfully!\n");
+    enterToContinue();
+}
+
 
 int hashFunction(const char* email) {
     int hash = 0;

@@ -29,6 +29,10 @@ struct Assignment {
     char name[100];
     int day, month, year;
 };
+typedef struct {
+    char taskName[100];
+    int importance; // 0: Düþük, 1: Yüksek
+} TaskInfo;
 
 
 void clearScreen();
@@ -90,4 +94,10 @@ void categorizeTask(const Task taskList[], int taskCount);
 
 int assign_deadline(Assignment* assignment);
 void viewDeadlines(Assignment assignments[], int count);
+
+
+
+
+void markTaskImportance();
+void reorderTasks();
 #endif // TASK_H
