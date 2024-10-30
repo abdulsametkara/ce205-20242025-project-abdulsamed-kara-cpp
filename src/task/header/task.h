@@ -83,11 +83,18 @@ int loginUserMenu(const char* pathFileUsers);
 
 
 int addTask(Task taskList[], int* taskCount, int maxTasks);
-void viewTask(const Task taskList[], int taskCount);
-void categorizeTask(const Task taskList[], int taskCount);
-
+void viewTask();
+void categorizeTask();
+int loadTasks(Task taskList[], int* taskCount, int maxTasks, const char* filename);
+void saveTasks(const Task taskList[], int taskCount);
 
 
 int assign_deadline(Assignment* assignment);
-void viewDeadlines(Assignment assignments[], int count);
+void viewDeadlines();
+
+
+
+
+
+
 #endif // TASK_H

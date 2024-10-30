@@ -16,6 +16,8 @@
 #define MAX_TASKS 100  // Maksimum görev sayısı
 #define MAX_ASSIGNMENT_NAME 50
 Assignment assignments[100];
+const char* filename = "tasks.bin";
+
 
 
 
@@ -227,11 +229,11 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             addTask(taskList, taskCount, maxTasks);  // Görev ekleme
             break;
         case 2:
-            viewTask(taskList, *taskCount);  // Görevleri görüntüleme
+            viewTask();  // Görevleri görüntüleme
             enterToContinue();
             break;
         case 3:
-            categorizeTask(taskList, *taskCount);  // Kategoriye göre listeleme
+            categorizeTask();  // Kategoriye göre listeleme
             break;
         case 4:
             return 0;  // Menüden çıkış
@@ -259,11 +261,11 @@ int createTaskMenu(Task taskList[], int* taskCount) {
 int addTask(Task taskList[], int* taskCount, int maxTasks) {
     if (*taskCount >= maxTasks) {
         printf("Task list is full. Cannot add more tasks.\n");
-        return 0;  // Görev listesi dolu
+        return 0;
     }
 
     Task newTask;
-    newTask.id = *taskCount + 1;  // Otomatik ID atama
+    newTask.id = *taskCount + 1;
 
     printf("Enter Task Name: ");
     fgets(newTask.name, sizeof(newTask.name), stdin);
@@ -281,36 +283,56 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
     fgets(newTask.dueDate, sizeof(newTask.dueDate), stdin);
     newTask.dueDate[strcspn(newTask.dueDate, "\n")] = 0;
 
-    // Görevi listeye ekle
+    // Görevi listeye ekle ve sayacı artır
     taskList[*taskCount] = newTask;
     (*taskCount)++;
 
-    printf("Task added successfully!\n");
-    return 1;  // Başarıyla eklendi
+    // Görevleri kaydet
+    saveTasks(taskList, *taskCount);
+
+    printf("Task added and saved successfully!\n");
+    return 1;
 }
 
 
-void viewTask(const Task taskList[], int taskCount) {
-    if (taskCount == 0) {
-        printf("No tasks available.\n");
+
+void viewTask() {
+    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda aç
+    if (file == NULL) {
+        printf("No tasks found. The task list is empty.\n");
+        enterToContinue();
         return;
     }
 
-    printf("List of Tasks:\n");
-    for (int i = 0; i < taskCount; i++) {
-        printf("ID: %d\n", taskList[i].id);
-        printf("Name: %s\n", taskList[i].name);
-        printf("Description: %s\n", taskList[i].description);
-        printf("Category: %s\n", taskList[i].category);
-        printf("Due Date: %s\n", taskList[i].dueDate);
+    Task task;
+    int taskCount = 0;
+
+    printf("\n--- List of Tasks ---\n");
+    // Dosyadaki tüm görevleri sırayla okuyalım
+    while (fread(&task, sizeof(Task), 1, file)) {
+        printf("ID: %d\n", task.id);
+        printf("Name: %s\n", task.name);
+        printf("Description: %s\n", task.description);
+        printf("Category: %s\n", task.category);
+        printf("Due Date: %s\n", task.dueDate);
         printf("---------------------------\n");
+        taskCount++;
     }
+
+    if (taskCount == 0) {
+        printf("No tasks available.\n");
+    }
+
+    fclose(file);  // Dosyayı kapatmayı unutmayın
+    enterToContinue();  // Kullanıcının devam etmesi için bekle
 }
 
 
-void categorizeTask(const Task taskList[], int taskCount) {
-    if (taskCount == 0) {
-        printf("No tasks available to categorize.\n");
+
+void categorizeTask() {
+    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda aç
+    if (!file) {
+        printf("Error: Could not open tasks file or no tasks found.\n");
         enterToContinue();
         return;
     }
@@ -318,16 +340,19 @@ void categorizeTask(const Task taskList[], int taskCount) {
     char category[50];
     printf("Enter category to filter: ");
     fgets(category, sizeof(category), stdin);
-    category[strcspn(category, "\n")] = 0;  // Yeni satırı sil
+    category[strcspn(category, "\n")] = 0;  // Yeni satır karakterini sil
 
-    int found = 0;
-    printf("Tasks in category '%s':\n", category);
-    for (int i = 0; i < taskCount; i++) {
-        if (strcmp(taskList[i].category, category) == 0) {
-            printf("ID: %d\n", taskList[i].id);
-            printf("Name: %s\n", taskList[i].name);
-            printf("Description: %s\n", taskList[i].description);
-            printf("Due Date: %s\n", taskList[i].dueDate);
+    Task task;
+    int found = 0;  // Kategoride görev bulunup bulunmadığını kontrol etmek için
+
+    printf("\n--- Tasks in Category '%s' ---\n", category);
+    // Dosyadaki görevleri sırayla okuyup kategoriye göre filtrele
+    while (fread(&task, sizeof(Task), 1, file)) {
+        if (strcmp(task.category, category) == 0) {
+            printf("ID: %d\n", task.id);
+            printf("Name: %s\n", task.name);
+            printf("Description: %s\n", task.description);
+            printf("Due Date: %s\n", task.dueDate);
             printf("---------------------------\n");
             found = 1;
         }
@@ -337,9 +362,41 @@ void categorizeTask(const Task taskList[], int taskCount) {
         printf("No tasks found in this category.\n");
     }
 
-    enterToContinue();  // Kullanıcı devam etmek için bir tuşa basar
+    fclose(file);  // Dosyayı kapat
+    enterToContinue();  // Kullanıcının devam etmesi için bekle
 }
 
+
+
+void saveTasks(const Task taskList[], int taskCount) {
+    FILE* file = fopen("tasks.bin", "wb");
+    if (file == NULL) {
+        printf("Error opening file for saving tasks.\n");
+        return;
+    }
+
+    fwrite(taskList, sizeof(Task), taskCount, file);
+    fclose(file);
+    printf("Tasks saved successfully!\n");
+}
+
+
+
+
+
+int loadTasks(Task taskList[], int maxTasks) {
+    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda açıyoruz
+    if (file == NULL) {
+        printf("No previous tasks found.\n");
+        return 0;  // Eğer dosya yoksa 0 görev yüklendi
+    }
+
+    int taskCount = fread(taskList, sizeof(Task), maxTasks, file);
+    fclose(file);
+
+    printf("%d tasks loaded successfully!\n", taskCount);
+    return taskCount;  // Yüklenen görev sayısını geri döndürüyoruz
+}
 
 
 
@@ -367,7 +424,7 @@ int deadlineSettingsMenu() {
             enterToContinue();
             break;
         case 2:
-            viewDeadlines(assignments, taskCount);
+            viewDeadlines();
             enterToContinue();
             break;
         case 3:
@@ -418,32 +475,64 @@ int assign_deadline(Assignment* assignment) {
     assignment->month = month;
     assignment->year = year;
 
-    printf("Deadline assigned successfully!\n");
+    // Deadline'ı dosyaya kaydet
+    FILE* file = fopen("deadlines.bin", "ab");
+    if (!file) {
+        printf("Error: Could not open deadlines file for writing.\n");
+        return -1;
+    }
+
+    fwrite(assignment, sizeof(Assignment), 1, file);
+    fclose(file);
+
+    printf("Deadline assigned and saved successfully!\n");
     return 0;
 }
 
+void viewDeadlines() {
+    FILE* tasksFile = fopen("tasks.bin", "rb");  // Görev adlarını okuma
+    FILE* deadlinesFile = fopen("deadlines.bin", "rb");  // Son teslim tarihlerini okuma
 
-void viewDeadlines(Assignment assignments[], int taskCount) {
-    if (taskCount == 0) {
-        printf("No assignments to display.\n");
+    if (!tasksFile || !deadlinesFile) {
+        printf("Error: Could not open tasks or deadlines file.\n");
+        if (tasksFile) fclose(tasksFile);
+        if (deadlinesFile) fclose(deadlinesFile);
         return;
     }
 
-    printf("Upcoming Deadlines:\n");
+    Task task;
+    Assignment deadline;
+    int taskCount = 0;
+
+    printf("\n--- Upcoming Deadlines ---\n");
     printf("----------------------------\n");
 
-    // Tüm görevleri listele
-    for (int i = 0; i < taskCount; ++i) {
-        printf("%d. %s - Deadline: %02d/%02d/%04d\n",
-            i + 1,
-            assignments[i].name,
-            assignments[i].day,
-            assignments[i].month,
-            assignments[i].year);
+    // Her iki dosyadan sırayla görev ve deadline bilgilerini okuyalım
+    while (fread(&task, sizeof(Task), 1, tasksFile) == 1 &&
+        fread(&deadline, sizeof(Assignment), 1, deadlinesFile) == 1) {
+        printf("%d. Task: %s - Deadline: %02d/%02d/%04d\n",
+            ++taskCount,
+            task.name,
+            deadline.day,
+            deadline.month,
+            deadline.year);
+    }
+
+    if (taskCount == 0) {
+        printf("No assignments to display.\n");
     }
 
     printf("----------------------------\n");
+
+    fclose(tasksFile);  // Dosyaları kapat
+    fclose(deadlinesFile);
+    printf("\n");
+    enterToContinue();  // Kullanıcıdan devam etmesini bekle
 }
+
+
+
+
 
 int reminderSystemMenu() {
     int choice;
