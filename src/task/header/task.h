@@ -14,7 +14,7 @@ typedef struct User {
     char surname[50];
     char email[50];
     char password[50];
-    struct User* next;  // Zincirleme için bağlı liste yapısı
+    struct User* next;  // Zincirleme iÃ§in baÃ°lÃ½ liste yapÃ½sÃ½
 } User;
 
 typedef struct Task {
@@ -22,13 +22,17 @@ typedef struct Task {
     char name[100];
     char description[255];
     char category[50];
-    char dueDate[20];  // YYYY-MM-DD formatında son tarih
+    char dueDate[20];  // YYYY-MM-DD formatÃ½nda son tarih
 } Task;
 
 struct Assignment {
     char name[100];
     int day, month, year;
 };
+typedef struct {
+    char taskName[100];
+    int importance; // 0: DÃ¼Ã¾Ã¼k, 1: YÃ¼ksek
+} TaskInfo;
 
 
 void clearScreen();
@@ -90,7 +94,10 @@ void saveTasks(const Task taskList[], int taskCount);
 
 
 int assign_deadline(Assignment* assignment);
+
 void viewDeadlines();
+
+
 
 
 

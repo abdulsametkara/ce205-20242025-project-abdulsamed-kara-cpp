@@ -24,6 +24,7 @@ const char* filename = "tasks.bin";
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
 int taskCount = 0;  // Mevcut görev sayısı
+TaskInfo tasks[MAX_TASKS]; // Görevler burada tutulur
 
 
 using namespace std;
@@ -578,8 +579,10 @@ int taskPrioritizationMenu() {
 
         switch (choice) {
         case 1:
+            markTaskImportance();
             break;
         case 2:
+            reorderTasks();
             break;
         case 3:
             return 0;
@@ -591,6 +594,123 @@ int taskPrioritizationMenu() {
         }
     }
 }
+
+int findTaskByName(const char* name) {
+    for (int i = 0; i < taskCount; i++) {
+        if (strcmp(tasks[i].taskName, name) == 0) {
+            return i;
+        }
+    }
+    return -1; // Görev bulunamazsa -1 döner
+}
+
+void markTaskImportance() {
+    char taskName[50];
+    int taskIndex, importance;
+
+    if (taskCount == 0) {
+        printf("The task list is empty.\n");
+        enterToContinue();
+        return;
+    }
+
+    clearScreen();
+    printf("Select the task you want to set importance for:\n");
+    for (int i = 0; i < taskCount; i++) {
+        const char* importanceStr =
+            tasks[i].importance == 1 ? "Low" :
+            tasks[i].importance == 2 ? "Medium" : "High";
+
+        printf("%d. %s (Importance: %s)\n", i + 1, tasks[i].taskName, importanceStr);
+    }
+
+    while (1) {
+        printf("Enter the name of the task: ");
+        scanf(" %[^\n]", taskName);  // Görev ismini okuma
+
+        taskIndex = findTaskByName(taskName);
+        if (taskIndex != -1) break;  // Geçerli görev bulunduysa döngüden çık
+
+        printf("Task not found! Please enter a valid task name.\n");
+    }
+
+    while (1) {
+        printf("Set the new importance (1: Low, 2: Medium, 3: High): ");
+        importance = getInput();
+
+        if (importance >= 1 && importance <= 3) break;  // Geçerli önem seviyesi girildiyse çık
+
+        printf("Invalid importance value! Please enter 1, 2, or 3.\n");
+    }
+
+    tasks[taskIndex].importance = importance;
+    printf("Importance level updated successfully!\n");
+
+    enterToContinue();
+}
+
+void reorderTasks() {
+    char fromTaskName[50], toTaskName[50];
+    int fromIndex, toIndex;
+
+    if (taskCount < 2) {
+        printf("You need at least two tasks to reorder.\n");
+        enterToContinue();
+        return;
+    }
+
+    clearScreen();
+    printf("Reorder your tasks:\n");
+    for (int i = 0; i < taskCount; i++) {
+        const char* importanceStr =
+            tasks[i].importance == 1 ? "Low" :
+            tasks[i].importance == 2 ? "Medium" : "High";
+
+        printf("%d. %s (Importance: %s)\n", i + 1, tasks[i].taskName, importanceStr);
+    }
+
+    while (1) {
+        printf("Enter the name of the task you want to move: ");
+        scanf(" %[^\n]", fromTaskName);
+
+        fromIndex = findTaskByName(fromTaskName);
+        if (fromIndex != -1) break;  // Geçerli görev bulunduysa döngüden çık
+
+        printf("Task not found! Please enter a valid task name.\n");
+    }
+
+    while (1) {
+        printf("Enter the name of the task to move it before: ");
+        scanf(" %[^\n]", toTaskName);
+
+        toIndex = findTaskByName(toTaskName);
+        if (toIndex != -1) break;  // Geçerli görev bulunduysa döngüden çık
+
+        printf("Task not found! Please enter a valid task name.\n");
+    }
+
+    // Görevi geçici olarak kaydet
+    TaskInfo temp = tasks[fromIndex];
+
+    // Taşınan görev sonrası elemanları kaydır
+    if (fromIndex < toIndex) {
+        for (int i = fromIndex; i < toIndex; i++) {
+            tasks[i] = tasks[i + 1];
+        }
+    }
+    else {
+        for (int i = fromIndex; i > toIndex; i--) {
+            tasks[i] = tasks[i - 1];
+        }
+    }
+
+    // Görevi yeni yerine ekle
+    tasks[toIndex] = temp;
+
+    printf("Task moved successfully!\n");
+    enterToContinue();
+}
+
 
 int hashFunction(const char* email) {
     int hash = 0;
