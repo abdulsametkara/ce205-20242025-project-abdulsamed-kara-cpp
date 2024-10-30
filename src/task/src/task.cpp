@@ -20,11 +20,10 @@ const char* filename = "tasks.bin";
 
 
 
-
+Task tasks[100];
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
 int taskCount = 0;  // Mevcut görev sayısı
-TaskInfo tasks[MAX_TASKS]; // Görevler burada tutulur
 
 
 using namespace std;
@@ -134,8 +133,8 @@ int printCreateTaskMenu() {
     printf("           CREATE TASK MENU          \n");
     printf("========================================\n");
     printf("1. Add Task\n");
-    printf("2. Categorize Tasks\n");
-    printf("3. View Tasks\n");
+    printf("2. View Tasks\n");
+    printf("3. Categorize Tasks\n");
     printf("4. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice: ");
@@ -177,7 +176,7 @@ int printTaskPrioritizationMenu() {
     printf("       TASK PRIORITIZATION MENU       \n");
     printf("========================================\n");
     printf("1. Mark Task Importance\n");
-    printf("2. Reorder Tasks\n");
+    printf("2. Importance Ordering\n");
     printf("3. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice : ");
@@ -533,8 +532,6 @@ void viewDeadlines() {
 
 
 
-
-
 int reminderSystemMenu() {
     int choice;
 
@@ -564,14 +561,15 @@ int reminderSystemMenu() {
     }
 }
 
+
 int taskPrioritizationMenu() {
     int choice;
 
     while (1) {
-        printTaskPrioritizationMenu();
-        choice = getInput();
+        printTaskPrioritizationMenu();  // Menüyü ekrana yazdır
+        choice = getInput();  // Kullanıcıdan giriş al
 
-        if (choice == -2) {
+        if (choice == -2) {  // Hatalı giriş durumu
             handleInputError();
             enterToContinue();
             continue;
@@ -579,13 +577,12 @@ int taskPrioritizationMenu() {
 
         switch (choice) {
         case 1:
-            markTaskImportance();
+            markTaskImportance();  // Görevin önemini belirleme
             break;
         case 2:
-            reorderTasks();
             break;
         case 3:
-            return 0;
+            return 0;  // Menüden çıkış
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -595,120 +592,120 @@ int taskPrioritizationMenu() {
     }
 }
 
-int findTaskByName(const char* name) {
-    for (int i = 0; i < taskCount; i++) {
-        if (strcmp(tasks[i].taskName, name) == 0) {
-            return i;
-        }
-    }
-    return -1; // Görev bulunamazsa -1 döner
-}
 
 void markTaskImportance() {
-    char taskName[50];
-    int taskIndex, importance;
+    clearScreen();
 
-    if (taskCount == 0) {
-        printf("The task list is empty.\n");
+    Task tasks[100];  // Maksimum 100 görev için yer ayırıyoruz
+    int taskCount = loadTasks(tasks, 100);  // Görevleri yükle
+
+    if (taskCount <= 0) {
+        printf("No tasks available. Please add tasks first.\n");
         enterToContinue();
         return;
     }
 
-    clearScreen();
-    printf("Select the task you want to set importance for:\n");
-    for (int i = 0; i < taskCount; i++) {
+    // Tüm görevleri göster
+    printf("Tasks loaded:\n");
+    for (int i = 0; i < taskCount; ++i) {
         const char* importanceStr =
-            tasks[i].importance == 1 ? "Low" :
-            tasks[i].importance == 2 ? "Medium" : "High";
-
-        printf("%d. %s (Importance: %s)\n", i + 1, tasks[i].taskName, importanceStr);
+            tasks[i].impid == 1 ? "Low" :
+            tasks[i].impid == 2 ? "Medium" :
+            tasks[i].impid == 3 ? "High" : "Unmarked";
+        printf("ID: %d, Name: %s, Importance: %s\n",
+            tasks[i].id, tasks[i].name, importanceStr);
     }
+
+    // Kullanıcıdan görevin adını al
+    char taskName[100];
+    Task* selectedTask = NULL;
 
     while (1) {
-        printf("Enter the name of the task: ");
-        scanf(" %[^\n]", taskName);  // Görev ismini okuma
+        printf("\nEnter the name of the task to mark importance: ");
+        scanf(" %[^\n]%*c", taskName);  // Boşluklu girişleri alır
 
-        taskIndex = findTaskByName(taskName);
-        if (taskIndex != -1) break;  // Geçerli görev bulunduysa döngüden çık
+        // Görev adını bul ve işaretle
+        for (int i = 0; i < taskCount; ++i) {
+            if (strcmp(tasks[i].name, taskName) == 0) {
+                selectedTask = &tasks[i];
+                break;
+            }
+        }
 
-        printf("Task not found! Please enter a valid task name.\n");
+        if (selectedTask) {
+            break;  // Geçerli bir görev bulunduysa döngüden çık
+        }
+        else {
+            printf("Task not found! Please enter a valid task name.\n");
+        }
     }
 
+    // Kullanıcıdan önem seviyesini al
+    int importanceId;
     while (1) {
-        printf("Set the new importance (1: Low, 2: Medium, 3: High): ");
-        importance = getInput();
+        printf("Enter the importance ID (1: Low, 2: Medium, 3: High): ");
+        importanceId = getInput();
 
-        if (importance >= 1 && importance <= 3) break;  // Geçerli önem seviyesi girildiyse çık
-
-        printf("Invalid importance value! Please enter 1, 2, or 3.\n");
+        if (importanceId >= 1 && importanceId <= 3) {
+            break;  // Geçerli önem seviyesi girildiyse döngüden çık
+        }
+        else {
+            printf("Invalid importance value! Please enter 1, 2, or 3.\n");
+        }
     }
 
-    tasks[taskIndex].importance = importance;
-    printf("Importance level updated successfully!\n");
+    // Önem seviyesini güncelle
+    selectedTask->impid = importanceId;
 
+    // Güncellenen görev listesini dosyaya kaydet
+    saveTasks(tasks, taskCount);
+
+    printf("Importance level of '%s' marked successfully as %d.\n",
+        selectedTask->name, importanceId);
     enterToContinue();
 }
 
-void reorderTasks() {
-    char fromTaskName[50], toTaskName[50];
-    int fromIndex, toIndex;
 
-    if (taskCount < 2) {
-        printf("You need at least two tasks to reorder.\n");
-        enterToContinue();
+
+
+
+
+
+int findTaskByName(const char* name) {
+    for (int i = 0; i < taskCount; i++) {
+        if (strcmp(tasks[i].name, name) == 0) {
+            return i;  // Görev bulunduysa indeksini döndür
+        }
+    }
+    return -1;  // Görev bulunamazsa -1 döner
+}
+
+
+void loadTasksFromFile() {
+    FILE* file = fopen("tasks.bin", "rb");
+    if (file == NULL) {
+        printf("Error opening tasks.bin! No tasks loaded.\n");
         return;
     }
 
-    clearScreen();
-    printf("Reorder your tasks:\n");
-    for (int i = 0; i < taskCount; i++) {
-        const char* importanceStr =
-            tasks[i].importance == 1 ? "Low" :
-            tasks[i].importance == 2 ? "Medium" : "High";
+    taskCount = fread(tasks, sizeof(Task), 100, file);
+    fclose(file);
 
-        printf("%d. %s (Importance: %s)\n", i + 1, tasks[i].taskName, importanceStr);
+    printf("%d tasks loaded successfully from tasks.bin.\n", taskCount);
+}
+
+// tasks.bin dosyasına görevleri kaydeden fonksiyon
+void saveTasksToFile() {
+    FILE* file = fopen("tasks.bin", "wb");
+    if (file == NULL) {
+        printf("Error opening tasks.bin for writing!\n");
+        return;
     }
 
-    while (1) {
-        printf("Enter the name of the task you want to move: ");
-        scanf(" %[^\n]", fromTaskName);
+    fwrite(tasks, sizeof(Task), taskCount, file);
+    fclose(file);
 
-        fromIndex = findTaskByName(fromTaskName);
-        if (fromIndex != -1) break;  // Geçerli görev bulunduysa döngüden çık
-
-        printf("Task not found! Please enter a valid task name.\n");
-    }
-
-    while (1) {
-        printf("Enter the name of the task to move it before: ");
-        scanf(" %[^\n]", toTaskName);
-
-        toIndex = findTaskByName(toTaskName);
-        if (toIndex != -1) break;  // Geçerli görev bulunduysa döngüden çık
-
-        printf("Task not found! Please enter a valid task name.\n");
-    }
-
-    // Görevi geçici olarak kaydet
-    TaskInfo temp = tasks[fromIndex];
-
-    // Taşınan görev sonrası elemanları kaydır
-    if (fromIndex < toIndex) {
-        for (int i = fromIndex; i < toIndex; i++) {
-            tasks[i] = tasks[i + 1];
-        }
-    }
-    else {
-        for (int i = fromIndex; i > toIndex; i--) {
-            tasks[i] = tasks[i - 1];
-        }
-    }
-
-    // Görevi yeni yerine ekle
-    tasks[toIndex] = temp;
-
-    printf("Task moved successfully!\n");
-    enterToContinue();
+    printf("Tasks saved successfully to tasks.bin.\n");
 }
 
 
@@ -911,7 +908,7 @@ int userOptionsMenu() {
 
         switch (choice) {
         case 1:
-            createTaskMenu(taskList, &taskCount);  
+            createTaskMenu(taskList, &taskCount);
             break;
         case 2:
             deadlineSettingsMenu();
