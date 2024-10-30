@@ -12,6 +12,14 @@
 #include <iostream>
 #include <cstring>
 
+
+#ifdef _WIN32
+#include <windows.h>  // Windows için Sleep()
+#else
+#include <unistd.h>   // Linux/macOS için sleep()
+#endif
+
+
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
 #define MAX_TASKS 100  // Maksimum görev sayısı
 #define MAX_ASSIGNMENT_NAME 50
@@ -24,6 +32,8 @@ Task tasks[100];
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
 int taskCount = 0;  // Mevcut görev sayısı
+int notificationMethod = 0;
+
 
 
 using namespace std;
@@ -547,8 +557,10 @@ int reminderSystemMenu() {
 
         switch (choice) {
         case 1:
+            setReminders();
             break;
         case 2:
+            notificationSettings();
             break;
         case 3:
             return 0;
@@ -558,6 +570,112 @@ int reminderSystemMenu() {
             enterToContinue();
             break;
         }
+    }
+}
+
+
+
+// Hatırlatıcı Ayarlama Fonksiyonu
+void setReminders() {
+    clearScreen();
+
+    int seconds, minutes, hours, days;
+
+    printf("Enter the reminder duration:\n");
+    printf("Days: ");
+    days = getInput();
+    printf("Hours: ");
+    hours = getInput();
+    printf("Minutes: ");
+    minutes = getInput();
+    printf("Seconds: ");
+    seconds = getInput();
+
+    // Toplam süreyi saniyeye çevir
+    int totalSeconds = seconds + minutes * 60 + hours * 3600 + days * 86400;
+
+    if (totalSeconds <= 0) {
+        printf("Invalid duration. Please enter a positive duration.\n");
+        enterToContinue();
+        return;
+    }
+
+    printf("Setting reminder for %d seconds...\n", totalSeconds);
+
+    // Geri sayım yaparak bekleme
+    for (int remaining = totalSeconds; remaining > 0; --remaining) {
+        clearScreen();
+        printf("Time remaining: %02d:%02d:%02d:%02d\n",
+            remaining / 86400,            // Gün
+            (remaining % 86400) / 3600,   // Saat
+            (remaining % 3600) / 60,      // Dakika
+            remaining % 60);              // Saniye
+
+        platformSleep(1);  // 1 saniye bekle
+    }
+
+    printf("Time's up! Reminder triggered.\n");
+    enterToContinue();
+}
+
+// Platforma göre uyumlu bekleme fonksiyonu
+void platformSleep(int seconds) {
+#ifdef _WIN32
+    Sleep(seconds * 1000);  // Windows: milisaniye cinsinden bekler
+#else
+    sleep(seconds);         // Linux/macOS: saniye cinsinden bekler
+#endif
+}
+
+
+void notificationSettings() {
+    clearScreen();
+
+    // Mevcut bildirim yöntemini göster
+    showCurrentNotificationMethod();
+
+    int choice;
+    printf("Select notification method:\n");
+    printf("1. SMS\n");
+    printf("2. E-Mail\n");
+    printf("3. Phone Call\n");
+    printf("Enter your choice: ");
+    choice = getInput();
+
+    switch (choice) {
+    case 1:
+        notificationMethod = 1;
+        printf("Your reminder has been set to SMS.\n");
+        break;
+    case 2:
+        notificationMethod = 2;
+        printf("Your reminder has been set to E-Mail.\n");
+        break;
+    case 3:
+        notificationMethod = 3;
+        printf("Your reminder has been set to Phone Call.\n");
+        break;
+    default:
+        printf("Invalid choice. Please try again.\n");
+        enterToContinue();
+        notificationSettings();  // Geçersiz girişte tekrar çağır
+        return;
+    }
+
+    enterToContinue();
+}
+
+// Mevcut bildirim yöntemini ekranda gösterir
+void showCurrentNotificationMethod() {
+    if (notificationMethod == 0) {
+        printf("No notification method selected yet.\n");
+    }
+    else {
+        const char* methodStr =
+            (notificationMethod == 1) ? "SMS" :
+            (notificationMethod == 2) ? "E-Mail" : "Notification";
+
+        printf("Current notification method: %s\n", methodStr);
     }
 }
 

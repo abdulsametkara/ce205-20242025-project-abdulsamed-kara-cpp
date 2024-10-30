@@ -97,6 +97,13 @@ void viewDeadlines();
 
 
 
+void setReminders();
+void platformSleep(int seconds);
+void showCurrentNotificationMethod();
+void notificationSettings();
+
+
+
 int findTaskByName(const char* name);
 void markTaskImportance();
 void saveTasksToFile();
