@@ -510,6 +510,7 @@ void viewDeadlines() {
         return;
     }
 
+
     Task task;
     Assignment deadline;
     int taskCount = 0;
