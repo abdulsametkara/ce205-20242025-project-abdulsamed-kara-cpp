@@ -15,7 +15,7 @@
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
 #define MAX_TASKS 100  // Maksimum görev sayısı
 #define MAX_ASSIGNMENT_NAME 50
-
+#define MAX_ASSIGNMENT_NAME 100
 
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
@@ -411,20 +411,59 @@ int assign_deadline(Assignment* assignment) {
 }
 
 
-int view_deadlines(const Assignment assignments[], int count) {
+// Tarih karşılaştırması
+int compare_dates(const Assignment* a, const Assignment* b) {
+    if (a->year != b->year) return a->year - b->year;
+    if (a->month != b->month) return a->month - b->month;
+    return a->day - b->day;
+}
+
+// Heapify işlemi (Max-Heap)
+void heapify(Assignment assignments[], int n, int i) {
+    int largest = i, left = 2 * i + 1, right = 2 * i + 2;
+
+    if (left < n && compare_dates(&assignments[left], &assignments[largest]) > 0)
+        largest = left;
+
+    if (right < n && compare_dates(&assignments[right], &assignments[largest]) > 0)
+        largest = right;
+
+    if (largest != i) {
+        Assignment temp = assignments[i];
+        assignments[i] = assignments[largest];
+        assignments[largest] = temp;
+        heapify(assignments, n, largest);
+    }
+}
+
+// Heap Sort işlemi
+void heap_sort(Assignment assignments[], int n) {
+    for (int i = n / 2 - 1; i >= 0; i--)
+        heapify(assignments, n, i);
+
+    for (int i = n - 1; i > 0; i--) {
+        Assignment temp = assignments[0];
+        assignments[0] = assignments[i];
+        assignments[i] = temp;
+        heapify(assignments, i, 0);
+    }
+}
+
+// Görevleri tarihe göre sıralayıp listeleme
+int view_deadlines(Assignment assignments[], int count) {
     if (count == 0) {
         printf("No assignments available.\n");
-        return -1;  // Hata: Görev listesi boş
+        return -1;
     }
 
-    printf("Assignments and Deadlines:\n");
-    for (int i = 0; i < count; i++) {
-        printf("%d. %s - %02d/%02d/%04d\n", 
-               i + 1, assignments[i].name, 
-               assignments[i].day, assignments[i].month, assignments[i].year);
-    }
+    heap_sort(assignments, count);
 
-    return 0;  // Başarıyla listelendi
+    printf("Assignments and Deadlines (Sorted by Date):\n");
+    for (int i = 0; i < count; i++)
+        printf("%d. %s - %02d/%02d/%04d\n", i + 1, assignments[i].name,
+            assignments[i].day, assignments[i].month, assignments[i].year);
+
+    return 0;
 }
 
 int reminderSystemMenu() {
