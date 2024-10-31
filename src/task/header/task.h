@@ -93,15 +93,13 @@ void saveTasks(const Task taskList[], int taskCount);
 
 
 int assign_deadline(Assignment* assignment);
-void viewDeadlines();
-
+int view_deadlines(Assignment assignments[], int count);
 
 
 void setReminders();
 void platformSleep(int seconds);
 void showCurrentNotificationMethod();
 void notificationSettings();
-
 
 
 int findTaskByName(const char* name);
