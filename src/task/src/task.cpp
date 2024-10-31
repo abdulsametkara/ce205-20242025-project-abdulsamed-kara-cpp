@@ -15,7 +15,7 @@
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
 #define MAX_TASKS 100  // Maksimum görev sayısı
 #define MAX_ASSIGNMENT_NAME 50
-#define MAX_ASSIGNMENT_NAME 100
+
 
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
