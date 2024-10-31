@@ -12,14 +12,28 @@
 #include <iostream>
 #include <cstring>
 
+
+#ifdef _WIN32
+#include <windows.h>  // Windows için Sleep()
+#else
+#include <unistd.h>   // Linux/macOS için sleep()
+#endif
+
+
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
 #define MAX_TASKS 100  // Maksimum görev sayısı
 #define MAX_ASSIGNMENT_NAME 50
+Assignment assignments[100];
+const char* filename = "tasks.bin";
 
 
+
+Task tasks[100];
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
 int taskCount = 0;  // Mevcut görev sayısı
+int notificationMethod = 0;
+
 
 
 using namespace std;
@@ -129,8 +143,8 @@ int printCreateTaskMenu() {
     printf("           CREATE TASK MENU          \n");
     printf("========================================\n");
     printf("1. Add Task\n");
-    printf("2. Categorize Tasks\n");
-    printf("3. View Tasks\n");
+    printf("2. View Tasks\n");
+    printf("3. Categorize Tasks\n");
     printf("4. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice: ");
@@ -172,7 +186,7 @@ int printTaskPrioritizationMenu() {
     printf("       TASK PRIORITIZATION MENU       \n");
     printf("========================================\n");
     printf("1. Mark Task Importance\n");
-    printf("2. Reorder Tasks\n");
+    printf("2. Importance Ordering\n");
     printf("3. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice : ");
@@ -225,11 +239,11 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             addTask(taskList, taskCount, maxTasks);  // Görev ekleme
             break;
         case 2:
-            viewTask(taskList, *taskCount);  // Görevleri görüntüleme
+            viewTask();  // Görevleri görüntüleme
             enterToContinue();
             break;
         case 3:
-            categorizeTask(taskList, *taskCount);  // Kategoriye göre listeleme
+            categorizeTask();  // Kategoriye göre listeleme
             break;
         case 4:
             return 0;  // Menüden çıkış
@@ -257,11 +271,11 @@ int createTaskMenu(Task taskList[], int* taskCount) {
 int addTask(Task taskList[], int* taskCount, int maxTasks) {
     if (*taskCount >= maxTasks) {
         printf("Task list is full. Cannot add more tasks.\n");
-        return 0;  // Görev listesi dolu
+        return 0;
     }
 
     Task newTask;
-    newTask.id = *taskCount + 1;  // Otomatik ID atama
+    newTask.id = *taskCount + 1;
 
     printf("Enter Task Name: ");
     fgets(newTask.name, sizeof(newTask.name), stdin);
@@ -279,36 +293,56 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
     fgets(newTask.dueDate, sizeof(newTask.dueDate), stdin);
     newTask.dueDate[strcspn(newTask.dueDate, "\n")] = 0;
 
-    // Görevi listeye ekle
+    // Görevi listeye ekle ve sayacı artır
     taskList[*taskCount] = newTask;
     (*taskCount)++;
 
-    printf("Task added successfully!\n");
-    return 1;  // Başarıyla eklendi
+    // Görevleri kaydet
+    saveTasks(taskList, *taskCount);
+
+    printf("Task added and saved successfully!\n");
+    return 1;
 }
 
 
-void viewTask(const Task taskList[], int taskCount) {
-    if (taskCount == 0) {
-        printf("No tasks available.\n");
+
+void viewTask() {
+    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda aç
+    if (file == NULL) {
+        printf("No tasks found. The task list is empty.\n");
+        enterToContinue();
         return;
     }
 
-    printf("List of Tasks:\n");
-    for (int i = 0; i < taskCount; i++) {
-        printf("ID: %d\n", taskList[i].id);
-        printf("Name: %s\n", taskList[i].name);
-        printf("Description: %s\n", taskList[i].description);
-        printf("Category: %s\n", taskList[i].category);
-        printf("Due Date: %s\n", taskList[i].dueDate);
+    Task task;
+    int taskCount = 0;
+
+    printf("\n--- List of Tasks ---\n");
+    // Dosyadaki tüm görevleri sırayla okuyalım
+    while (fread(&task, sizeof(Task), 1, file)) {
+        printf("ID: %d\n", task.id);
+        printf("Name: %s\n", task.name);
+        printf("Description: %s\n", task.description);
+        printf("Category: %s\n", task.category);
+        printf("Due Date: %s\n", task.dueDate);
         printf("---------------------------\n");
+        taskCount++;
     }
+
+    if (taskCount == 0) {
+        printf("No tasks available.\n");
+    }
+
+    fclose(file);  // Dosyayı kapatmayı unutmayın
+    enterToContinue();  // Kullanıcının devam etmesi için bekle
 }
 
 
-void categorizeTask(const Task taskList[], int taskCount) {
-    if (taskCount == 0) {
-        printf("No tasks available to categorize.\n");
+
+void categorizeTask() {
+    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda aç
+    if (!file) {
+        printf("Error: Could not open tasks file or no tasks found.\n");
         enterToContinue();
         return;
     }
@@ -316,16 +350,19 @@ void categorizeTask(const Task taskList[], int taskCount) {
     char category[50];
     printf("Enter category to filter: ");
     fgets(category, sizeof(category), stdin);
-    category[strcspn(category, "\n")] = 0;  // Yeni satırı sil
+    category[strcspn(category, "\n")] = 0;  // Yeni satır karakterini sil
 
-    int found = 0;
-    printf("Tasks in category '%s':\n", category);
-    for (int i = 0; i < taskCount; i++) {
-        if (strcmp(taskList[i].category, category) == 0) {
-            printf("ID: %d\n", taskList[i].id);
-            printf("Name: %s\n", taskList[i].name);
-            printf("Description: %s\n", taskList[i].description);
-            printf("Due Date: %s\n", taskList[i].dueDate);
+    Task task;
+    int found = 0;  // Kategoride görev bulunup bulunmadığını kontrol etmek için
+
+    printf("\n--- Tasks in Category '%s' ---\n", category);
+    // Dosyadaki görevleri sırayla okuyup kategoriye göre filtrele
+    while (fread(&task, sizeof(Task), 1, file)) {
+        if (strcmp(task.category, category) == 0) {
+            printf("ID: %d\n", task.id);
+            printf("Name: %s\n", task.name);
+            printf("Description: %s\n", task.description);
+            printf("Due Date: %s\n", task.dueDate);
             printf("---------------------------\n");
             found = 1;
         }
@@ -335,9 +372,41 @@ void categorizeTask(const Task taskList[], int taskCount) {
         printf("No tasks found in this category.\n");
     }
 
-    enterToContinue();  // Kullanıcı devam etmek için bir tuşa basar
+    fclose(file);  // Dosyayı kapat
+    enterToContinue();  // Kullanıcının devam etmesi için bekle
 }
 
+
+
+void saveTasks(const Task taskList[], int taskCount) {
+    FILE* file = fopen("tasks.bin", "wb");
+    if (file == NULL) {
+        printf("Error opening file for saving tasks.\n");
+        return;
+    }
+
+    fwrite(taskList, sizeof(Task), taskCount, file);
+    fclose(file);
+    printf("Tasks saved successfully!\n");
+}
+
+
+
+
+
+int loadTasks(Task taskList[], int maxTasks) {
+    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda açıyoruz
+    if (file == NULL) {
+        printf("No previous tasks found.\n");
+        return 0;  // Eğer dosya yoksa 0 görev yüklendi
+    }
+
+    int taskCount = fread(taskList, sizeof(Task), maxTasks, file);
+    fclose(file);
+
+    printf("%d tasks loaded successfully!\n", taskCount);
+    return taskCount;  // Yüklenen görev sayısını geri döndürüyoruz
+}
 
 
 
@@ -365,7 +434,7 @@ int deadlineSettingsMenu() {
             enterToContinue();
             break;
         case 2:
-            printf("View Deadlines: Not implemented yet.\n");
+            viewDeadlines();
             enterToContinue();
             break;
         case 3:
@@ -384,12 +453,16 @@ int assign_deadline(Assignment* assignment) {
     char taskName[MAX_ASSIGNMENT_NAME];
     int day, month, year;
 
-    // Kullanıcıdan görev adı ve tarih bilgisi al
+    // Görev adını kullanıcıdan al
     printf("Enter Task Name: ");
-    while (getchar() != '\n');  // Önceki newline'ı temizle
-    fgets(taskName, MAX_ASSIGNMENT_NAME, stdin);
+    while (getchar() != '\n');  // stdin'deki önceki newline'ı temizle
+    if (fgets(taskName, MAX_ASSIGNMENT_NAME, stdin) == NULL) {
+        printf("Error reading task name.\n");
+        return -1;
+    }
     taskName[strcspn(taskName, "\n")] = '\0';  // Yeni satırı sil
 
+    // Deadline bilgisi al
     printf("Enter Deadline (day month year): ");
     if (scanf("%d %d %d", &day, &month, &year) != 3) {
         printf("Invalid input! Please try again.\n");
@@ -397,74 +470,78 @@ int assign_deadline(Assignment* assignment) {
         return -1;
     }
 
+    // Tarih geçerliliğini kontrol et
+    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
+        printf("Invalid date! Please enter a valid date.\n");
+        return -1;
+    }
+
     // Görev adını kopyala
-    strncpy(assignment->name, taskName, MAX_ASSIGNMENT_NAME);
-    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  // Güvenlik için null terminator
+    strncpy(assignment->name, taskName, MAX_ASSIGNMENT_NAME - 1);
+    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  // Null terminator
 
     // Deadline tarihini ata
     assignment->day = day;
     assignment->month = month;
     assignment->year = year;
 
-    printf("Deadline assigned successfully!\n");
-    return 0;
-}
-
-
-// Tarih karşılaştırması
-int compare_dates(const Assignment* a, const Assignment* b) {
-    if (a->year != b->year) return a->year - b->year;
-    if (a->month != b->month) return a->month - b->month;
-    return a->day - b->day;
-}
-
-// Heapify işlemi (Max-Heap)
-void heapify(Assignment assignments[], int n, int i) {
-    int largest = i, left = 2 * i + 1, right = 2 * i + 2;
-
-    if (left < n && compare_dates(&assignments[left], &assignments[largest]) > 0)
-        largest = left;
-
-    if (right < n && compare_dates(&assignments[right], &assignments[largest]) > 0)
-        largest = right;
-
-    if (largest != i) {
-        Assignment temp = assignments[i];
-        assignments[i] = assignments[largest];
-        assignments[largest] = temp;
-        heapify(assignments, n, largest);
-    }
-}
-
-// Heap Sort işlemi
-void heap_sort(Assignment assignments[], int n) {
-    for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(assignments, n, i);
-
-    for (int i = n - 1; i > 0; i--) {
-        Assignment temp = assignments[0];
-        assignments[0] = assignments[i];
-        assignments[i] = temp;
-        heapify(assignments, i, 0);
-    }
-}
-
-// Görevleri tarihe göre sıralayıp listeleme
-int view_deadlines(Assignment assignments[], int count) {
-    if (count == 0) {
-        printf("No assignments available.\n");
+    // Deadline'ı dosyaya kaydet
+    FILE* file = fopen("deadlines.bin", "ab");
+    if (!file) {
+        printf("Error: Could not open deadlines file for writing.\n");
         return -1;
     }
 
-    heap_sort(assignments, count);
+    fwrite(assignment, sizeof(Assignment), 1, file);
+    fclose(file);
 
-    printf("Assignments and Deadlines (Sorted by Date):\n");
-    for (int i = 0; i < count; i++)
-        printf("%d. %s - %02d/%02d/%04d\n", i + 1, assignments[i].name,
-            assignments[i].day, assignments[i].month, assignments[i].year);
-
+    printf("Deadline assigned and saved successfully!\n");
     return 0;
 }
+
+void viewDeadlines() {
+    FILE* tasksFile = fopen("tasks.bin", "rb");  // Görev adlarını okuma
+    FILE* deadlinesFile = fopen("deadlines.bin", "rb");  // Son teslim tarihlerini okuma
+
+    if (!tasksFile || !deadlinesFile) {
+        printf("Error: Could not open tasks or deadlines file.\n");
+        if (tasksFile) fclose(tasksFile);
+        if (deadlinesFile) fclose(deadlinesFile);
+        return;
+    }
+
+
+    Task task;
+    Assignment deadline;
+    int taskCount = 0;
+
+    printf("\n--- Upcoming Deadlines ---\n");
+    printf("----------------------------\n");
+
+    // Her iki dosyadan sırayla görev ve deadline bilgilerini okuyalım
+    while (fread(&task, sizeof(Task), 1, tasksFile) == 1 &&
+        fread(&deadline, sizeof(Assignment), 1, deadlinesFile) == 1) {
+        printf("%d. Task: %s - Deadline: %02d/%02d/%04d\n",
+            ++taskCount,
+            task.name,
+            deadline.day,
+            deadline.month,
+            deadline.year);
+    }
+
+    if (taskCount == 0) {
+        printf("No assignments to display.\n");
+    }
+
+    printf("----------------------------\n");
+
+    fclose(tasksFile);  // Dosyaları kapat
+    fclose(deadlinesFile);
+    printf("\n");
+    enterToContinue();  // Kullanıcıdan devam etmesini bekle
+}
+
+
 
 int reminderSystemMenu() {
     int choice;
@@ -481,8 +558,10 @@ int reminderSystemMenu() {
 
         switch (choice) {
         case 1:
+            setReminders();
             break;
         case 2:
+            notificationSettings();
             break;
         case 3:
             return 0;
@@ -495,14 +574,121 @@ int reminderSystemMenu() {
     }
 }
 
+
+
+// Hatırlatıcı Ayarlama Fonksiyonu
+void setReminders() {
+    clearScreen();
+
+    int seconds, minutes, hours, days;
+
+    printf("Enter the reminder duration:\n");
+    printf("Days: ");
+    days = getInput();
+    printf("Hours: ");
+    hours = getInput();
+    printf("Minutes: ");
+    minutes = getInput();
+    printf("Seconds: ");
+    seconds = getInput();
+
+    // Toplam süreyi saniyeye çevir
+    int totalSeconds = seconds + minutes * 60 + hours * 3600 + days * 86400;
+
+    if (totalSeconds <= 0) {
+        printf("Invalid duration. Please enter a positive duration.\n");
+        enterToContinue();
+        return;
+    }
+
+    printf("Setting reminder for %d seconds...\n", totalSeconds);
+
+    // Geri sayım yaparak bekleme
+    for (int remaining = totalSeconds; remaining > 0; --remaining) {
+        clearScreen();
+        printf("Time remaining: %02d:%02d:%02d:%02d\n",
+            remaining / 86400,            // Gün
+            (remaining % 86400) / 3600,   // Saat
+            (remaining % 3600) / 60,      // Dakika
+            remaining % 60);              // Saniye
+
+        platformSleep(1);  // 1 saniye bekle
+    }
+
+    printf("Time's up! Reminder triggered.\n");
+    enterToContinue();
+}
+
+// Platforma göre uyumlu bekleme fonksiyonu
+void platformSleep(int seconds) {
+#ifdef _WIN32
+    Sleep(seconds * 1000);  // Windows: milisaniye cinsinden bekler
+#else
+    sleep(seconds);         // Linux/macOS: saniye cinsinden bekler
+#endif
+}
+
+
+void notificationSettings() {
+    clearScreen();
+
+    // Mevcut bildirim yöntemini göster
+    showCurrentNotificationMethod();
+
+    int choice;
+    printf("Select notification method:\n");
+    printf("1. SMS\n");
+    printf("2. E-Mail\n");
+    printf("3. Phone Call\n");
+    printf("Enter your choice: ");
+    choice = getInput();
+
+    switch (choice) {
+    case 1:
+        notificationMethod = 1;
+        printf("Your reminder has been set to SMS.\n");
+        break;
+    case 2:
+        notificationMethod = 2;
+        printf("Your reminder has been set to E-Mail.\n");
+        break;
+    case 3:
+        notificationMethod = 3;
+        printf("Your reminder has been set to Phone Call.\n");
+        break;
+    default:
+        printf("Invalid choice. Please try again.\n");
+        enterToContinue();
+        notificationSettings();  // Geçersiz girişte tekrar çağır
+        return;
+    }
+
+    enterToContinue();
+}
+
+// Mevcut bildirim yöntemini ekranda gösterir
+void showCurrentNotificationMethod() {
+    if (notificationMethod == 0) {
+        printf("No notification method selected yet.\n");
+    }
+    else {
+        const char* methodStr =
+            (notificationMethod == 1) ? "SMS" :
+            (notificationMethod == 2) ? "E-Mail" : "Notification";
+
+        printf("Current notification method: %s\n", methodStr);
+    }
+}
+
+
 int taskPrioritizationMenu() {
     int choice;
 
     while (1) {
-        printTaskPrioritizationMenu();
-        choice = getInput();
+        printTaskPrioritizationMenu();  // Menüyü ekrana yazdır
+        choice = getInput();  // Kullanıcıdan giriş al
 
-        if (choice == -2) {
+        if (choice == -2) {  // Hatalı giriş durumu
             handleInputError();
             enterToContinue();
             continue;
@@ -510,11 +696,12 @@ int taskPrioritizationMenu() {
 
         switch (choice) {
         case 1:
+            markTaskImportance();  // Görevin önemini belirleme
             break;
         case 2:
             break;
         case 3:
-            return 0;
+            return 0;  // Menüden çıkış
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -523,6 +710,123 @@ int taskPrioritizationMenu() {
         }
     }
 }
+
+
+void markTaskImportance() {
+    clearScreen();
+
+    Task tasks[100];  // Maksimum 100 görev için yer ayırıyoruz
+    int taskCount = loadTasks(tasks, 100);  // Görevleri yükle
+
+    if (taskCount <= 0) {
+        printf("No tasks available. Please add tasks first.\n");
+        enterToContinue();
+        return;
+    }
+
+    // Tüm görevleri göster
+    printf("Tasks loaded:\n");
+    for (int i = 0; i < taskCount; ++i) {
+        const char* importanceStr =
+            tasks[i].impid == 1 ? "Low" :
+            tasks[i].impid == 2 ? "Medium" :
+            tasks[i].impid == 3 ? "High" : "Unmarked";
+        printf("ID: %d, Name: %s, Importance: %s\n",
+            tasks[i].id, tasks[i].name, importanceStr);
+    }
+
+    // Kullanıcıdan görevin adını al
+    char taskName[100];
+    Task* selectedTask = NULL;
+
+    while (1) {
+        printf("\nEnter the name of the task to mark importance: ");
+        scanf(" %[^\n]%*c", taskName);  // Boşluklu girişleri alır
+
+        // Görev adını bul ve işaretle
+        for (int i = 0; i < taskCount; ++i) {
+            if (strcmp(tasks[i].name, taskName) == 0) {
+                selectedTask = &tasks[i];
+                break;
+            }
+        }
+
+        if (selectedTask) {
+            break;  // Geçerli bir görev bulunduysa döngüden çık
+        }
+        else {
+            printf("Task not found! Please enter a valid task name.\n");
+        }
+    }
+
+    // Kullanıcıdan önem seviyesini al
+    int importanceId;
+    while (1) {
+        printf("Enter the importance ID (1: Low, 2: Medium, 3: High): ");
+        importanceId = getInput();
+
+        if (importanceId >= 1 && importanceId <= 3) {
+            break;  // Geçerli önem seviyesi girildiyse döngüden çık
+        }
+        else {
+            printf("Invalid importance value! Please enter 1, 2, or 3.\n");
+        }
+    }
+
+    // Önem seviyesini güncelle
+    selectedTask->impid = importanceId;
+
+    // Güncellenen görev listesini dosyaya kaydet
+    saveTasks(tasks, taskCount);
+
+    printf("Importance level of '%s' marked successfully as %d.\n",
+        selectedTask->name, importanceId);
+    enterToContinue();
+}
+
+
+
+
+
+
+
+int findTaskByName(const char* name) {
+    for (int i = 0; i < taskCount; i++) {
+        if (strcmp(tasks[i].name, name) == 0) {
+            return i;  // Görev bulunduysa indeksini döndür
+        }
+    }
+    return -1;  // Görev bulunamazsa -1 döner
+}
+
+
+void loadTasksFromFile() {
+    FILE* file = fopen("tasks.bin", "rb");
+    if (file == NULL) {
+        printf("Error opening tasks.bin! No tasks loaded.\n");
+        return;
+    }
+
+    taskCount = fread(tasks, sizeof(Task), 100, file);
+    fclose(file);
+
+    printf("%d tasks loaded successfully from tasks.bin.\n", taskCount);
+}
+
+// tasks.bin dosyasına görevleri kaydeden fonksiyon
+void saveTasksToFile() {
+    FILE* file = fopen("tasks.bin", "wb");
+    if (file == NULL) {
+        printf("Error opening tasks.bin for writing!\n");
+        return;
+    }
+
+    fwrite(tasks, sizeof(Task), taskCount, file);
+    fclose(file);
+
+    printf("Tasks saved successfully to tasks.bin.\n");
+}
+
 
 int hashFunction(const char* email) {
     int hash = 0;
@@ -723,7 +1027,7 @@ int userOptionsMenu() {
 
         switch (choice) {
         case 1:
-            createTaskMenu(taskList, &taskCount);  
+            createTaskMenu(taskList, &taskCount);
             break;
         case 2:
             deadlineSettingsMenu();

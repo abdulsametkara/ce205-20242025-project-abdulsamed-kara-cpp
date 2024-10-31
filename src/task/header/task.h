@@ -14,7 +14,7 @@ typedef struct User {
     char surname[50];
     char email[50];
     char password[50];
-    struct User* next;  // Zincirleme için baðlý liste yapýsý
+    struct User* next;
 } User;
 
 typedef struct Task {
@@ -22,13 +22,15 @@ typedef struct Task {
     char name[100];
     char description[255];
     char category[50];
-    char dueDate[20];  // YYYY-MM-DD formatýnda son tarih
+    char dueDate[20];
+    int impid;
 } Task;
 
-typedef struct {
-    char name[MAX_ASSIGNMENT_NAME];  // Görev adý
-    int day, month, year;            // Deadline (Son teslim tarihi)
-} Assignment;
+struct Assignment {
+    char name[100];
+    int day, month, year;
+};
+
 
 void clearScreen();
 
@@ -82,12 +84,30 @@ int loginUserMenu(const char* pathFileUsers);
 
 
 int addTask(Task taskList[], int* taskCount, int maxTasks);
-void viewTask(const Task taskList[], int taskCount);
-void categorizeTask(const Task taskList[], int taskCount);
+void viewTask();
+void categorizeTask();
+int loadTasks(Task taskList[], int maxTasks);
+void saveTasks(const Task taskList[], int taskCount);
+
 
 
 
 int assign_deadline(Assignment* assignment);
+void viewDeadlines();
+
+
+
+void setReminders();
+void platformSleep(int seconds);
+void showCurrentNotificationMethod();
+void notificationSettings();
+
+
+
+int findTaskByName(const char* name);
+void markTaskImportance();
+void saveTasksToFile();
+
 
 
 #endif // TASK_H
