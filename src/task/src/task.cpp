@@ -510,6 +510,7 @@ void viewDeadlines() {
         return;
     }
 
+<<<<<<< HEAD
 
     Task task;
     Assignment deadline;
@@ -518,6 +519,15 @@ void viewDeadlines() {
     printf("\n--- Upcoming Deadlines ---\n");
     printf("----------------------------\n");
 
+=======
+    Task task;
+    Assignment deadline;
+    int taskCount = 0;
+
+    printf("\n--- Upcoming Deadlines ---\n");
+    printf("----------------------------\n");
+
+>>>>>>> 5072a8869404dd9125ed42ceeb37417508d8a4ae
     // Her iki dosyadan sırayla görev ve deadline bilgilerini okuyalım
     while (fread(&task, sizeof(Task), 1, tasksFile) == 1 &&
         fread(&deadline, sizeof(Assignment), 1, deadlinesFile) == 1) {
@@ -1084,3 +1094,5 @@ int mainMenu(const char* pathFileUsers) {
         }
     }
 }
+
+
