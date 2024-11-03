@@ -93,8 +93,7 @@ void saveTasks(const Task taskList[], int taskCount);
 
 
 int assign_deadline(Assignment* assignment);
-int view_deadlines(Assignment assignments[], int count);
-
+void viewDeadlines();
 
 void setReminders();
 void platformSleep(int seconds);
