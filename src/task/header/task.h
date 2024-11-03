@@ -50,6 +50,7 @@ typedef struct StackNode {
     struct StackNode* next;
 } StackNode;
 
+
 QueueNode* front = NULL;  // Kuyru�un ba��
 QueueNode* rear = NULL;   // Kuyru�un sonu
 StackNode* stackTop = NULL;  // Y���n�n en �st�
