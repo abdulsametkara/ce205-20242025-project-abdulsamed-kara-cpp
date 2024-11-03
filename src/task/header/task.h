@@ -30,7 +30,13 @@ struct Assignment {
     char name[100];
     int day, month, year;
 };
-
+// Sparse Matrix düðüm yapýsý
+typedef struct SparseMatrixNode {
+    int row;  // Görev ID
+    int col;  // Tarih
+    int value;  // Bildirim türü (0: Yok, 1: SMS, 2: E-Mail, 3: Notification)
+    struct SparseMatrixNode* next;
+} SparseMatrixNode;
 
 void clearScreen();
 

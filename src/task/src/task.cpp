@@ -679,6 +679,55 @@ void showCurrentNotificationMethod() {
     }
 }
 
+SparseMatrixNode* createNode(int row, int col, int value) {
+    SparseMatrixNode* newNode = (SparseMatrixNode*)malloc(sizeof(SparseMatrixNode));
+    newNode->row = row;
+    newNode->col = col;
+    newNode->value = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Sparse Matrix'e değer ekleme
+void addNotification(SparseMatrixNode** head, int row, int col, int value) {
+    SparseMatrixNode* newNode = createNode(row, col, value);
+    newNode->next = *head;
+    *head = newNode;
+}
+
+// Bildirimleri gösterme
+void displayNotifications(SparseMatrixNode* head) {
+    SparseMatrixNode* temp = head;
+    while (temp != NULL) {
+        printf("Task ID: %d, Date: %d, Notification Type: %d\n", temp->row, temp->col, temp->value);
+        temp = temp->next;
+    }
+}
+
+void updateNotificationMethod(int taskId, int date, int method, SparseMatrixNode** head) {
+    addNotification(head, taskId, date, method);
+    printf("Notification method updated for Task ID %d on Date %d\n", taskId, date);
+}
+
+void showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date) {
+    SparseMatrixNode* temp = head;
+    while (temp != NULL) {
+        if (temp->row == taskId && temp->col == date) {
+            const char* methodStr =
+                (temp->value == 1) ? "SMS" :
+                (temp->value == 2) ? "E-Mail" : "Notification";
+            printf("Current notification method for Task ID %d on Date %d: %s\n", taskId, date, methodStr);
+            return;
+        }
+        temp = temp->next;
+    }
+    printf("No notification method selected for Task ID %d on Date %d.\n", taskId, date);
+}
+
+
+
+
+
 
 int taskPrioritizationMenu() {
     int choice;
