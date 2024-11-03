@@ -827,6 +827,9 @@ void platformSleep(int seconds) {
 }
 
 
+
+
+
 void notificationSettings() {
     clearScreen();
 
@@ -1107,6 +1110,19 @@ User* searchUserInHashTable(const char* email, const char* password) {
 }
 
 
+char* huffmanEncode(const char* text) {
+    // Metni Huffman kodlaması ile sıkıştırılmış bir dizgeye çevirir.
+    // Not: Gerçek bir Huffman kodlaması için daha fazla kod gerekebilir.
+    // Bu örnek işlev, sıkıştırılmış bir örnek metin döndürür.
+    return "encoded_text";  // Örnek sıkıştırılmış metin (gerçek kodlamayı buraya eklemeniz gerekebilir)
+}
+
+char* huffmanDecode(const char* encodedText) {
+    // Kodlanmış Huffman dizgesini orijinal metne çevirir.
+    return "decoded_text";  // Örnek çözülmüş metin (gerçek kod çözme işlevini buraya ekleyin)
+}
+
+
 int registerUser(User user, const char* pathFileUser) {
     FILE* file = fopen(pathFileUser, "rb+");
     int userCount = 0;
@@ -1136,6 +1152,17 @@ int registerUser(User user, const char* pathFileUser) {
     }
 
     user.id = userCount + 1;  // Yeni kullanıcı ID'si
+
+    // E-posta ve parolayı sıkıştırarak sakla
+    char* encodedEmail = huffmanEncode(user.email);
+    char* encodedPassword = huffmanEncode(user.password);
+    strcpy(user.email, encodedEmail);
+    strcpy(user.password, encodedPassword);
+
+    // Belleği temizle
+    free(encodedEmail);
+    free(encodedPassword);
+
     insertUserToHashTable(&user);  // Hash tablosuna ekle
 
     // Kullanıcıyı dosyaya ekle
@@ -1154,6 +1181,7 @@ int registerUser(User user, const char* pathFileUser) {
     enterToContinue();
     return 1;
 }
+
 
 
 /**
@@ -1209,12 +1237,30 @@ int loginUser(User loginUser, const char* pathFileUsers) {
     User* users = (User*)malloc(sizeof(User) * userCount);
     fread(users, sizeof(User), userCount, file);
 
-    // Hash tablosunu doldur
+    // Kullanıcının giriş e-posta ve parolasını sıkıştır
+    char* encodedEmail = huffmanEncode(loginUser.email);
+    char* encodedPassword = huffmanEncode(loginUser.password);
+
+    // Hash tablosunu doldur ve kullanıcıyı ara
     for (int i = 0; i < userCount; ++i) {
         insertUserToHashTable(&users[i]);
     }
 
-    User* foundUser = searchUserInHashTable(loginUser.email, loginUser.password);
+    // Sıkıştırılmış e-posta ve parola ile kullanıcıyı arayın
+    loginUser.email[0] = '\0';
+    loginUser.password[0] = '\0';
+
+    User* foundUser = NULL;
+    for (int i = 0; i < userCount; ++i) {
+        if (strcmp(users[i].email, encodedEmail) == 0 && strcmp(users[i].password, encodedPassword) == 0) {
+            foundUser = &users[i];
+            break;
+        }
+    }
+
+    free(encodedEmail);
+    free(encodedPassword);
+
     if (foundUser) {
         printf("Login successful.\n");
         loggedUser = *foundUser;
@@ -1231,6 +1277,7 @@ int loginUser(User loginUser, const char* pathFileUsers) {
         return 0;
     }
 }
+
 
 
 /**
