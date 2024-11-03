@@ -6,7 +6,9 @@
 using namespace std;
 
 #define MAX_ASSIGNMENT_NAME 50
-
+#define MAX_HEAP_SIZE 100  // Maksimum görev sayısı
+#define MAX_KEYS 3  // Her düğümde maksimum anahtar sayısı (basit bir örnek için)
+#define MAX_CHILDREN (MAX_KEYS + 1)
 
 typedef struct User {
     int id;
@@ -50,9 +52,54 @@ typedef struct StackNode {
     struct StackNode* next;
 } StackNode;
 
+typedef struct {
+    Assignment deadlines[MAX_HEAP_SIZE];
+    int size;
+} MinHeap;
+
 QueueNode* front = NULL;  // Kuyru�un ba��
 QueueNode* rear = NULL;   // Kuyru�un sonu
 StackNode* stackTop = NULL;  // Y���n�n en �st�
+
+typedef struct ScheduledTask {
+    char name[50];
+    int day, month, year;
+    char description[100];
+    char category[50];
+} ScheduledTask;
+
+typedef struct BPlusTreeNode {
+    bool isLeaf;
+    int numKeys;
+    int keys[MAX_KEYS];
+    ScheduledTask* tasks[MAX_KEYS];  // Burada Task yerine ScheduledTask kullanıyoruz
+    struct BPlusTreeNode* children[MAX_CHILDREN];
+    struct BPlusTreeNode* next;  // Yaprak düğümler arasında geçiş için
+} BPlusTreeNode;
+
+typedef struct BPlusTree {
+    BPlusTreeNode* root;
+} BPlusTree;
+
+
+
+BPlusTreeNode* createNode(bool isLeaf) {
+    BPlusTreeNode* node = (BPlusTreeNode*)malloc(sizeof(BPlusTreeNode));
+    node->isLeaf = isLeaf;
+    node->numKeys = 0;
+    node->next = NULL;
+    for (int i = 0; i < MAX_CHILDREN; i++) {
+        node->children[i] = NULL;
+    }
+    return node;
+}
+
+BPlusTree* createBPlusTree() {
+    BPlusTree* tree = (BPlusTree*)malloc(sizeof(BPlusTree));
+    tree->root = createNode(true);  // Başlangıçta tek bir yaprak düğümü var
+    return tree;
+}
+
 
 void clearScreen();
 
@@ -119,6 +166,8 @@ Task dequeue();
 
 int assign_deadline(Assignment* assignment);
 void viewDeadlines();
+void insertMinHeap(MinHeap* heap, Assignment deadline);
+Assignment extractMin(MinHeap* heap);
 
 
 
