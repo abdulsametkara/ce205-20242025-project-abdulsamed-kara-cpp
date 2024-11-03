@@ -31,6 +31,20 @@ struct Assignment {
     int day, month, year;
 };
 
+typedef struct QueueNode {
+    Task task;
+    struct QueueNode* next;
+} QueueNode;
+
+typedef struct StackNode {
+    Task task;
+    struct StackNode* next;
+} StackNode;
+
+QueueNode* front = NULL;  // Kuyruðun baþý
+QueueNode* rear = NULL;   // Kuyruðun sonu
+StackNode* stackTop = NULL;  // Yýðýnýn en üstü
+
 
 void clearScreen();
 
@@ -88,6 +102,9 @@ void viewTask();
 void categorizeTask();
 int loadTasks(Task taskList[], int maxTasks);
 void saveTasks(const Task taskList[], int taskCount);
+void enqueue(Task task);
+void push(Task task);
+Task dequeue();
 
 
 
