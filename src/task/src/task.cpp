@@ -1096,4 +1096,6 @@ int mainMenu(const char* pathFileUsers) {
             break;
         }
     }
-}
+} 
+
+
