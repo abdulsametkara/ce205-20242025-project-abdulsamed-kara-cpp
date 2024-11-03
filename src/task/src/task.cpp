@@ -28,6 +28,8 @@ const char* filename = "tasks.bin";
 
 
 
+
+
 Task tasks[100];
 User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
@@ -507,7 +509,8 @@ int deadlineSettingsMenu() {
     }
 }
 
-// Kullanıcıdan görev bilgisi alıp deadline atayan fonksiyon
+MinHeap deadlineHeap = { {0}, 0 };  // İlk alan tüm görevler için sıfırlanır, ikinci alan size olarak 0 atanır
+
 int assign_deadline(Assignment* assignment) {
     char taskName[MAX_ASSIGNMENT_NAME];
     int day, month, year;
@@ -544,6 +547,9 @@ int assign_deadline(Assignment* assignment) {
     assignment->month = month;
     assignment->year = year;
 
+    // Deadline'ı yığına ekle
+    insertMinHeap(&deadlineHeap, *assignment);
+
     // Deadline'ı dosyaya kaydet
     FILE* file = fopen("deadlines.bin", "ab");
     if (!file) {
@@ -559,47 +565,181 @@ int assign_deadline(Assignment* assignment) {
 }
 
 void viewDeadlines() {
-    FILE* tasksFile = fopen("tasks.bin", "rb");  // Görev adlarını okuma
-    FILE* deadlinesFile = fopen("deadlines.bin", "rb");  // Son teslim tarihlerini okuma
-
-    if (!tasksFile || !deadlinesFile) {
-        printf("Error: Could not open tasks or deadlines file.\n");
-        if (tasksFile) fclose(tasksFile);
-        if (deadlinesFile) fclose(deadlinesFile);
+    if (deadlineHeap.size == 0) {
+        printf("No deadlines to display.\n");
         return;
     }
 
-    Task task;
-    Assignment deadline;
+    printf("\n--- Upcoming Deadlines (Sorted by Date) ---\n");
+    printf("-------------------------------------------\n");
+
+    MinHeap tempHeap = deadlineHeap;  // Yığının bir kopyasını alarak orijinali koruyoruz
+
     int taskCount = 0;
-
-    printf("\n--- Upcoming Deadlines ---\n");
-    printf("----------------------------\n");
-
-    // Her iki dosyadan sırayla görev ve deadline bilgilerini okuyalım
-    while (fread(&task, sizeof(Task), 1, tasksFile) == 1 &&
-        fread(&deadline, sizeof(Assignment), 1, deadlinesFile) == 1) {
+    while (tempHeap.size > 0) {
+        Assignment deadline = extractMin(&tempHeap);
         printf("%d. Task: %s - Deadline: %02d/%02d/%04d\n",
             ++taskCount,
-            task.name,
+            deadline.name,
             deadline.day,
             deadline.month,
             deadline.year);
     }
 
     if (taskCount == 0) {
-        printf("No assignments to display.\n");
+        printf("No deadlines to display.\n");
     }
 
-    printf("----------------------------\n");
-
-    fclose(tasksFile);  // Dosyaları kapat
-    fclose(deadlinesFile);
-    printf("\n");
+    printf("-------------------------------------------\n");
     enterToContinue();  // Kullanıcıdan devam etmesini bekle
 }
 
+int getDateKey(int day, int month, int year) {
+    return year * 10000 + month * 100 + day;  // YYYYMMDD formatında bir anahtar oluşturur
+}
 
+void insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
+    int i = leaf->numKeys - 1;
+    while (i >= 0 && leaf->keys[i] > key) {
+        leaf->keys[i + 1] = leaf->keys[i];
+        leaf->tasks[i + 1] = leaf->tasks[i];
+        i--;
+    }
+    leaf->keys[i + 1] = key;
+    leaf->tasks[i + 1] = task;
+    leaf->numKeys++;
+}
+
+void insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
+    int key = getDateKey(task->day, task->month, task->year);
+    BPlusTreeNode* root = tree->root;
+
+    if (root->numKeys < MAX_KEYS) {
+        insertInLeaf(root, key, task);
+    }
+    else {
+        printf("Node splitting required. Implement split logic here.\n");
+    }
+}
+
+void searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
+    if (node == NULL) return;
+
+    int i = 0;
+    while (i < node->numKeys && node->keys[i] < startKey) i++;
+
+    if (node->isLeaf) {
+        while (i < node->numKeys && node->keys[i] <= endKey) {
+            printf("Task: %s, Deadline: %02d/%02d/%04d\n",
+                node->tasks[i]->name,
+                node->tasks[i]->day,
+                node->tasks[i]->month,
+                node->tasks[i]->year);
+            i++;
+        }
+        if (node->next != NULL && node->keys[node->numKeys - 1] <= endKey) {
+            searchInDateRange(node->next, startKey, endKey);
+        }
+    }
+    else {
+        while (i <= node->numKeys) {
+            searchInDateRange(node->children[i], startKey, endKey);
+            i++;
+        }
+    }
+}
+
+void viewDeadlinesInRange(BPlusTree* tree) {
+    int startDay, startMonth, startYear;
+    int endDay, endMonth, endYear;
+
+    printf("Enter start date (day month year): ");
+    scanf("%d %d %d", &startDay, &startMonth, &startYear);
+    printf("Enter end date (day month year): ");
+    scanf("%d %d %d", &endDay, &endMonth, &endYear);
+
+    int startKey = getDateKey(startDay, startMonth, startYear);
+    int endKey = getDateKey(endDay, endMonth, endYear);
+
+    printf("\n--- Tasks between %02d/%02d/%04d and %02d/%02d/%04d ---\n",
+        startDay, startMonth, startYear, endDay, endMonth, endYear);
+
+    searchInDateRange(tree->root, startKey, endKey);
+}
+
+void swap(Assignment* a, Assignment* b) {
+    Assignment temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void heapify(MinHeap* heap, int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    // Deadline'a göre karşılaştırma
+    if (left < heap->size &&
+        (heap->deadlines[left].year < heap->deadlines[smallest].year ||
+            (heap->deadlines[left].year == heap->deadlines[smallest].year && heap->deadlines[left].month < heap->deadlines[smallest].month) ||
+            (heap->deadlines[left].year == heap->deadlines[smallest].year && heap->deadlines[left].month == heap->deadlines[smallest].month && heap->deadlines[left].day < heap->deadlines[smallest].day))) {
+        smallest = left;
+    }
+
+    if (right < heap->size &&
+        (heap->deadlines[right].year < heap->deadlines[smallest].year ||
+            (heap->deadlines[right].year == heap->deadlines[smallest].year && heap->deadlines[right].month < heap->deadlines[smallest].month) ||
+            (heap->deadlines[right].year == heap->deadlines[smallest].year && heap->deadlines[right].month == heap->deadlines[smallest].month && heap->deadlines[right].day < heap->deadlines[smallest].day))) {
+        smallest = right;
+    }
+
+    if (smallest != i) {
+        swap(&heap->deadlines[i], &heap->deadlines[smallest]);
+        heapify(heap, smallest);
+    }
+}
+
+// Yığına görevi deadline sırasına göre ekleme
+void insertMinHeap(MinHeap* heap, Assignment deadline) {
+    if (heap->size == MAX_HEAP_SIZE) {
+        printf("Heap is full\n");
+        return;
+    }
+
+    heap->size++;
+    int i = heap->size - 1;
+    heap->deadlines[i] = deadline;
+
+    // Yukarı doğru yer değiştirerek minimum yığın özelliğini koruma
+    while (i != 0 &&
+        (heap->deadlines[(i - 1) / 2].year > heap->deadlines[i].year ||
+            (heap->deadlines[(i - 1) / 2].year == heap->deadlines[i].year && heap->deadlines[(i - 1) / 2].month > heap->deadlines[i].month) ||
+            (heap->deadlines[(i - 1) / 2].year == heap->deadlines[i].year && heap->deadlines[(i - 1) / 2].month == heap->deadlines[i].month && heap->deadlines[(i - 1) / 2].day > heap->deadlines[i].day))) {
+        swap(&heap->deadlines[i], &heap->deadlines[(i - 1) / 2]);
+        i = (i - 1) / 2;
+    }
+}
+
+// Yığının en üstündeki (en yakın deadline'a sahip) görevi çıkartma
+Assignment extractMin(MinHeap* heap) {
+    if (heap->size <= 0) {
+        printf("Heap is empty\n");
+        Assignment emptyAssignment;
+        emptyAssignment.day = emptyAssignment.month = emptyAssignment.year = -1;
+        return emptyAssignment;
+    }
+    if (heap->size == 1) {
+        heap->size--;
+        return heap->deadlines[0];
+    }
+
+    Assignment root = heap->deadlines[0];
+    heap->deadlines[0] = heap->deadlines[heap->size - 1];
+    heap->size--;
+    heapify(heap, 0);
+
+    return root;
+}
 
 int reminderSystemMenu() {
     int choice;
