@@ -31,6 +31,15 @@ struct Assignment {
     int day, month, year;
 };
 
+// Sparse Matrix dï¿½ï¿½ï¿½m yapï¿½sï¿½
+typedef struct SparseMatrixNode {
+    int row;  // Gï¿½rev ID
+    int col;  // Tarih
+    int value;  // Bildirim tï¿½rï¿½ (0: Yok, 1: SMS, 2: E-Mail, 3: Notification)
+    struct SparseMatrixNode* next;
+} SparseMatrixNode;
+
+
 typedef struct QueueNode {
     Task task;
     struct QueueNode* next;
@@ -41,10 +50,9 @@ typedef struct StackNode {
     struct StackNode* next;
 } StackNode;
 
-QueueNode* front = NULL;  // Kuyruðun baþý
-QueueNode* rear = NULL;   // Kuyruðun sonu
-StackNode* stackTop = NULL;  // Yýðýnýn en üstü
-
+QueueNode* front = NULL;  // Kuyruï¿½un baï¿½ï¿½
+QueueNode* rear = NULL;   // Kuyruï¿½un sonu
+StackNode* stackTop = NULL;  // Yï¿½ï¿½ï¿½nï¿½n en ï¿½stï¿½
 
 void clearScreen();
 
