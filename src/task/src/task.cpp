@@ -297,6 +297,12 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
     taskList[*taskCount] = newTask;
     (*taskCount)++;
 
+    // Görevi kuyruğa ekle
+    enqueue(newTask);
+
+    // Görevi geri alma için yığına ekle
+    push(newTask);
+
     // Görevleri kaydet
     saveTasks(taskList, *taskCount);
 
@@ -307,34 +313,23 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
 
 
 void viewTask() {
-    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda aç
-    if (file == NULL) {
+    if (front == NULL) {
         printf("No tasks found. The task list is empty.\n");
         enterToContinue();
         return;
     }
 
-    Task task;
-    int taskCount = 0;
-
     printf("\n--- List of Tasks ---\n");
-    // Dosyadaki tüm görevleri sırayla okuyalım
-    while (fread(&task, sizeof(Task), 1, file)) {
+    while (front != NULL) {
+        Task task = dequeue();
         printf("ID: %d\n", task.id);
         printf("Name: %s\n", task.name);
         printf("Description: %s\n", task.description);
         printf("Category: %s\n", task.category);
         printf("Due Date: %s\n", task.dueDate);
         printf("---------------------------\n");
-        taskCount++;
     }
-
-    if (taskCount == 0) {
-        printf("No tasks available.\n");
-    }
-
-    fclose(file);  // Dosyayı kapatmayı unutmayın
-    enterToContinue();  // Kullanıcının devam etmesi için bekle
+    enterToContinue();
 }
 
 
@@ -408,8 +403,72 @@ int loadTasks(Task taskList[], int maxTasks) {
     return taskCount;  // Yüklenen görev sayısını geri döndürüyoruz
 }
 
+void enqueue(Task task) {
+    QueueNode* newNode = (QueueNode*)malloc(sizeof(QueueNode));
+    newNode->task = task;
+    newNode->next = NULL;
 
+    if (rear == NULL) {
+        front = rear = newNode;
+        return;
+    }
+    rear->next = newNode;
+    rear = newNode;
+}
 
+Task dequeue() {
+    if (front == NULL) {
+        printf("Queue is empty\n");
+        Task emptyTask;
+        emptyTask.id = -1; // Hata durumu için
+        return emptyTask;
+    }
+    QueueNode* temp = front;
+    Task task = temp->task;
+    front = front->next;
+
+    if (front == NULL) {
+        rear = NULL;
+    }
+    free(temp);
+    return task;
+}
+
+void push(Task task) {
+    StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
+    newNode->task = task;
+    newNode->next = stackTop;
+    stackTop = newNode;
+}
+
+Task pop() {
+    if (stackTop == NULL) {
+        printf("Stack is empty\n");
+        Task emptyTask;
+        emptyTask.id = -1; // Hata durumu için
+        return emptyTask;
+    }
+    StackNode* temp = stackTop;
+    Task task = temp->task;
+    stackTop = stackTop->next;
+    free(temp);
+    return task;
+}
+
+void undoLastTask(Task taskList[], int* taskCount) {
+    Task lastTask = pop();
+    if (lastTask.id == -1) {
+        printf("No tasks to undo.\n");
+        return;
+    }
+
+    // Son görevi listeden çıkar
+    (*taskCount)--;
+    printf("Last task '%s' undone successfully.\n", lastTask.name);
+
+    // Dosyayı güncelle
+    saveTasks(taskList, *taskCount);
+}
 
 
 // Menü fonksiyonu
