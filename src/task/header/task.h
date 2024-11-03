@@ -30,13 +30,29 @@ struct Assignment {
     char name[100];
     int day, month, year;
 };
-// Sparse Matrix düðüm yapýsý
+
+// Sparse Matrix dï¿½ï¿½ï¿½m yapï¿½sï¿½
 typedef struct SparseMatrixNode {
-    int row;  // Görev ID
+    int row;  // Gï¿½rev ID
     int col;  // Tarih
-    int value;  // Bildirim türü (0: Yok, 1: SMS, 2: E-Mail, 3: Notification)
+    int value;  // Bildirim tï¿½rï¿½ (0: Yok, 1: SMS, 2: E-Mail, 3: Notification)
     struct SparseMatrixNode* next;
 } SparseMatrixNode;
+
+
+typedef struct QueueNode {
+    Task task;
+    struct QueueNode* next;
+} QueueNode;
+
+typedef struct StackNode {
+    Task task;
+    struct StackNode* next;
+} StackNode;
+
+QueueNode* front = NULL;  // Kuyruï¿½un baï¿½ï¿½
+QueueNode* rear = NULL;   // Kuyruï¿½un sonu
+StackNode* stackTop = NULL;  // Yï¿½ï¿½ï¿½nï¿½n en ï¿½stï¿½
 
 void clearScreen();
 
@@ -94,6 +110,9 @@ void viewTask();
 void categorizeTask();
 int loadTasks(Task taskList[], int maxTasks);
 void saveTasks(const Task taskList[], int taskCount);
+void enqueue(Task task);
+void push(Task task);
+Task dequeue();
 
 
 
