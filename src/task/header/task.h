@@ -9,6 +9,16 @@ using namespace std;
 #define MAX_HEAP_SIZE 100  // Maksimum görev sayısı
 #define MAX_KEYS 3  // Her düğümde maksimum anahtar sayısı (basit bir örnek için)
 #define MAX_CHILDREN (MAX_KEYS + 1)
+#define MAX_TASKS 100
+#define MAX_DEPENDENCIES 10
+
+#define TABLE_SIZE 10  // Hash tablosunun boyutu
+#define OVERFLOW_SIZE 10  // Taşma alanı boyutu
+#define TABLE_SIZE 10  // Hash tablosunun boyutu
+#define Q_STEP 3       // Sabit adım boyutu (q)
+
+
+
 
 typedef struct User {
     int id;
@@ -26,6 +36,8 @@ typedef struct Task {
     char category[50];
     char dueDate[20];
     int impid;
+    int dependencies[MAX_DEPENDENCIES]; // Görevin bağlı olduğu diğer görevlerin ID’leri
+    int dependencyCount;
 } Task;
 
 struct Assignment {
@@ -57,6 +69,15 @@ typedef struct {
     int size;
 } MinHeap;
 
+typedef struct AdjacencyNode {
+    int data;
+    struct AdjacencyNode* next;
+} AdjacencyNode;
+
+AdjacencyNode* sccStack = NULL;
+
+
+
 QueueNode* front = NULL;  // Kuyru�un ba��
 QueueNode* rear = NULL;   // Kuyru�un sonu
 StackNode* stackTop = NULL;  // Y���n�n en �st�
@@ -80,6 +101,7 @@ typedef struct BPlusTreeNode {
 typedef struct BPlusTree {
     BPlusTreeNode* root;
 } BPlusTree;
+
 
 
 
@@ -132,6 +154,7 @@ int taskPrioritizationMenu();
 int userOptionsMenu();
 
 int mainMenu(const char* pathFileUsers);
+void algorithmsMenu();
 
 
 
@@ -160,6 +183,9 @@ void saveTasks(const Task taskList[], int taskCount);
 void enqueue(Task task);
 void push(Task task);
 Task dequeue();
+void printDependencies(Task taskList[], int taskCount, int startTaskId);
+int analyzeSCC(Task taskList[], int taskCount, FILE* out);
+void searchTasksByKeyword();
 
 
 

@@ -35,6 +35,8 @@ User* hashTable[TABLE_SIZE];
 Task taskList[MAX_TASKS];  // Görev listesi
 int taskCount = 0;  // Mevcut görev sayısı
 int notificationMethod = 0;
+User overflowArea[OVERFLOW_SIZE];
+int overflowCount = 0;
 
 
 
@@ -131,7 +133,8 @@ int printMainMenu() {
     printf("2. Deadline Settings\n");
     printf("3. Reminder System\n");
     printf("4. Task Prioritization\n");
-    printf("5. Exit\n");
+    printf("5. Task Prioritization\n");
+    printf("6. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice: ");
     return 1;
@@ -195,6 +198,22 @@ int printTaskPrioritizationMenu() {
     return 1;
 }
 
+void printAlgorithmsMenu() {
+    clearScreen();
+    printf("========================================\n");
+    printf("              ALGORITHMS MENU           \n");
+    printf("========================================\n");
+    printf("1. Progressive Overflow\n");
+    printf("2. Linear Probing\n");
+    printf("3. Quadratic Probing\n");
+    printf("4. Double Hashing\n");
+    printf("5. Use of Buckets\n");
+    printf("6. Linear Quotient\n");
+    printf("7. Brent's Method\n");
+    printf("8. Exit to Main Menu\n");
+    printf("========================================\n");
+    printf("Please enter your choice: ");
+}
 
 int getNewUserId(User users[], int userCount) {
     if (userCount == 0)
@@ -223,32 +242,52 @@ int loadUsers(const char* pathFileUsers, User** users) {
 }
 
 int createTaskMenu(Task taskList[], int* taskCount) {
-    int maxTasks = 100;  // Lokal olarak tanımlanan ve başlangıç değeri atanan değişken
+    int maxTasks = 100;
     int choice;
 
     while (1) {
-        printCreateTaskMenu();  // Menü çıktısını ekrana basar
-        choice = getInput();  // Kullanıcıdan giriş alır
+        printCreateTaskMenu();
+        choice = getInput();
 
         if (choice == -2) {
-            handleInputError();  // Hatalı giriş
+            handleInputError();
             enterToContinue();
             continue;
         }
 
         switch (choice) {
         case 1:
-            addTask(taskList, taskCount, maxTasks);  // Görev ekleme
+            addTask(taskList, taskCount, maxTasks);
             break;
         case 2:
-            viewTask();  // Görevleri görüntüleme
+            viewTask();
             enterToContinue();
             break;
         case 3:
-            categorizeTask();  // Kategoriye göre listeleme
+            categorizeTask();
             break;
-        case 4:
-            return 0;  // Menüden çıkış
+        case 4: {
+            int taskId;
+            printf("Enter the task ID to view its dependencies: ");
+            taskId = getInput();
+
+            if (taskId > 0 && taskId <= *taskCount) {
+                printDependencies(taskList, *taskCount, taskId);
+            }
+            else {
+                printf("Invalid task ID.\n");
+            }
+            enterToContinue();
+            break;
+        }
+        case 5:
+            analyzeSCC(taskList, *taskCount, stdout);
+            enterToContinue();
+            break;
+        case 6:
+            searchTasksByKeyword();  // KMP araması ile görevleri ara
+            enterToContinue();
+            break;
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -257,9 +296,6 @@ int createTaskMenu(Task taskList[], int* taskCount) {
         }
     }
 }
-
-
-
 
 
 /**
@@ -278,6 +314,7 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
 
     Task newTask;
     newTask.id = *taskCount + 1;
+    newTask.dependencyCount = 0;
 
     printf("Enter Task Name: ");
     fgets(newTask.name, sizeof(newTask.name), stdin);
@@ -294,6 +331,17 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
     printf("Enter Due Date (YYYY-MM-DD): ");
     fgets(newTask.dueDate, sizeof(newTask.dueDate), stdin);
     newTask.dueDate[strcspn(newTask.dueDate, "\n")] = 0;
+
+    // Görevin bağımlılıklarını al
+    printf("Enter number of dependencies: ");
+    scanf("%d", &newTask.dependencyCount);
+    getchar(); // Yeni satırı temizlemek için
+
+    for (int i = 0; i < newTask.dependencyCount; i++) {
+        printf("Enter dependency task ID for dependency %d: ", i + 1);
+        scanf("%d", &newTask.dependencies[i]);
+        getchar(); // Yeni satırı temizlemek için
+    }
 
     // Görevi listeye ekle ve sayacı artır
     taskList[*taskCount] = newTask;
@@ -471,6 +519,225 @@ void undoLastTask(Task taskList[], int* taskCount) {
     // Dosyayı güncelle
     saveTasks(taskList, *taskCount);
 }
+
+// Görevlerin bağımlılıklarını DFS ile takip eden yardımcı fonksiyon
+void printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
+    if (visited[taskId]) {
+        return;
+    }
+    visited[taskId] = true;
+
+    Task task = taskList[taskId - 1]; // taskId'den görevi al
+
+    // Görevin bağımlılıklarını yazdır
+    for (int i = 0; i < task.dependencyCount; i++) {
+        int dependencyId = task.dependencies[i];
+        printf("Task %d depends on Task %d\n", task.id, dependencyId);
+
+        // Bağımlı görevi tekrar çağırarak tüm alt bağımlılıkları bul
+        printDependenciesUtil(taskList, dependencyId, visited);
+    }
+}
+
+// Ana fonksiyon: Bir görevin tüm bağımlılıklarını yazdır
+void printDependencies(Task taskList[], int taskCount, int startTaskId) {
+    bool visited[MAX_TASKS] = { false };
+
+    printf("Dependencies for Task %d:\n", startTaskId);
+    printDependenciesUtil(taskList, startTaskId, visited);
+}
+
+
+void pushSccStack(int v) {
+    AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    newNode->data = v;
+    newNode->next = sccStack;
+    sccStack = newNode;
+}
+
+int popSccStack() {
+    if (sccStack == NULL) return -1;
+    int top = sccStack->data;
+    AdjacencyNode* temp = sccStack;
+    sccStack = sccStack->next;
+    free(temp);
+    return top;
+}
+
+void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** component) {
+    visited[v] = 1;
+    pushSccStack(v);
+    AdjacencyNode* temp = adj[v];
+    while (temp != NULL) {
+        if (!visited[temp->data]) {
+            dfsUtil(temp->data, visited, adj, component);
+        }
+        temp = temp->next;
+    }
+}
+
+void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
+    int visited[MAX_TASKS] = { 0 };
+
+    for (int i = 0; i < V; i++) {
+        if (!visited[i]) {
+            dfsUtil(i, visited, adj, NULL);
+        }
+    }
+
+    AdjacencyNode* transpose[MAX_TASKS] = { NULL };
+    for (int v = 0; v < V; v++) {
+        AdjacencyNode* temp = adj[v];
+        while (temp != NULL) {
+            int u = temp->data;
+            AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+            newNode->data = v;
+            newNode->next = transpose[u];
+            transpose[u] = newNode;
+            temp = temp->next;
+        }
+    }
+
+    memset(visited, 0, sizeof(visited));
+    int numSCC = 0;
+
+    while (sccStack != NULL) {
+        int v = popSccStack();
+
+        if (!visited[v]) {
+            fprintf(out, "SCC #%d: ", ++numSCC);
+            dfsUtil(v, visited, transpose, &sccStack);
+            while (sccStack != NULL) {
+                fprintf(out, "%d ", popSccStack());
+            }
+            fprintf(out, "\n");
+        }
+    }
+
+    for (int i = 0; i < V; i++) {
+        while (transpose[i] != NULL) {
+            AdjacencyNode* temp = transpose[i];
+            transpose[i] = transpose[i]->next;
+            free(temp);
+        }
+    }
+}
+
+int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
+    AdjacencyNode* adj[MAX_TASKS] = { NULL };
+
+    for (int i = 0; i < taskCount; i++) {
+        Task task = taskList[i];
+        for (int j = 0; j < task.dependencyCount; j++) {
+            int dep = task.dependencies[j];
+            AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+            newNode->data = dep - 1;
+            newNode->next = adj[task.id - 1];
+            adj[task.id - 1] = newNode;
+        }
+    }
+
+    findSCCs(taskCount, adj, out);
+
+    for (int i = 0; i < taskCount; i++) {
+        while (adj[i] != NULL) {
+            AdjacencyNode* temp = adj[i];
+            adj[i] = adj[i]->next;
+            free(temp);
+        }
+    }
+    return 1;
+}
+
+
+// Önek Tablosunu (Prefix Table) Oluştur
+void computePrefixTable(const char* pattern, int* prefixTable, int patternLength) {
+    int length = 0;
+    prefixTable[0] = 0;  // İlk eleman 0
+
+    for (int i = 1; i < patternLength; i++) {
+        while (length > 0 && pattern[i] != pattern[length]) {
+            length = prefixTable[length - 1];
+        }
+        if (pattern[i] == pattern[length]) {
+            length++;
+        }
+        prefixTable[i] = length;
+    }
+}
+
+// KMP Arama Fonksiyonu
+int KMPsearch(const char* text, const char* pattern) {
+    int textLength = strlen(text);
+    int patternLength = strlen(pattern);
+
+    // Önek tablosunu oluştur
+    int* prefixTable = (int*)malloc(sizeof(int) * patternLength);
+    computePrefixTable(pattern, prefixTable, patternLength);
+
+    int i = 0;  // text indeks
+    int j = 0;  // pattern indeks
+    while (i < textLength) {
+        if (pattern[j] == text[i]) {
+            j++;
+            i++;
+        }
+        if (j == patternLength) {
+            free(prefixTable);  // Belleği serbest bırak
+            return 1;  // Eşleşme bulundu
+        }
+        else if (i < textLength && pattern[j] != text[i]) {
+            if (j != 0) {
+                j = prefixTable[j - 1];
+            }
+            else {
+                i++;
+            }
+        }
+    }
+    free(prefixTable);  // Belleği serbest bırak
+    return 0;  // Eşleşme bulunamadı
+}
+
+void searchTasksByKeyword() {
+    FILE* file = fopen("tasks.bin", "rb");
+    if (!file) {
+        printf("Error opening tasks file.\n");
+        return;
+    }
+
+    char keyword[256];
+    printf("Enter the keyword to search in task descriptions: ");
+    fgets(keyword, sizeof(keyword), stdin);
+    keyword[strcspn(keyword, "\n")] = 0;  // Yeni satır karakterini sil
+
+    Task task;
+    int found = 0;
+
+    printf("\nTasks containing the keyword '%s' in their descriptions:\n", keyword);
+    printf("----------------------------------------------------\n");
+
+    while (fread(&task, sizeof(Task), 1, file)) {
+        if (KMPsearch(task.description, keyword)) {
+            printf("ID: %d\n", task.id);
+            printf("Name: %s\n", task.name);
+            printf("Description: %s\n", task.description);
+            printf("Category: %s\n", task.category);
+            printf("Due Date: %s\n", task.dueDate);
+            printf("----------------------------------------------------\n");
+            found = 1;
+        }
+    }
+
+    if (!found) {
+        printf("No tasks found with the keyword '%s'.\n", keyword);
+    }
+
+    fclose(file);
+}
+
+
+
 
 
 // Menü fonksiyonu
@@ -1087,101 +1354,451 @@ int hashFunction(const char* email) {
     return hash;
 }
 
-void insertUserToHashTable(User* user) {
+int hashFunction2(const char* email) {
+    int hash = 0;
+    while (*email) {
+        hash = (hash + *email) % (TABLE_SIZE - 1);  // TABLE_SIZE - 1 ile çarpma önerilir
+        email++;
+    }
+    return (TABLE_SIZE - 1 - hash);  // Double hashing için dönüş değeri
+}
+int secondHashFunction(const char* email) {
+    int hash = 0;
+    while (*email) {
+        hash = (hash * 31 + *email) % TABLE_SIZE;  // Daha etkili çakışma çözümü için ikinci hash fonksiyonu
+        email++;
+    }
+    return (TABLE_SIZE - 1 - hash);
+}
+
+
+void insertUserToHashTableWithLinearProbing(User* user) {
+    int index = hashFunction(user->email);
+    int originalIndex = index;
+
+    printf("Inserting user with email: %s\n", user->email);  // Hata ayıklama için
+
+    // Linear Probing ile boş yer arıyoruz
+    while (hashTable[index] != NULL) {
+        // Eğer aynı e-posta mevcutsa kullanıcı zaten kayıtlı
+        if (strcmp(hashTable[index]->email, user->email) == 0) {
+            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            return;
+        }
+
+        // Bir sonraki konuma geç ve mod işlemi ile dairesel dolaşım sağla
+        index = (index + 1) % TABLE_SIZE;
+
+        // Eğer tabloda döngü yapıyorsak, tablo dolu demektir
+        if (index == originalIndex) {
+            printf("Hash table is full, cannot add more users.\n");
+            return;
+        }
+    }
+
+    // Kullanıcıyı boş bulunan konuma ekle
+    hashTable[index] = (User*)malloc(sizeof(User));
+    *hashTable[index] = *user;
+
+    printf("User added at index %d.\n", index);  // Kullanıcının eklendiğini doğrulamak için
+}
+
+void insertUserToHashTableWithOverflow(User* user) {
     int index = hashFunction(user->email);
 
-    // Yeni kullanıcıyı eklemek için bağlı liste başına yerleştiriyoruz
-    user->next = hashTable[index];
-    hashTable[index] = user;
+    // Ana hash tablosunda boş yer arama
+    if (hashTable[index] == NULL) {
+        hashTable[index] = (User*)malloc(sizeof(User));
+        *hashTable[index] = *user;
+        printf("User added at index %d in main hash table.\n", index);
+    }
+    else {
+        // Eğer ana tabloda çakışma varsa taşma alanına ekle
+        if (overflowCount < OVERFLOW_SIZE) {
+            overflowArea[overflowCount++] = *user;
+            printf("User added at index %d in overflow area.\n", overflowCount - 1);
+        }
+        else {
+            printf("Overflow area is full, cannot add more users.\n");
+        }
+    }
 }
+
+void insertUserToHashTableWithQuadraticProbing(User* user) {
+    int index = hashFunction(user->email);
+    int i = 1;
+
+    // Quadratic Probing ile boş yer arama
+    while (hashTable[index] != NULL) {
+        // Eğer aynı e-posta mevcutsa kullanıcı zaten kayıtlı
+        if (strcmp(hashTable[index]->email, user->email) == 0) {
+            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            return;
+        }
+
+        // Çakışma olduğunda quadratik artış yaparak yeni indeks belirle
+        index = (index + i * i) % TABLE_SIZE;
+        i++;
+
+        // Eğer döngü oluşursa, tablo dolu demektir
+        if (i >= TABLE_SIZE) {
+            printf("Hash table is full, cannot add more users.\n");
+            return;
+        }
+    }
+
+    // Kullanıcıyı boş bulunan konuma ekle
+    hashTable[index] = (User*)malloc(sizeof(User));
+    *hashTable[index] = *user;
+
+    printf("User added at index %d using Quadratic Probing.\n", index);
+}
+
+void insertUserToHashTableWithDoubleHashing(User* user) {
+    int index = hashFunction(user->email);
+    int stepSize = hashFunction2(user->email);
+    int i = 0;
+
+    // Double Hashing ile boş yer arama
+    while (hashTable[index] != NULL) {
+        // Eğer aynı e-posta mevcutsa kullanıcı zaten kayıtlı
+        if (strcmp(hashTable[index]->email, user->email) == 0) {
+            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            return;
+        }
+
+        // Çakışma durumunda ikinci hash fonksiyonunu kullanarak yeni konuma geçiş yap
+        index = (index + stepSize) % TABLE_SIZE;
+        i++;
+
+        // Eğer döngü oluşursa, tablo dolu demektir
+        if (i >= TABLE_SIZE) {
+            printf("Hash table is full, cannot add more users.\n");
+            return;
+        }
+    }
+
+    // Kullanıcıyı boş bulunan konuma ekle
+    hashTable[index] = (User*)malloc(sizeof(User));
+    *hashTable[index] = *user;
+
+    printf("User added at index %d using Double Hashing.\n", index);
+}
+
+void insertUserToHashTableWithLinearQuotient(User* user) {
+    int index = hashFunction(user->email);
+    int stepSize = Q_STEP;
+
+    // Linear Quotient ile boş yer arama
+    while (hashTable[index] != NULL) {
+        // Eğer aynı e-posta mevcutsa, kullanıcı zaten kayıtlı
+        if (strcmp(hashTable[index]->email, user->email) == 0) {
+            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            return;
+        }
+
+        // Çakışma olduğunda sabit bir adım boyutu kadar ilerle
+        index = (index + stepSize) % TABLE_SIZE;
+
+        // Eğer tablo tamamen doluysa, kullanıcı eklenemez
+        if (index == hashFunction(user->email)) {
+            printf("Hash table is full, cannot add more users.\n");
+            return;
+        }
+    }
+
+    // Kullanıcıyı boş bulunan konuma ekle
+    hashTable[index] = (User*)malloc(sizeof(User));
+    *hashTable[index] = *user;
+
+    printf("User added at index %d using Linear Quotient.\n", index);
+}
+
+void insertUserToHashTableWithBrentsMethod(User* user) {
+    int index = hashFunction(user->email);
+    int stepSize = secondHashFunction(user->email);
+
+    if (hashTable[index] == NULL) {
+        // Eğer ilk pozisyon boşsa doğrudan ekle
+        hashTable[index] = (User*)malloc(sizeof(User));
+        *hashTable[index] = *user;
+        printf("User added at index %d using Brent's Method.\n", index);
+    }
+    else {
+        // Çakışma durumunda
+        int i = 1, newIndex = index;
+        User* currentUser = user;
+
+        while (hashTable[newIndex] != NULL) {
+            // İki alternatif stratejiyi değerlendir: mevcut konumdan devam etmek veya yer değiştirmek
+            int trialIndex1 = (newIndex + i * stepSize) % TABLE_SIZE;  // İleri adımla yeni konum
+            int trialIndex2 = (index + i) % TABLE_SIZE;                // Alternatif konum
+
+            // En kısa adım sayısıyla uygun pozisyonu seç
+            if (hashTable[trialIndex1] == NULL) {
+                newIndex = trialIndex1;
+                break;
+            }
+            else if (hashTable[trialIndex2] == NULL) {
+                newIndex = trialIndex2;
+                break;
+            }
+
+            i++;
+        }
+
+        hashTable[newIndex] = (User*)malloc(sizeof(User));
+        *hashTable[newIndex] = *user;
+        printf("User placed at index %d using Brent's Method after collision.\n", newIndex);
+    }
+}   
+
 
 User* searchUserInHashTable(const char* email, const char* password) {
     int index = hashFunction(email);
-    User* current = hashTable[index];
+    int originalIndex = index;
 
-    // Bağlı liste üzerinde arama yapıyoruz
-    while (current) {
-        if (strcmp(current->email, email) == 0 && strcmp(current->password, password) == 0) {
-            return current;  // Kullanıcı bulundu
+    // Linear Probing ile kullanıcı arama
+    while (hashTable[index] != NULL) {
+        if (strcmp(hashTable[index]->email, email) == 0 &&
+            strcmp(hashTable[index]->password, password) == 0) {
+            return hashTable[index];  // Kullanıcı bulundu
         }
-        current = current->next;
+
+        // Bir sonraki konuma geç ve mod işlemi ile dairesel dolaşım sağla
+        index = (index + 1) % TABLE_SIZE;
+
+        // Eğer tabloda döngü yapıyorsak, kullanıcı yok demektir
+        if (index == originalIndex) {
+            break;
+        }
     }
     return NULL;  // Kullanıcı bulunamadı
 }
 
 
-char* huffmanEncode(const char* text) {
-    // Metni Huffman kodlaması ile sıkıştırılmış bir dizgeye çevirir.
-    // Not: Gerçek bir Huffman kodlaması için daha fazla kod gerekebilir.
-    // Bu örnek işlev, sıkıştırılmış bir örnek metin döndürür.
-    return "encoded_text";  // Örnek sıkıştırılmış metin (gerçek kodlamayı buraya eklemeniz gerekebilir)
+
+
+void linearProbingDemo() {
+    printf("Linear Probing is active for user hash table management.\n");
+
+    User user;
+    printf("Enter user details:\n");
+
+    printf("Name: ");
+    fgets(user.name, sizeof(user.name), stdin);
+    user.name[strcspn(user.name, "\n")] = 0;
+
+    printf("Surname: ");
+    fgets(user.surname, sizeof(user.surname), stdin);
+    user.surname[strcspn(user.surname, "\n")] = 0;
+
+    printf("Email: ");
+    fgets(user.email, sizeof(user.email), stdin);
+    user.email[strcspn(user.email, "\n")] = 0;
+
+    printf("Password: ");
+    fgets(user.password, sizeof(user.password), stdin);
+    user.password[strcspn(user.password, "\n")] = 0;
+
+    insertUserToHashTableWithLinearProbing(&user);  // Linear Probing ile kullanıcı ekle
+
+    printf("User insertion complete.\n");  // Kullanıcı eklemenin bittiğini gösteren mesaj
+    enterToContinue();
 }
 
-char* huffmanDecode(const char* encodedText) {
-    // Kodlanmış Huffman dizgesini orijinal metne çevirir.
-    return "decoded_text";  // Örnek çözülmüş metin (gerçek kod çözme işlevini buraya ekleyin)
+void progressiveOverflowDemo() {
+    printf("Progressive Overflow is active for user hash table management.\n");
+
+    User user;
+    printf("Enter user details:\n");
+
+    printf("Name: ");
+    fgets(user.name, sizeof(user.name), stdin);
+    user.name[strcspn(user.name, "\n")] = 0;
+
+    printf("Surname: ");
+    fgets(user.surname, sizeof(user.surname), stdin);
+    user.surname[strcspn(user.surname, "\n")] = 0;
+
+    printf("Email: ");
+    fgets(user.email, sizeof(user.email), stdin);
+    user.email[strcspn(user.email, "\n")] = 0;
+
+    printf("Password: ");
+    fgets(user.password, sizeof(user.password), stdin);
+    user.password[strcspn(user.password, "\n")] = 0;
+
+    insertUserToHashTableWithOverflow(&user);  // Progressive Overflow ile kullanıcı ekle
+
+    printf("User insertion complete.\n");  // Kullanıcı eklemenin bittiğini gösteren mesaj
+    enterToContinue();
+}
+
+
+void quadraticProbingDemo() {
+    printf("Quadratic Probing is active for user hash table management.\n");
+
+    User user;
+    printf("Enter user details:\n");
+
+    printf("Name: ");
+    fgets(user.name, sizeof(user.name), stdin);
+    user.name[strcspn(user.name, "\n")] = 0;
+
+    printf("Surname: ");
+    fgets(user.surname, sizeof(user.surname), stdin);
+    user.surname[strcspn(user.surname, "\n")] = 0;
+
+    printf("Email: ");
+    fgets(user.email, sizeof(user.email), stdin);
+    user.email[strcspn(user.email, "\n")] = 0;
+
+    printf("Password: ");
+    fgets(user.password, sizeof(user.password), stdin);
+    user.password[strcspn(user.password, "\n")] = 0;
+
+    insertUserToHashTableWithQuadraticProbing(&user);  // Quadratic Probing ile kullanıcı ekle
+
+    printf("User insertion complete.\n");
+    enterToContinue();
+}
+
+void doubleHashingDemo() {
+    printf("Double Hashing is active for user hash table management.\n");
+
+    User user;
+    printf("Enter user details:\n");
+
+    printf("Name: ");
+    fgets(user.name, sizeof(user.name), stdin);
+    user.name[strcspn(user.name, "\n")] = 0;
+
+    printf("Surname: ");
+    fgets(user.surname, sizeof(user.surname), stdin);
+    user.surname[strcspn(user.surname, "\n")] = 0;
+
+    printf("Email: ");
+    fgets(user.email, sizeof(user.email), stdin);
+    user.email[strcspn(user.email, "\n")] = 0;
+
+    printf("Password: ");
+    fgets(user.password, sizeof(user.password), stdin);
+    user.password[strcspn(user.password, "\n")] = 0;
+
+    insertUserToHashTableWithDoubleHashing(&user);  // Double Hashing ile kullanıcı ekle
+
+    printf("User insertion complete.\n");
+    enterToContinue();
+}
+
+void linearQuotientDemo() {
+    printf("Linear Quotient is active for user hash table management.\n");
+
+    User user;
+    printf("Enter user details:\n");
+
+    printf("Name: ");
+    fgets(user.name, sizeof(user.name), stdin);
+    user.name[strcspn(user.name, "\n")] = 0;
+
+    printf("Surname: ");
+    fgets(user.surname, sizeof(user.surname), stdin);
+    user.surname[strcspn(user.surname, "\n")] = 0;
+
+    printf("Email: ");
+    fgets(user.email, sizeof(user.email), stdin);
+    user.email[strcspn(user.email, "\n")] = 0;
+
+    printf("Password: ");
+    fgets(user.password, sizeof(user.password), stdin);
+    user.password[strcspn(user.password, "\n")] = 0;
+
+    insertUserToHashTableWithLinearQuotient(&user);  // Linear Quotient ile kullanıcı ekle
+
+    printf("User insertion complete.\n");
+    enterToContinue();
+}
+
+void brentsMethodDemo() {
+    printf("Brent's Method is active for user hash table management.\n");
+
+    User user;
+    printf("Enter user details:\n");
+
+    printf("Name: ");
+    fgets(user.name, sizeof(user.name), stdin);
+    user.name[strcspn(user.name, "\n")] = 0;
+
+    printf("Surname: ");
+    fgets(user.surname, sizeof(user.surname), stdin);
+    user.surname[strcspn(user.surname, "\n")] = 0;
+
+    printf("Email: ");
+    fgets(user.email, sizeof(user.email), stdin);
+    user.email[strcspn(user.email, "\n")] = 0;
+
+    printf("Password: ");
+    fgets(user.password, sizeof(user.password), stdin);
+    user.password[strcspn(user.password, "\n")] = 0;
+
+    insertUserToHashTableWithBrentsMethod(&user);  // Brent's Method ile kullanıcı ekle
+
+    printf("User insertion complete.\n");
+    enterToContinue();
 }
 
 
 int registerUser(User user, const char* pathFileUser) {
     FILE* file = fopen(pathFileUser, "rb+");
     int userCount = 0;
-    User* users = NULL;
 
     if (file) {
+        // Kullanıcı sayısını dosyadan oku
         fread(&userCount, sizeof(int), 1, file);
-        users = (User*)malloc(sizeof(User) * userCount);
-        fread(users, sizeof(User), userCount, file);
 
-        // Hash tablosunu doldur
+        // Kullanıcıyı dosyada arayarak zaten kayıtlı olup olmadığını kontrol et
+        User tempUser;
         for (int i = 0; i < userCount; ++i) {
-            insertUserToHashTable(&users[i]);
+            fread(&tempUser, sizeof(User), 1, file);
+            if (strcmp(tempUser.email, user.email) == 0) {
+                printf("User already exists.\n");
+                fclose(file);
+                enterToContinue();
+                return 0;
+            }
         }
 
-        // Kullanıcı zaten var mı kontrol et
-        if (searchUserInHashTable(user.email, user.password)) {
-            printf("User already exists.\n");
-            fclose(file);
-            free(users);
-            enterToContinue();
+        // Dosyanın sonuna giderek yeni kullanıcı eklemesi yapacağız
+        fseek(file, 0, SEEK_END);
+    }
+    else {
+        // Dosya yoksa yeni bir dosya oluştur
+        file = fopen(pathFileUser, "wb+");
+        if (!file) {
+            printf("Failed to open or create user file.\n");
             return 0;
         }
     }
-    else {
-        file = fopen(pathFileUser, "wb");
-    }
 
-    user.id = userCount + 1;  // Yeni kullanıcı ID'si
-
-    // E-posta ve parolayı sıkıştırarak sakla
-    char* encodedEmail = huffmanEncode(user.email);
-    char* encodedPassword = huffmanEncode(user.password);
-    strcpy(user.email, encodedEmail);
-    strcpy(user.password, encodedPassword);
-
-    // Belleği temizle
-    free(encodedEmail);
-    free(encodedPassword);
-
-    insertUserToHashTable(&user);  // Hash tablosuna ekle
-
-    // Kullanıcıyı dosyaya ekle
+    // Yeni kullanıcıya bir ID ver ve kullanıcı sayısını artır
+    user.id = userCount + 1;
     userCount++;
-    users = (User*)realloc(users, sizeof(User) * userCount);
-    users[userCount - 1] = user;
 
+    // Kullanıcı sayısını dosyanın başına yaz
     rewind(file);
     fwrite(&userCount, sizeof(int), 1, file);
-    fwrite(users, sizeof(User), userCount, file);
+
+    // Yeni kullanıcıyı dosyanın sonuna ekle
+    fseek(file, 0, SEEK_END);
+    fwrite(&user, sizeof(User), 1, file);
 
     printf("User registered successfully: Welcome %s %s\n", user.name, user.surname);
 
-    free(users);
     fclose(file);
     enterToContinue();
     return 1;
 }
-
 
 
 /**
@@ -1234,50 +1851,32 @@ int loginUser(User loginUser, const char* pathFileUsers) {
 
     int userCount = 0;
     fread(&userCount, sizeof(int), 1, file);
-    User* users = (User*)malloc(sizeof(User) * userCount);
-    fread(users, sizeof(User), userCount, file);
 
-    // Kullanıcının giriş e-posta ve parolasını sıkıştır
-    char* encodedEmail = huffmanEncode(loginUser.email);
-    char* encodedPassword = huffmanEncode(loginUser.password);
-
-    // Hash tablosunu doldur ve kullanıcıyı ara
+    // Tüm kullanıcıları sırayla dosyadan okuyarak arama yapıyoruz
+    User tempUser;
+    int found = 0;
     for (int i = 0; i < userCount; ++i) {
-        insertUserToHashTable(&users[i]);
-    }
-
-    // Sıkıştırılmış e-posta ve parola ile kullanıcıyı arayın
-    loginUser.email[0] = '\0';
-    loginUser.password[0] = '\0';
-
-    User* foundUser = NULL;
-    for (int i = 0; i < userCount; ++i) {
-        if (strcmp(users[i].email, encodedEmail) == 0 && strcmp(users[i].password, encodedPassword) == 0) {
-            foundUser = &users[i];
+        fread(&tempUser, sizeof(User), 1, file);
+        if (strcmp(tempUser.email, loginUser.email) == 0 &&
+            strcmp(tempUser.password, loginUser.password) == 0) {
+            printf("Login successful.\n");
+            loggedUser = tempUser;
+            found = 1;
             break;
         }
     }
 
-    free(encodedEmail);
-    free(encodedPassword);
+    fclose(file);
 
-    if (foundUser) {
-        printf("Login successful.\n");
-        loggedUser = *foundUser;
-        free(users);
-        fclose(file);
-        enterToContinue();
-        return 1;
-    }
-    else {
+    if (!found) {
         printf("Incorrect email or password.\n");
-        free(users);
-        fclose(file);
         enterToContinue();
         return 0;
     }
-}
 
+    enterToContinue();
+    return 1;
+}
 
 
 /**
@@ -1303,7 +1902,6 @@ int loginUserMenu(const char* pathFileUsers) {
     // loginUser fonksiyonunu çağırırken yeni değişkeni kullanıyoruz
     return loginUser(userInput, pathFileUsers);
 }
-
 
 
 int userOptionsMenu() {
@@ -1332,6 +1930,8 @@ int userOptionsMenu() {
         case 4:
             taskPrioritizationMenu();
         case 5:
+            algorithmsMenu();
+        case 6:
             return 0;
         default:
             clearScreen();
@@ -1341,6 +1941,52 @@ int userOptionsMenu() {
         }
     }
 }
+
+void algorithmsMenu() {
+    int choice;
+    while (1) {
+        printAlgorithmsMenu();
+        choice = getInput();
+
+        if (choice == -2) {
+            handleInputError();
+            enterToContinue();
+            continue;
+        }
+
+        switch (choice) {
+        case 1:
+            progressiveOverflowDemo();
+            break;
+        case 2:
+            linearProbingDemo();
+            break;
+        case 3:
+            quadraticProbingDemo();
+            break;
+        case 4:
+            doubleHashingDemo();
+            break;
+        case 5:
+            //useOfBuckets();
+            break;
+        case 6:
+            linearQuotientDemo();
+            break;
+        case 7:
+            brentsMethodDemo();
+            break;
+        case 8:
+            return;  // Ana menüye dön
+        default:
+            clearScreen();
+            printf("Invalid choice. Please try again.\n");
+            enterToContinue();
+            break;
+        }
+    }
+}
+
 
 int mainMenu(const char* pathFileUsers) {
     int choice;
