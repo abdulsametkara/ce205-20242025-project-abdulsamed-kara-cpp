@@ -18,8 +18,6 @@ using namespace std;
 #define Q_STEP 3       // Sabit adım boyutu (q)
 
 
-
-
 typedef struct User {
     int id;
     char name[50];
@@ -102,6 +100,17 @@ typedef struct BPlusTree {
     BPlusTreeNode* root;
 } BPlusTree;
 
+typedef struct TaskNode {
+    Task task;              // Görev verisi
+    struct TaskNode* next;  // Sonraki düğüm
+    struct TaskNode* prev;  // Önceki düğüm
+} TaskNode;
+
+// XOR Linked List düğümü
+typedef struct XORNode {
+    Task task;
+    struct XORNode* xorPtr; // XOR işaretçisi
+} XORNode;
 
 
 
@@ -186,7 +195,9 @@ Task dequeue();
 void printDependencies(Task taskList[], int taskCount, int startTaskId);
 int analyzeSCC(Task taskList[], int taskCount, FILE* out);
 void searchTasksByKeyword();
-
+void navigateTasks();
+void navigateXORList();
+void loadTasksToXORList(const char* filename);
 
 
 
