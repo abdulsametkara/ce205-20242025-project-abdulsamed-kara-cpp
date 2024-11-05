@@ -13,11 +13,18 @@
 #include <cstring>
 
 
+
 #ifdef _WIN32
 #include <windows.h>  // Windows için Sleep()
 #else
 #include <unistd.h>   // Linux/macOS için sleep()
 #endif
+
+TaskNode* head = NULL;      // Liste başı (ilk görev)
+TaskNode* tail = NULL;      // Liste sonu (son görev)
+XORNode* xorHead = NULL;
+XORNode* xorTail = NULL;
+
 
 
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
@@ -133,7 +140,7 @@ int printMainMenu() {
     printf("2. Deadline Settings\n");
     printf("3. Reminder System\n");
     printf("4. Task Prioritization\n");
-    printf("5. Task Prioritization\n");
+    printf("5. Algorithms\n");
     printf("6. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice: ");
@@ -150,7 +157,12 @@ int printCreateTaskMenu() {
     printf("1. Add Task\n");
     printf("2. View Tasks\n");
     printf("3. Categorize Tasks\n");
-    printf("4. Exit\n");
+    printf("4. Dependencies of Functions\n");
+    printf("5. Analyze SCC\n");
+    printf("6. Search By Keyword\n");
+    printf("7. Double Linked List\n");
+    printf("8. XOR Linked List\n");
+    printf("9. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice: ");
     return 1;
@@ -265,6 +277,7 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             break;
         case 3:
             categorizeTask();
+            enterToContinue();
             break;
         case 4: {
             int taskId;
@@ -288,6 +301,15 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             searchTasksByKeyword();  // KMP araması ile görevleri ara
             enterToContinue();
             break;
+        case 7:
+            navigateTasks();  // Çift bağlantılı liste ile görevler arasında gezinme
+            enterToContinue();
+            break;
+        case 8:
+            loadTasksToXORList("tasks.bin");  // XOR Linked List'e görevleri yükle
+            navigateXORList();  // XOR Linked List üzerinde gezin
+            enterToContinue();
+            break;
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -295,6 +317,97 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             break;
         }
     }
+}
+
+void addTaskToXORList(Task task) {
+    XORNode* newNode = (XORNode*)malloc(sizeof(XORNode));
+    newNode->task = task;
+    newNode->xorPtr = xorTail; // Yeni düğümün XOR işaretçisini mevcut kuyruğa işaret edecek şekilde ayarla
+
+    if (xorHead == NULL) {
+        xorHead = xorTail = newNode; // Liste boşsa, baş ve son düğüm aynı olur
+    }
+    else {
+        xorTail->xorPtr = (XORNode*)((uintptr_t)(xorTail->xorPtr) ^ (uintptr_t)newNode); // Önceki düğümün XOR işaretçisini güncelle
+        xorTail = newNode; // Kuyruğu güncelle
+    }
+}
+
+void loadTasksToXORList(const char* filename) {
+    FILE* file = fopen(filename, "rb");
+    if (!file) {
+        printf("Error: Unable to open tasks file.\n");
+        return;
+    }
+
+    Task task;
+    while (fread(&task, sizeof(Task), 1, file)) {
+        addTaskToXORList(task); // Her bir görevi XOR Linked List'e ekle
+    }
+
+    fclose(file);
+    printf("Tasks loaded into XOR Linked List successfully!\n");
+}
+
+void navigateXORList() {
+    XORNode* current = xorHead;
+    XORNode* prev = NULL;
+    XORNode* next;
+
+    if (current == NULL) {
+        printf("No tasks found in the list.\n");
+        return;
+    }
+
+    int choice;
+    do {
+        // Mevcut görevi göster
+        printf("ID: %d\n", current->task.id);
+        printf("Name: %s\n", current->task.name);
+        printf("Description: %s\n", current->task.description);
+        printf("Category: %s\n", current->task.category);
+        printf("Due Date: %s\n", current->task.dueDate);
+        printf("---------------------------\n");
+
+        // Kullanıcıdan seçim al
+        printf("Press 1 to go forward, 2 to go backward, or 0 to exit: ");
+        choice = getInput();
+
+        // Seçime göre sonraki veya önceki düğüme geç
+        if (choice == 1) {
+            next = (XORNode*)((uintptr_t)prev ^ (uintptr_t)current->xorPtr);
+            prev = current;
+            current = next;
+        }
+        else if (choice == 2) {
+            next = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)prev);
+            prev = current;
+            current = next;
+        }
+
+        if (current == NULL) {
+            printf("No more tasks in this direction.\n");
+            break;
+        }
+    } while (choice != 0);
+
+    printf("Exiting navigation.\n");
+}
+
+
+void addTaskToList(Task newTask) {
+    TaskNode* newNode = (TaskNode*)malloc(sizeof(TaskNode));
+    newNode->task = newTask;
+    newNode->next = NULL;
+    newNode->prev = tail;
+
+    if (tail) {
+        tail->next = newNode;
+    }
+    else {
+        head = newNode;
+    }
+    tail = newNode;
 }
 
 
@@ -332,35 +445,74 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
     fgets(newTask.dueDate, sizeof(newTask.dueDate), stdin);
     newTask.dueDate[strcspn(newTask.dueDate, "\n")] = 0;
 
-    // Görevin bağımlılıklarını al
     printf("Enter number of dependencies: ");
     scanf("%d", &newTask.dependencyCount);
-    getchar(); // Yeni satırı temizlemek için
+    getchar();
 
     for (int i = 0; i < newTask.dependencyCount; i++) {
         printf("Enter dependency task ID for dependency %d: ", i + 1);
         scanf("%d", &newTask.dependencies[i]);
-        getchar(); // Yeni satırı temizlemek için
+        getchar();
     }
 
-    // Görevi listeye ekle ve sayacı artır
     taskList[*taskCount] = newTask;
     (*taskCount)++;
 
-    // Görevi kuyruğa ekle
     enqueue(newTask);
-
-    // Görevi geri alma için yığına ekle
     push(newTask);
-
-    // Görevleri kaydet
     saveTasks(taskList, *taskCount);
+
+    // Çift bağlantılı listeye ekle
+    addTaskToList(newTask);
 
     printf("Task added and saved successfully!\n");
     return 1;
 }
 
+void navigateTasks() {
+    if (!head) {
+        printf("No tasks available for navigation.\n");
+        return;
+    }
 
+    TaskNode* current = head;
+    int choice;
+
+    while (1) {
+        printf("\nCurrent Task:\n");
+        printf("ID: %d\n", current->task.id);
+        printf("Name: %s\n", current->task.name);
+        printf("Description: %s\n", current->task.description);
+        printf("Category: %s\n", current->task.category);
+        printf("Due Date: %s\n", current->task.dueDate);
+
+        printf("\n1. Next\n2. Previous\n3. Exit\nChoose an option: ");
+        choice = getInput();
+
+        if (choice == 1) {
+            if (current->next) {
+                current = current->next;
+            }
+            else {
+                printf("This is the last task.\n");
+            }
+        }
+        else if (choice == 2) {
+            if (current->prev) {
+                current = current->prev;
+            }
+            else {
+                printf("This is the first task.\n");
+            }
+        }
+        else if (choice == 3) {
+            break;
+        }
+        else {
+            printf("Invalid choice. Try again.\n");
+        }
+    }
+}
 
 void viewTask() {
     if (front == NULL) {
@@ -381,7 +533,6 @@ void viewTask() {
     }
     enterToContinue();
 }
-
 
 
 void categorizeTask() {
@@ -1317,32 +1468,6 @@ int findTaskByName(const char* name) {
 }
 
 
-void loadTasksFromFile() {
-    FILE* file = fopen("tasks.bin", "rb");
-    if (file == NULL) {
-        printf("Error opening tasks.bin! No tasks loaded.\n");
-        return;
-    }
-
-    taskCount = fread(tasks, sizeof(Task), 100, file);
-    fclose(file);
-
-    printf("%d tasks loaded successfully from tasks.bin.\n", taskCount);
-}
-
-// tasks.bin dosyasına görevleri kaydeden fonksiyon
-void saveTasksToFile() {
-    FILE* file = fopen("tasks.bin", "wb");
-    if (file == NULL) {
-        printf("Error opening tasks.bin for writing!\n");
-        return;
-    }
-
-    fwrite(tasks, sizeof(Task), taskCount, file);
-    fclose(file);
-
-    printf("Tasks saved successfully to tasks.bin.\n");
-}
 
 
 int hashFunction(const char* email) {
@@ -1749,15 +1874,29 @@ void brentsMethodDemo() {
 }
 
 
+// Huffman ile parolayı sıkıştırarak döndüren işlev
+char* huffmanEncode(const char* input) {
+    // Huffman kodlaması burada gerçekleştirilir ve sıkıştırılmış dize döndürülür
+    // Örnek olarak, doğrudan aynı metni döndürüyoruz (gerçek projede değiştirilmelidir).
+    char* encoded = strdup(input);
+    return encoded;
+}
+
+// Huffman kodlu parolayı çözen işlev
+char* huffmanDecode(const char* encoded) {
+    // Huffman çözme işlemi burada yapılır ve orijinal metin döndürülür.
+    char* decoded = strdup(encoded);
+    return decoded;
+}
+
+
 int registerUser(User user, const char* pathFileUser) {
     FILE* file = fopen(pathFileUser, "rb+");
     int userCount = 0;
 
     if (file) {
-        // Kullanıcı sayısını dosyadan oku
         fread(&userCount, sizeof(int), 1, file);
 
-        // Kullanıcıyı dosyada arayarak zaten kayıtlı olup olmadığını kontrol et
         User tempUser;
         for (int i = 0; i < userCount; ++i) {
             fread(&tempUser, sizeof(User), 1, file);
@@ -1768,12 +1907,9 @@ int registerUser(User user, const char* pathFileUser) {
                 return 0;
             }
         }
-
-        // Dosyanın sonuna giderek yeni kullanıcı eklemesi yapacağız
         fseek(file, 0, SEEK_END);
     }
     else {
-        // Dosya yoksa yeni bir dosya oluştur
         file = fopen(pathFileUser, "wb+");
         if (!file) {
             printf("Failed to open or create user file.\n");
@@ -1781,15 +1917,35 @@ int registerUser(User user, const char* pathFileUser) {
         }
     }
 
-    // Yeni kullanıcıya bir ID ver ve kullanıcı sayısını artır
     user.id = userCount + 1;
     userCount++;
 
-    // Kullanıcı sayısını dosyanın başına yaz
     rewind(file);
     fwrite(&userCount, sizeof(int), 1, file);
 
-    // Yeni kullanıcıyı dosyanın sonuna ekle
+    char* encodedEmail = huffmanEncode(user.email);
+    char* encodedPassword = huffmanEncode(user.password);
+
+    FILE* huffFile = fopen("user.huf", "ab");
+    if (huffFile) {
+        int emailLen = strlen(encodedEmail);
+        int passwordLen = strlen(encodedPassword);
+
+        fwrite(&user.id, sizeof(int), 1, huffFile);
+        fwrite(&emailLen, sizeof(int), 1, huffFile);
+        fwrite(encodedEmail, sizeof(char), emailLen, huffFile);
+        fwrite(&passwordLen, sizeof(int), 1, huffFile);
+        fwrite(encodedPassword, sizeof(char), passwordLen, huffFile);
+
+        fclose(huffFile);
+    }
+    else {
+        printf("Failed to open or create Huffman encoded user file.\n");
+    }
+
+    free(encodedEmail);
+    free(encodedPassword);
+
     fseek(file, 0, SEEK_END);
     fwrite(&user, sizeof(User), 1, file);
 
@@ -1850,20 +2006,41 @@ int loginUser(User loginUser, const char* pathFileUsers) {
     }
 
     int userCount = 0;
-    fread(&userCount, sizeof(int), 1, file);
+    if (fread(&userCount, sizeof(int), 1, file) != 1) {
+        printf("Failed to read user count from file.\n");
+        fclose(file);
+        return 0;
+    }
 
-    // Tüm kullanıcıları sırayla dosyadan okuyarak arama yapıyoruz
-    User tempUser;
     int found = 0;
+    User tempUser;
+
     for (int i = 0; i < userCount; ++i) {
-        fread(&tempUser, sizeof(User), 1, file);
-        if (strcmp(tempUser.email, loginUser.email) == 0 &&
-            strcmp(tempUser.password, loginUser.password) == 0) {
+        // Kullanıcı verilerini dosyadan oku
+        if (fread(&tempUser, sizeof(User), 1, file) != 1) {
+            printf("Error reading user data from file.\n");
+            break;
+        }
+
+        // E-posta ve şifreyi Huffman kod çözme işlemiyle çöz
+        char* decodedEmail = huffmanDecode(tempUser.email);
+        char* decodedPassword = huffmanDecode(tempUser.password);
+
+        // E-posta ve şifre kontrolü yap
+        if (strcmp(decodedEmail, loginUser.email) == 0 && strcmp(decodedPassword, loginUser.password) == 0) {
             printf("Login successful.\n");
             loggedUser = tempUser;
             found = 1;
+
+            // Dinamik olarak ayrılan belleği serbest bırak
+            free(decodedEmail);
+            free(decodedPassword);
             break;
         }
+
+        // Dinamik olarak ayrılan belleği serbest bırak
+        free(decodedEmail);
+        free(decodedPassword);
     }
 
     fclose(file);
