@@ -210,7 +210,7 @@ int printTaskPrioritizationMenu() {
     return 1;
 }
 
-void printAlgorithmsMenu() {
+int printAlgorithmsMenu() {
     clearScreen();
     printf("========================================\n");
     printf("              ALGORITHMS MENU           \n");
@@ -225,6 +225,7 @@ void printAlgorithmsMenu() {
     printf("8. Exit to Main Menu\n");
     printf("========================================\n");
     printf("Please enter your choice: ");
+    return 1;
 }
 
 int getNewUserId(User users[], int userCount) {
@@ -232,6 +233,11 @@ int getNewUserId(User users[], int userCount) {
         return 1;
 
     int maxId = users[0].id;
+    for (int i = 1; i < userCount; ++i) {
+        if (users[i].id > maxId) {
+            maxId = users[i].id;
+        }
+    }
 
     return maxId + 1;
 }
@@ -319,7 +325,7 @@ int createTaskMenu(Task taskList[], int* taskCount) {
     }
 }
 
-void addTaskToXORList(Task task) {
+int addTaskToXORList(Task task) {
     XORNode* newNode = (XORNode*)malloc(sizeof(XORNode));
     newNode->task = task;
     newNode->xorPtr = xorTail; // Yeni düğümün XOR işaretçisini mevcut kuyruğa işaret edecek şekilde ayarla
@@ -331,6 +337,7 @@ void addTaskToXORList(Task task) {
         xorTail->xorPtr = (XORNode*)((uintptr_t)(xorTail->xorPtr) ^ (uintptr_t)newNode); // Önceki düğümün XOR işaretçisini güncelle
         xorTail = newNode; // Kuyruğu güncelle
     }
+    return 1;
 }
 
 void loadTasksToXORList(const char* filename) {
