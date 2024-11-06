@@ -202,8 +202,8 @@ void loadTasksToXORList(const char* filename);
 
 
 int assign_deadline(Assignment* assignment);
-void viewDeadlines();
-void insertMinHeap(MinHeap* heap, Assignment deadline);
+int viewDeadlines();
+int insertMinHeap(MinHeap* heap, Assignment deadline);
 Assignment extractMin(MinHeap* heap);
 
 
