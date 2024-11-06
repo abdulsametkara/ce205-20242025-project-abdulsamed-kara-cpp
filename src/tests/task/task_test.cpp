@@ -204,6 +204,80 @@ TEST_F(TaskAppTest, AddTaskToXORList) {
     EXPECT_EQ(xorHead, xorTail); // Bu görev ilk görevse baþ ve son ayný olmalý
 }
 
+TEST_F(TaskAppTest, DeadlineSettingsMenu_AssignDeadline) {
+    // Kullanýcýnýn 1'i seçip bir deadline atamasýný simüle et
+    simulateUserInput("1\nxyz\n\n30 12 2001\n3\n");  // 1: Deadline atama, 3: Menüden çýkýþ
+
+    // Menü fonksiyonunu çalýþtýr
+    int result = deadlineSettingsMenu();
+
+    resetStdinStdout();
+
+    // Menüyü baþarýyla çalýþtýrdýktan sonra 0 dönmeli
+    EXPECT_EQ(result, 0);
+
+    // Standart giriþ ve çýkýþý sýfýrla
+    
+}
+
+TEST_F(TaskAppTest, AssignDeadline_ValidInput) {
+    // Geçerli bir görev adý ve tarih girdisini simüle et
+    simulateUserInput("Sample Task\n\n10 11 2024\n");
+
+    Assignment assignment;
+
+    // Fonksiyonu çalýþtýr ve beklenen deðeri kontrol et
+    int result = assign_deadline(&assignment);
+    resetStdinStdout();
+    EXPECT_EQ(result, 0);  // Fonksiyonun baþarýyla çalýþmasý bekleniyor
+
+
+    // Standart giriþ ve çýkýþý sýfýrla
+    
+}
+
+TEST_F(TaskAppTest, AssignDeadline_InvalidDate) {
+    // Geçersiz bir tarih girdisini simüle et
+    simulateUserInput("Sample Task\n\n32 13 2024\n");
+
+    Assignment assignment;
+
+    // Fonksiyonu çalýþtýr ve geçersiz tarih için -1 döndürmesini bekle
+    int result = assign_deadline(&assignment);
+    resetStdinStdout();
+    EXPECT_EQ(result, -1);
+
+    // Standart giriþ ve çýkýþý sýfýrla
+    
+}
+
+TEST_F(TaskAppTest, ViewDeadlines_NoDeadlines) {
+    // Yýðýný boþ hale getiriyoruz
+    deadlineHeap.size = 0;
+
+    // viewDeadlines fonksiyonunu çaðýrýyoruz ve çýktý dosyasýna yönlendiriyoruz
+    simulateUserInput(""); // Boþ girdi simüle ediyoruz
+    int result = viewDeadlines();
+    resetStdinStdout();
+
+    // Fonksiyonun -1 döndürdüðünü ve "No deadlines to display." yazdýðýný kontrol ediyoruz
+    EXPECT_EQ(result, -1);
+    FILE* outputFile = fopen(outputTest, "rb");
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 256, outputFile);
+    fclose(outputFile);
+    EXPECT_NE(strstr(outputBuffer, "No deadlines to display."), nullptr);
+}
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -989,10 +989,10 @@ int assign_deadline(Assignment* assignment) {
     return 0;
 }
 
-void viewDeadlines() {
+int viewDeadlines() {
     if (deadlineHeap.size == 0) {
         printf("No deadlines to display.\n");
-        return;
+        return -1;
     }
 
     printf("\n--- Upcoming Deadlines (Sorted by Date) ---\n");
@@ -1017,13 +1017,14 @@ void viewDeadlines() {
 
     printf("-------------------------------------------\n");
     enterToContinue();  // Kullanıcıdan devam etmesini bekle
+    return 1;
 }
 
 int getDateKey(int day, int month, int year) {
     return year * 10000 + month * 100 + day;  // YYYYMMDD formatında bir anahtar oluşturur
 }
 
-void insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
+int insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
     int i = leaf->numKeys - 1;
     while (i >= 0 && leaf->keys[i] > key) {
         leaf->keys[i + 1] = leaf->keys[i];
@@ -1033,9 +1034,10 @@ void insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
     leaf->keys[i + 1] = key;
     leaf->tasks[i + 1] = task;
     leaf->numKeys++;
+    return 1;
 }
 
-void insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
+int insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
     int key = getDateKey(task->day, task->month, task->year);
     BPlusTreeNode* root = tree->root;
 
@@ -1045,10 +1047,11 @@ void insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
     else {
         printf("Node splitting required. Implement split logic here.\n");
     }
+    return 1;
 }
 
-void searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
-    if (node == NULL) return;
+int searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
+    if (node == NULL) return -1;
 
     int i = 0;
     while (i < node->numKeys && node->keys[i] < startKey) i++;
@@ -1072,9 +1075,10 @@ void searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
             i++;
         }
     }
+    return 1;
 }
 
-void viewDeadlinesInRange(BPlusTree* tree) {
+int viewDeadlinesInRange(BPlusTree* tree) {
     int startDay, startMonth, startYear;
     int endDay, endMonth, endYear;
 
@@ -1090,15 +1094,17 @@ void viewDeadlinesInRange(BPlusTree* tree) {
         startDay, startMonth, startYear, endDay, endMonth, endYear);
 
     searchInDateRange(tree->root, startKey, endKey);
+    return 1;
 }
 
-void swap(Assignment* a, Assignment* b) {
+int swap(Assignment* a, Assignment* b) {
     Assignment temp = *a;
     *a = *b;
     *b = temp;
+    return 1;
 }
 
-void heapify(MinHeap* heap, int i) {
+int heapify(MinHeap* heap, int i) {
     int smallest = i;
     int left = 2 * i + 1;
     int right = 2 * i + 2;
@@ -1122,13 +1128,14 @@ void heapify(MinHeap* heap, int i) {
         swap(&heap->deadlines[i], &heap->deadlines[smallest]);
         heapify(heap, smallest);
     }
+    return 1;
 }
 
 // Yığına görevi deadline sırasına göre ekleme
-void insertMinHeap(MinHeap* heap, Assignment deadline) {
+int insertMinHeap(MinHeap* heap, Assignment deadline) {
     if (heap->size == MAX_HEAP_SIZE) {
         printf("Heap is full\n");
-        return;
+        return -1;
     }
 
     heap->size++;
@@ -1143,6 +1150,7 @@ void insertMinHeap(MinHeap* heap, Assignment deadline) {
         swap(&heap->deadlines[i], &heap->deadlines[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
+    return 1;
 }
 
 // Yığının en üstündeki (en yakın deadline'a sahip) görevi çıkartma
