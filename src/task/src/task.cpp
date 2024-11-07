@@ -549,6 +549,8 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             navigateXORList();  
             enterToContinue();
             break;
+        case 9:
+            return 0;
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
