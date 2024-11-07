@@ -34,19 +34,13 @@ Run 4-install-windows-enviroment.bat to install required applications.
 
 Open powershell as admin and enter WSL then goto project folder and run 4-install-wsl-environment.sh to setup WSL environment
 
-
-
 ## Generate Development Environment
 
 You can run 9-clean-configure-app-windows.bat to generate Visual Studio Communit Edition Project of this file. Or You can use Cmake project development with Visual Studio Community Edition
 
-
-
 ## Build, Test and Package Application on Windows
 
 Run 7-build-app-windows.bat to build, test and generate packed binaries for your application on windows.
-
-
 
 Also you can run 7-build-doc-windows.bat to only generate documentation and 8-build-test-windows.bat to only test application. 
 
@@ -54,13 +48,9 @@ Also you can run 7-build-doc-windows.bat to only generate documentation and 8-bu
 
 Run 7-build-app-linux.sh to build, test and generate packed binaries for your application on WSL environment.
 
-
-
 ## Clean Project
 
 You can run 9-clean-project.bat to clean project outputs. 
-
-
 
 ## Supported Platforms
 
@@ -85,8 +75,6 @@ You can run 9-clean-project.bat to clean project outputs.
 |                    | Windows OS                                                        | Linux OS (WSL-Ubuntu 20.04)                                         |
 | ------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
 | **Coverage Ratio** | ![Line Coverage](assets/doccoveragelibwin/badge_linecoverage.svg) | ![Line Coverage](assets/doccoverageliblinux/badge_linecoverage.svg) |
-
-
 
 #### Install Test Results to HTML Converter
 
@@ -150,7 +138,7 @@ you can use our public notes
 
 After WSL installation, right click and open WSL bash and run `7-build-app-linux.sh` this will provide similart task with windows and will generate report and libraries on release folder. 
 
-
+![XPD1Rzim38Nl_XKwRi20L4xSkDsbRR800zR1QBhTEOlnjCgIGSd0ab-_M9WL4p7GcsdnUtn-fXvy00fzQxBua6L11uFY2RoknIluDx6lVwFg3PAeoFt1EeZAWCsoXbpVYHyUIJpMjUjj462Ls4A0SoTsG12qivaGzwnfGnWFn8VzCF5Uo9k5NEIhJ-ABLR5QdQkFdnFupJMQTQzOTy6xu_oT.png](C:\Users\samet\Desktop\XPD1Rzim38Nl_XKwRi20L4xSkDsbRR800zR1QBhTEOlnjCgIGSd0ab-_M9WL4p7GcsdnUtn-fXvy00fzQxBua6L11uFY2RoknIluDx6lVwFg3PAeoFt1EeZAWCsoXbpVYHyUIJpMjUjj462Ls4A0SoTsG12qivaGzwnfGnWFn8VzCF5Uo9k5NEIhJ-ABLR5QdQkFdnFupJMQTQzOTy6xu_oT.png)
 
 ----
 
