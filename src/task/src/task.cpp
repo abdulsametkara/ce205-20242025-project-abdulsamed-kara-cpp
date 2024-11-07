@@ -1,4 +1,4 @@
-﻿
+
 /**
  * @file task.cpp
  * @brief Contains task definitions and operations for the Task Scheduler project.
@@ -259,7 +259,9 @@ int printDeadlineSettingsMenu() {
     printf("========================================\n");
     printf("1. Assign Deadline\n");
     printf("2. View Deadlines\n");
-    printf("3. Exit\n");
+    printf("3. View Deadlines In Range\n");
+    printf("4. Search In Date Range\n");
+    printf("5. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice : ");
     return 1;
@@ -464,6 +466,8 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             navigateXORList();  // XOR Linked List üzerinde gezin
             enterToContinue();
             break;
+        case 9:
+            return 0;
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -1291,6 +1295,32 @@ int deadlineSettingsMenu() {
             enterToContinue();
             break;
         case 3:
+            // Belirli bir tarih aralığındaki görevleri görüntüle
+            viewDeadlinesInRange(tree);
+            enterToContinue();
+            break;
+        case 4:
+            // Tarih aralığında görev arama fonksiyonunu çağır
+        {
+            int startDay, startMonth, startYear;
+            int endDay, endMonth, endYear;
+
+            printf("Enter start date (day month year): ");
+            scanf("%d %d %d", &startDay, &startMonth, &startYear);
+            printf("Enter end date (day month year): ");
+            scanf("%d %d %d", &endDay, &endMonth, &endYear);
+
+            int startKey = getDateKey(startDay, startMonth, startYear);
+            int endKey = getDateKey(endDay, endMonth, endYear);
+
+            printf("\n--- Tasks between %02d/%02d/%04d and %02d/%02d/%04d ---\n",
+                startDay, startMonth, startYear, endDay, endMonth, endYear);
+
+            searchInDateRange(tree->root, startKey, endKey);
+            enterToContinue();
+        }
+        break;
+        case 5:
             return 0;  // Menüden çıkış
         default:
             clearScreen();
@@ -2616,7 +2646,7 @@ int userOptionsMenu() {
             createTaskMenu(taskList, &taskCount);
             break;
         case 2:
-            deadlineSettingsMenu();
+            deadlineSettingsMenu(tree);
             break;
         case 3:
             reminderSystemMenu();

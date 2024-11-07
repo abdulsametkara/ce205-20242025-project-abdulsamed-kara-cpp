@@ -154,7 +154,7 @@ int printDeadlineSettingsMenu();
 int printTaskPrioritizationMenu();
 
 int createTaskMenu(Task taskList[], int* taskCount);
-int deadlineSettingsMenu();
+int deadlineSettingsMenu(BPlusTree* tree);
 
 int reminderSystemMenu();
 
@@ -212,17 +212,18 @@ int setReminders();
 int platformSleep(int seconds);
 int showCurrentNotificationMethod();
 int notificationSettings();
-int addNotification();
-int displayNotifications();
-int updateNotificationMethod();
+int addNotification(SparseMatrixNode** head, int row, int col, int value);
+int displayNotifications(SparseMatrixNode* head);
+int updateNotificationMethod(int taskId, int date, int method, SparseMatrixNode** head);
 int showCurrentNotificationMethod();
-
+int viewDeadlinesInRange(BPlusTree* tree);
+int searchInDateRange(BPlusTreeNode* node, int startKey, int endKey);
+int getDateKey(int day, int month, int year);
 
 
 
 int findTaskByName(const char* name);
 void markTaskImportance();
-void saveTasksToFile();
 
 
 
