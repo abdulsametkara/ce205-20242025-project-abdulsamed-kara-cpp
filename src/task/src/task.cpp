@@ -1,4 +1,13 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
+﻿
+/**
+ * @file task.cpp
+ * @brief Contains task definitions and operations for the Task Scheduler project.
+ *
+ * This file contains functions and classes related to task management in the Task Scheduler project.
+ * The functions include task addition, editing, and various user operations.
+ */
+
+#define _CRT_SECURE_NO_WARNINGS
 #include "../header/task.h"
 #include <stdexcept>
 #include <regex>
@@ -12,7 +21,20 @@
 #include <iostream>
 #include <cstring>
 
-
+ /**
+  * @file task_manager.cpp
+  * @brief Defines constants, data structures, and platform-specific headers for the Task Scheduler project.
+  *
+  * This file includes platform-specific headers, task structures, and global variables used in the Task Scheduler project.
+  *
+  * - Platform-Specific Operations: Includes appropriate headers (`Sleep()` for Windows and `sleep()` for Unix-like systems).
+  * - Global Task Pointers: Task linked list using `head` and `tail`, and XOR linked list using `xorHead` and `xorTail`.
+  * - Constant Definitions:
+  *   - `TABLE_SIZE`: The size of the hash table.
+  *   - `MAX_TASKS`: Maximum number of tasks that can be handled.
+  *   - `MAX_ASSIGNMENT_NAME`: Maximum length for the assignment name.
+  * - Global Variables: The `assignments` array to store tasks and `filename` for persistent task data storage.
+  */
 
 #ifdef _WIN32
 #include <windows.h>  // Windows için Sleep()
@@ -34,7 +56,27 @@ Assignment assignments[100];
 const char* filename = "tasks.bin";
 
 
-
+/**
+ * @file task_manager.cpp
+ * @brief Defines global variables, data structures, and namespace usage for the Task Scheduler project.
+ *
+ * This file contains various global variables and data structures for managing tasks, users, and notifications
+ * in the Task Scheduler project. It also uses the standard namespace for convenience.
+ *
+ * - Task Management:
+ *   - `tasks`: An array to store up to 100 tasks.
+ *   - `taskList`: An array to maintain the current list of tasks in the system.
+ *   - `taskCount`: Tracks the current number of tasks in the system.
+ * - User Management:
+ *   - `hashTable`: A hash table to store user information for quick access.
+ *   - `overflowArea`: An area to manage user data that overflows the hash table.
+ *   - `overflowCount`: Tracks the number of users in the overflow area.
+ *   - `loggedUser`: Stores information about the currently logged-in user.
+ * - Notification Settings:
+ *   - `notificationMethod`: Stores the notification preference set by the user.
+ * - Namespace:
+ *   - `using namespace std`: Used to simplify the use of standard library features.
+ */
 
 
 Task tasks[100];
@@ -52,7 +94,12 @@ using namespace std;
 User loggedUser;
 
 
-
+/**
+ * @brief Clears the console screen.
+ *
+ * The `clearScreen` function is used to clear the console screen, depending on the operating system.
+ * On Windows, it uses the `cls` command, while on Unix-like systems (e.g., Linux, macOS), it uses the `clear` command.
+ */
 
 void clearScreen() {
 #ifdef _WIN32
@@ -114,6 +161,15 @@ int getInput() {
     return choice;
 }
 
+/**
+ * @brief Displays the opening screen menu of the Task Manager.
+ *
+ * The `openingScreenMenu` function displays a welcome message and provides the main menu options for the user.
+ * The user can choose to log in, register, or exit the program.
+ *
+ * @return Always returns 1, which can be used as a placeholder for further menu implementation.
+ */
+
 int openingScreenMenu() {
     printf("***************************************\n");
     printf("*                                     *\n");
@@ -131,6 +187,16 @@ int openingScreenMenu() {
     return 1;
 }
 
+/**
+ * @brief Displays the main menu of the Task Manager.
+ *
+ * The `printMainMenu` function clears the console and displays the main menu options for the user.
+ * The menu includes options for creating a task, setting deadlines, managing reminders, prioritizing tasks,
+ * running algorithms, and exiting the application.
+ *
+ * @return Always returns 1, which can be used as a placeholder for further menu implementation.
+ */
+
 int printMainMenu() {
     clearScreen();
     printf("========================================\n");
@@ -147,7 +213,15 @@ int printMainMenu() {
     return 1;
 }
 
-
+/**
+ * @brief Displays the create task menu in the Task Manager.
+ *
+ * The `printCreateTaskMenu` function clears the console and presents the user with options for creating and managing tasks.
+ * Options include adding a new task, viewing existing tasks, categorizing tasks, analyzing dependencies, and more advanced
+ * functions such as analyzing strongly connected components (SCC) or working with linked lists.
+ *
+ * @return Always returns 1, which can be used as a placeholder for further menu implementation.
+ */
 
 int printCreateTaskMenu() {
     clearScreen();
@@ -169,6 +243,15 @@ int printCreateTaskMenu() {
 }
 
 
+/**
+ * @brief Displays the deadline settings menu in the Task Manager.
+ *
+ * The `printDeadlineSettingsMenu` function clears the console and presents the user with options to manage task deadlines.
+ * The menu allows the user to assign deadlines to tasks, view existing deadlines, or exit the menu.
+ *
+ * @return Always returns 1, which can be used as a placeholder for further menu implementation.
+ */
+
 int printDeadlineSettingsMenu() {
     clearScreen();
     printf("========================================\n");
@@ -183,6 +266,15 @@ int printDeadlineSettingsMenu() {
 }
 
 
+/**
+ * @brief Displays the reminder system menu in the Task Manager.
+ *
+ * The `printReminderSystemMenu` function clears the console and presents the user with options for managing reminders.
+ * Options include setting reminders for tasks, configuring notification settings, or exiting the menu.
+ *
+ * @return Always returns 1, which can be used as a placeholder for further menu implementation.
+ */
+
 int printReminderSystemMenu() {
     clearScreen();
     printf("========================================\n");
@@ -196,6 +288,14 @@ int printReminderSystemMenu() {
     return 1;
 }
 
+/**
+ * @brief Displays the task prioritization menu in the Task Manager.
+ *
+ * The `printTaskPrioritizationMenu` function clears the console and presents the user with options to manage task prioritization.
+ * The menu allows the user to mark a task as important, reorder tasks based on their importance, or exit the menu.
+ *
+ * @return Always returns 1, which can be used as a placeholder for further menu implementation.
+ */
 
 int printTaskPrioritizationMenu() {
     clearScreen();
@@ -209,6 +309,17 @@ int printTaskPrioritizationMenu() {
     printf("Please enter your choice : ");
     return 1;
 }
+
+/**
+ * @brief Displays the algorithms menu in the Task Manager.
+ *
+ * The `printAlgorithmsMenu` function clears the console and presents the user with various algorithms
+ * that can be explored within the Task Manager project. These include techniques for collision resolution in hashing
+ * such as progressive overflow, linear probing, quadratic probing, double hashing, and more.
+ * Users can also return to the main menu by selecting the appropriate option.
+ *
+ * @return Always returns 1, which can be used as a placeholder for further menu implementation.
+ */
 
 int printAlgorithmsMenu() {
     clearScreen();
@@ -228,6 +339,17 @@ int printAlgorithmsMenu() {
     return 1;
 }
 
+/**
+ * @brief Generates a new user ID based on existing user data.
+ *
+ * The `getNewUserId` function calculates a new unique user ID by finding the maximum existing user ID
+ * and incrementing it by one. If no users exist, it returns 1 as the first user ID.
+ *
+ * @param users Array of users.
+ * @param userCount The number of users currently in the system.
+ * @return The newly generated user ID.
+ */
+
 int getNewUserId(User users[], int userCount) {
     if (userCount == 0)
         return 1;
@@ -241,6 +363,17 @@ int getNewUserId(User users[], int userCount) {
 
     return maxId + 1;
 }
+
+/**
+ * @brief Loads user data from a binary file.
+ *
+ * The `loadUsers` function loads user data from the specified binary file and stores it in a dynamically
+ * allocated array. If the file cannot be opened, it returns 0 and sets the `users` pointer to NULL.
+ *
+ * @param pathFileUsers Path to the binary file containing user data.
+ * @param users Pointer to the array where user data will be stored.
+ * @return The number of users loaded from the file.
+ */
 
 int loadUsers(const char* pathFileUsers, User** users) {
     FILE* file = fopen(pathFileUsers, "rb");
@@ -258,6 +391,21 @@ int loadUsers(const char* pathFileUsers, User** users) {
     fclose(file);
     return count;
 }
+
+
+/**
+ * @brief Displays and handles the task creation menu for the Task Manager.
+ *
+ * The `createTaskMenu` function provides an interactive menu that allows users to manage tasks.
+ * Users can create tasks, view and categorize tasks, analyze dependencies, and explore more advanced operations
+ * such as searching tasks by keyword, navigating tasks using a double linked list, and using an XOR linked list.
+ * The function runs in a loop until the user chooses to exit.
+ *
+ * @param taskList Array of tasks to be managed.
+ * @param taskCount Pointer to the current number of tasks in the system.
+ * @return This function does not return, as it runs indefinitely until an exit condition is met.
+ */
+
 
 int createTaskMenu(Task taskList[], int* taskCount) {
     int maxTasks = 100;
@@ -325,6 +473,17 @@ int createTaskMenu(Task taskList[], int* taskCount) {
     }
 }
 
+/**
+ * @brief Adds a task to the XOR linked list.
+ *
+ * The `addTaskToXORList` function creates a new node for the given task and adds it to the XOR linked list.
+ * If the list is empty, the new node becomes both the head and the tail of the list. If not, the function
+ * updates the existing tail's XOR pointer and adds the new node at the end.
+ *
+ * @param task The task to be added to the XOR linked list.
+ * @return Returns 1 after successfully adding the task.
+ */
+
 int addTaskToXORList(Task task) {
     XORNode* newNode = (XORNode*)malloc(sizeof(XORNode));
     newNode->task = task;
@@ -340,7 +499,16 @@ int addTaskToXORList(Task task) {
     return 1;
 }
 
-int loadTasksToXORList(const char* filename) {
+/**
+ * @brief Loads tasks from a file into the XOR linked list.
+ *
+ * The `loadTasksToXORList` function reads tasks from the specified binary file and adds each task
+ * to the XOR linked list using the `addTaskToXORList` function.
+ *
+ * @param filename The name of the binary file containing tasks to be loaded.
+ */
+
+void loadTasksToXORList(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
         printf("Error: Unable to open tasks file.\n");
@@ -354,8 +522,15 @@ int loadTasksToXORList(const char* filename) {
 
     fclose(file);
     printf("Tasks loaded into XOR Linked List successfully!\n");
-    return 1;
 }
+
+/**
+ * @brief Navigates through the XOR linked list of tasks.
+ *
+ * The `navigateXORList` function allows the user to navigate through the XOR linked list of tasks.
+ * The user can move forward or backward through the list to view tasks or exit navigation at any time.
+ * Navigation is based on XOR pointers to efficiently traverse in both directions.
+ */
 
 void navigateXORList() {
     XORNode* current = xorHead;
@@ -402,6 +577,14 @@ void navigateXORList() {
     printf("Exiting navigation.\n");
 }
 
+/**
+ * @brief Adds a new task to the doubly linked list of tasks.
+ *
+ * The `addTaskToList` function creates a new node for the given task and adds it to the end of the doubly linked list.
+ * If the list is empty, the new node becomes both the head and the tail of the list. Otherwise, it is appended after the current tail.
+ *
+ * @param newTask The task to be added to the doubly linked list.
+ */
 
 void addTaskToList(Task newTask) {
     TaskNode* newNode = (TaskNode*)malloc(sizeof(TaskNode));
@@ -477,6 +660,13 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
     return 1;
 }
 
+/**
+ * @brief Navigates through tasks in the doubly linked list.
+ *
+ * The `navigateTasks` function allows the user to navigate through the tasks in the doubly linked list.
+ * The user can move to the next or previous task or exit the navigation at any time.
+ * It provides a convenient way to view the details of each task sequentially.
+ */
 void navigateTasks() {
     if (!head) {
         printf("No tasks available for navigation.\n");
@@ -522,6 +712,12 @@ void navigateTasks() {
     }
 }
 
+/**
+ * @brief Displays all tasks in the queue.
+ *
+ * The `viewTask` function displays all tasks currently stored in the queue by dequeuing them one by one.
+ * If no tasks are found, it notifies the user that the task list is empty.
+ */
 void viewTask() {
     if (front == NULL) {
         printf("No tasks found. The task list is empty.\n");
@@ -542,7 +738,14 @@ void viewTask() {
     enterToContinue();
 }
 
-
+/**
+ * @brief Displays tasks filtered by a specific category.
+ *
+ * The `categorizeTask` function reads tasks from a binary file and displays those that match the user's chosen category.
+ * If the file cannot be opened or no tasks match the specified category, appropriate messages are displayed.
+ *
+ * @note The function prompts the user to enter the category name to filter tasks.
+ */
 void categorizeTask() {
     FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda aç
     if (!file) {
@@ -581,7 +784,15 @@ void categorizeTask() {
 }
 
 
-
+/**
+ * @brief Saves all tasks to a binary file.
+ *
+ * The `saveTasks` function writes the tasks from the given task list to a binary file, ensuring persistent storage.
+ * If the file cannot be opened, an error message is displayed.
+ *
+ * @param taskList Array of tasks to be saved.
+ * @param taskCount The number of tasks in the task list.
+ */
 void saveTasks(const Task taskList[], int taskCount) {
     FILE* file = fopen("tasks.bin", "wb");
     if (file == NULL) {
@@ -597,7 +808,16 @@ void saveTasks(const Task taskList[], int taskCount) {
 
 
 
-
+/**
+ * @brief Loads tasks from a binary file into the task list.
+ *
+ * The `loadTasks` function reads tasks from a specified binary file ("tasks.bin") and loads them into the provided task list.
+ * If the file does not exist, it notifies the user and returns 0 tasks loaded.
+ *
+ * @param taskList The array where the tasks will be loaded.
+ * @param maxTasks The maximum number of tasks that can be loaded into the task list.
+ * @return The number of tasks successfully loaded.
+ */
 int loadTasks(Task taskList[], int maxTasks) {
     FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda açıyoruz
     if (file == NULL) {
@@ -612,6 +832,14 @@ int loadTasks(Task taskList[], int maxTasks) {
     return taskCount;  // Yüklenen görev sayısını geri döndürüyoruz
 }
 
+/**
+ * @brief Adds a task to the queue.
+ *
+ * The `enqueue` function adds a new task to the end of the queue. If the queue is empty, the new task
+ * becomes both the front and rear of the queue.
+ *
+ * @param task The task to be added to the queue.
+ */
 void enqueue(Task task) {
     QueueNode* newNode = (QueueNode*)malloc(sizeof(QueueNode));
     newNode->task = task;
@@ -625,6 +853,14 @@ void enqueue(Task task) {
     rear = newNode;
 }
 
+/**
+ * @brief Removes and returns the task at the front of the queue.
+ *
+ * The `dequeue` function removes the task at the front of the queue and returns it.
+ * If the queue is empty, it returns a task with an ID of -1 to indicate an error.
+ *
+ * @return The task removed from the front of the queue.
+ */
 Task dequeue() {
     if (front == NULL) {
         printf("Queue is empty\n");
@@ -643,6 +879,13 @@ Task dequeue() {
     return task;
 }
 
+/**
+ * @brief Adds a task to the stack.
+ *
+ * The `push` function adds a new task to the top of the stack.
+ *
+ * @param task The task to be added to the stack.
+ */
 void push(Task task) {
     StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
     newNode->task = task;
@@ -650,6 +893,15 @@ void push(Task task) {
     stackTop = newNode;
 }
 
+
+/**
+ * @brief Removes and returns the task at the top of the stack.
+ *
+ * The `pop` function removes the task at the top of the stack and returns it.
+ * If the stack is empty, it returns a task with an ID of -1 to indicate an error.
+ *
+ * @return The task removed from the top of the stack.
+ */
 Task pop() {
     if (stackTop == NULL) {
         printf("Stack is empty\n");
@@ -664,6 +916,17 @@ Task pop() {
     return task;
 }
 
+
+/**
+ * @brief Undoes the last added task by removing it from the task list.
+ *
+ * The `undoLastTask` function removes the last added task from the task list by popping it from the stack.
+ * If no task is available to undo, an appropriate message is displayed. The function also updates the
+ * task storage file after the undo operation.
+ *
+ * @param taskList The list of tasks.
+ * @param taskCount Pointer to the current count of tasks.
+ */
 void undoLastTask(Task taskList[], int* taskCount) {
     Task lastTask = pop();
     if (lastTask.id == -1) {
@@ -679,7 +942,17 @@ void undoLastTask(Task taskList[], int* taskCount) {
     saveTasks(taskList, *taskCount);
 }
 
-// Görevlerin bağımlılıklarını DFS ile takip eden yardımcı fonksiyon
+/**
+ * @brief Utility function to print the dependencies of a given task using DFS.
+ *
+ * The `printDependenciesUtil` function is a helper function that performs a Depth-First Search (DFS) to print
+ * all dependencies for a given task. It uses a recursive approach to find and display all direct and indirect
+ * dependencies.
+ *
+ * @param taskList The list of tasks.
+ * @param taskId The ID of the task for which dependencies are being printed.
+ * @param visited Array to keep track of visited tasks to avoid cycles.
+ */
 void printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
     if (visited[taskId]) {
         return;
@@ -698,7 +971,16 @@ void printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
     }
 }
 
-// Ana fonksiyon: Bir görevin tüm bağımlılıklarını yazdır
+/**
+ * @brief Prints all dependencies of a given task.
+ *
+ * The `printDependencies` function prints all direct and indirect dependencies of the given task ID.
+ * It initializes a visited array to keep track of the tasks that have been visited during the traversal.
+ *
+ * @param taskList The list of tasks.
+ * @param taskCount The number of tasks in the list.
+ * @param startTaskId The ID of the task for which dependencies are to be printed.
+ */
 void printDependencies(Task taskList[], int taskCount, int startTaskId) {
     bool visited[MAX_TASKS] = { false };
 
@@ -706,7 +988,14 @@ void printDependencies(Task taskList[], int taskCount, int startTaskId) {
     printDependenciesUtil(taskList, startTaskId, visited);
 }
 
-
+/**
+ * @brief Pushes a vertex to the SCC stack.
+ *
+ * The `pushSccStack` function adds a vertex to the stack used during the Strongly Connected Components (SCC) analysis.
+ * This function is typically used during the Tarjan's or Kosaraju's algorithm implementation.
+ *
+ * @param v The vertex to be added to the SCC stack.
+ */
 void pushSccStack(int v) {
     AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
     newNode->data = v;
@@ -714,6 +1003,14 @@ void pushSccStack(int v) {
     sccStack = newNode;
 }
 
+/**
+ * @brief Pops the top element from the SCC stack.
+ *
+ * The `popSccStack` function removes and returns the top element from the stack used for Strongly Connected Components (SCC)
+ * analysis. If the stack is empty, it returns -1.
+ *
+ * @return The data value of the top element of the SCC stack, or -1 if the stack is empty.
+ */
 int popSccStack() {
     if (sccStack == NULL) return -1;
     int top = sccStack->data;
@@ -723,6 +1020,17 @@ int popSccStack() {
     return top;
 }
 
+/**
+ * @brief Depth-First Search (DFS) utility function for SCC analysis.
+ *
+ * The `dfsUtil` function performs a Depth-First Search (DFS) on the graph to explore and mark all reachable vertices from
+ * a given starting vertex. It uses recursion and is utilized to find SCCs and their components.
+ *
+ * @param v The starting vertex for the DFS traversal.
+ * @param visited Array to track visited vertices.
+ * @param adj The adjacency list representing the graph.
+ * @param component Pointer to the SCC stack for storing vertices in the current component.
+ */
 void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** component) {
     visited[v] = 1;
     pushSccStack(v);
@@ -735,6 +1043,17 @@ void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** compone
     }
 }
 
+/**
+ * @brief Finds and prints all Strongly Connected Components (SCCs) in the graph.
+ *
+ * The `findSCCs` function finds all SCCs in a directed graph represented by an adjacency list. It first performs a DFS
+ * to fill the stack with vertices based on their finishing time. Then it transposes the graph, and finally,
+ * performs another DFS to discover and print all SCCs.
+ *
+ * @param V The number of vertices in the graph.
+ * @param adj The adjacency list representing the graph.
+ * @param out The output file where SCCs are printed.
+ */
 void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
     int visited[MAX_TASKS] = { 0 };
 
@@ -782,6 +1101,18 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
     }
 }
 
+/**
+ * @brief Analyzes Strongly Connected Components (SCCs) in the task dependency graph.
+ *
+ * The `analyzeSCC` function creates an adjacency list representing the dependencies between tasks
+ * and finds all Strongly Connected Components (SCCs) in the graph. It outputs the SCCs to the specified file.
+ * After processing, it deallocates any dynamically allocated memory for the adjacency list.
+ *
+ * @param taskList The list of tasks containing dependencies.
+ * @param taskCount The number of tasks in the list.
+ * @param out The output file where the SCCs will be printed.
+ * @return Always returns 1 to indicate successful analysis.
+ */
 int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
     AdjacencyNode* adj[MAX_TASKS] = { NULL };
 
@@ -809,7 +1140,16 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
 }
 
 
-// Önek Tablosunu (Prefix Table) Oluştur
+/**
+ * @brief Constructs the prefix table for the Knuth-Morris-Pratt (KMP) algorithm.
+ *
+ * The `computePrefixTable` function constructs the prefix table used by the KMP string matching algorithm.
+ * This table helps in determining the next positions to be compared during mismatches in the pattern.
+ *
+ * @param pattern The pattern to be searched.
+ * @param prefixTable The prefix table to be filled.
+ * @param patternLength The length of the pattern.
+ */
 void computePrefixTable(const char* pattern, int* prefixTable, int patternLength) {
     int length = 0;
     prefixTable[0] = 0;  // İlk eleman 0
@@ -825,7 +1165,16 @@ void computePrefixTable(const char* pattern, int* prefixTable, int patternLength
     }
 }
 
-// KMP Arama Fonksiyonu
+/**
+ * @brief Searches for a pattern in the given text using the Knuth-Morris-Pratt (KMP) algorithm.
+ *
+ * The `KMPsearch` function searches for the given pattern in the provided text using the KMP algorithm.
+ * If the pattern is found, the function returns 1, otherwise it returns 0.
+ *
+ * @param text The text in which the pattern is to be searched.
+ * @param pattern The pattern to be searched in the text.
+ * @return Returns 1 if the pattern is found, otherwise returns 0.
+ */
 int KMPsearch(const char* text, const char* pattern) {
     int textLength = strlen(text);
     int patternLength = strlen(pattern);
@@ -858,6 +1207,16 @@ int KMPsearch(const char* text, const char* pattern) {
     return 0;  // Eşleşme bulunamadı
 }
 
+
+/**
+ * @brief Searches tasks for a specific keyword in their descriptions.
+ *
+ * The `searchTasksByKeyword` function searches for a given keyword in the descriptions of tasks stored in a binary file.
+ * It uses the KMP search algorithm to find the keyword in each task description. If tasks are found that contain the keyword,
+ * their details are displayed. If no tasks match, an appropriate message is shown.
+ *
+ * @note The keyword is case-sensitive.
+ */
 void searchTasksByKeyword() {
     FILE* file = fopen("tasks.bin", "rb");
     if (!file) {
@@ -898,8 +1257,15 @@ void searchTasksByKeyword() {
 
 
 
-
-// Menü fonksiyonu
+/**
+ * @brief Displays the deadline settings menu for managing deadlines.
+ *
+ * The `deadlineSettingsMenu` function presents the user with options to manage deadlines. The options include:
+ * assigning a deadline, viewing all deadlines, and exiting the menu.
+ * The menu runs in a loop until the user chooses to exit.
+ *
+ * @return Returns 0 when the user chooses to exit the menu.
+ */
 int deadlineSettingsMenu() {
     int choice;
     Assignment assignment;  // Görev yapısı
@@ -935,8 +1301,27 @@ int deadlineSettingsMenu() {
     }
 }
 
+/**
+ * @brief Represents a MinHeap data structure for managing deadlines.
+ *
+ * The `MinHeap` structure is used to manage deadlines in the task scheduling system.
+ * It helps to keep track of tasks with the closest deadlines at the top.
+ *
+ * @var deadlineHeap The MinHeap instance used to manage deadlines.
+ */
 MinHeap deadlineHeap = { {0}, 0 };  // İlk alan tüm görevler için sıfırlanır, ikinci alan size olarak 0 atanır
 
+
+/**
+ * @brief Assigns a deadline to a given assignment.
+ *
+ * The `assign_deadline` function prompts the user to enter the task name and the deadline (day, month, year).
+ * It checks the validity of the input date and assigns the deadline to the given assignment.
+ * The assignment is then added to a MinHeap to maintain a list of deadlines and saved to a binary file.
+ *
+ * @param assignment Pointer to the assignment to which the deadline will be assigned.
+ * @return Returns 0 if the deadline is assigned and saved successfully, or -1 if an error occurs.
+ */
 int assign_deadline(Assignment* assignment) {
     char taskName[MAX_ASSIGNMENT_NAME];
     int day, month, year;
@@ -990,6 +1375,15 @@ int assign_deadline(Assignment* assignment) {
     return 0;
 }
 
+
+/**
+ * @brief Displays upcoming deadlines in sorted order.
+ *
+ * The `viewDeadlines` function displays all deadlines stored in a MinHeap. It uses a copy of the heap
+ * to maintain the original heap order. If no deadlines are present, it notifies the user.
+ *
+ * @return Returns 1 if deadlines are successfully displayed, or -1 if no deadlines are found.
+ */
 int viewDeadlines() {
     if (deadlineHeap.size == 0) {
         printf("No deadlines to display.\n");
@@ -1021,10 +1415,34 @@ int viewDeadlines() {
     return 1;
 }
 
+
+/**
+ * @brief Generates a key for a given date in YYYYMMDD format.
+ *
+ * The `getDateKey` function creates an integer key based on the given day, month, and year in the format YYYYMMDD.
+ * This key is useful for indexing and searching tasks by date.
+ *
+ * @param day The day of the date.
+ * @param month The month of the date.
+ * @param year The year of the date.
+ * @return Returns an integer representing the date in YYYYMMDD format.
+ */
 int getDateKey(int day, int month, int year) {
     return year * 10000 + month * 100 + day;  // YYYYMMDD formatında bir anahtar oluşturur
 }
 
+
+/**
+ * @brief Inserts a key and task into a leaf node of the B+ Tree.
+ *
+ * The `insertInLeaf` function inserts a given key and corresponding task into a specified leaf node
+ * of the B+ Tree, maintaining the order of keys.
+ *
+ * @param leaf Pointer to the leaf node where the key and task are to be inserted.
+ * @param key The key to be inserted in the leaf.
+ * @param task Pointer to the task to be inserted.
+ * @return Returns 1 if the insertion is successful.
+ */
 int insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
     int i = leaf->numKeys - 1;
     while (i >= 0 && leaf->keys[i] > key) {
@@ -1038,6 +1456,16 @@ int insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
     return 1;
 }
 
+/**
+ * @brief Inserts a task into the B+ Tree.
+ *
+ * The `insertInBPlusTree` function inserts a given task into the B+ Tree. If the root node has space, the task is added directly.
+ * Otherwise, a node split is required, and further logic for splitting should be implemented.
+ *
+ * @param tree Pointer to the B+ Tree where the task is to be inserted.
+ * @param task Pointer to the task to be inserted.
+ * @return Returns 1 if the insertion is successful.
+ */
 int insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
     int key = getDateKey(task->day, task->month, task->year);
     BPlusTreeNode* root = tree->root;
@@ -1051,6 +1479,17 @@ int insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
     return 1;
 }
 
+/**
+ * @brief Searches for tasks within a specific date range in the B+ Tree.
+ *
+ * The `searchInDateRange` function searches for tasks with keys within the given date range in the B+ Tree.
+ * It traverses the B+ Tree, printing tasks that fall within the specified start and end keys.
+ *
+ * @param node Pointer to the current B+ Tree node being searched.
+ * @param startKey The starting key of the date range.
+ * @param endKey The ending key of the date range.
+ * @return Returns 1 if the search is successful, or -1 if the node is NULL.
+ */
 int searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
     if (node == NULL) return -1;
 
@@ -1079,6 +1518,15 @@ int searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
     return 1;
 }
 
+/**
+ * @brief Displays tasks with deadlines in a specific date range.
+ *
+ * The `viewDeadlinesInRange` function prompts the user to enter a start and end date.
+ * It then searches for and displays all tasks with deadlines within that date range.
+ *
+ * @param tree Pointer to the B+ Tree that stores tasks.
+ * @return Returns 1 if the operation is successful.
+ */
 int viewDeadlinesInRange(BPlusTree* tree) {
     int startDay, startMonth, startYear;
     int endDay, endMonth, endYear;
@@ -1098,6 +1546,15 @@ int viewDeadlinesInRange(BPlusTree* tree) {
     return 1;
 }
 
+/**
+ * @brief Swaps two assignments.
+ *
+ * The `swap` function exchanges the data of two given assignments.
+ *
+ * @param a Pointer to the first assignment.
+ * @param b Pointer to the second assignment.
+ * @return Returns 1 after successfully swapping the assignments.
+ */
 int swap(Assignment* a, Assignment* b) {
     Assignment temp = *a;
     *a = *b;
@@ -1105,6 +1562,16 @@ int swap(Assignment* a, Assignment* b) {
     return 1;
 }
 
+/**
+ * @brief Maintains the min-heap property by adjusting the subtree rooted at a given index.
+ *
+ * The `heapify` function ensures that the min-heap property is maintained for the subtree rooted at index `i`.
+ * It compares the parent node with its children and swaps nodes as needed to ensure the minimum value is at the root.
+ *
+ * @param heap Pointer to the MinHeap.
+ * @param i The index of the subtree root to heapify.
+ * @return Returns 1 if the operation is successful.
+ */
 int heapify(MinHeap* heap, int i) {
     int smallest = i;
     int left = 2 * i + 1;
@@ -1132,7 +1599,16 @@ int heapify(MinHeap* heap, int i) {
     return 1;
 }
 
-// Yığına görevi deadline sırasına göre ekleme
+/**
+ * @brief Inserts a new task into the min-heap based on its deadline.
+ *
+ * The `insertMinHeap` function adds a new task to the min-heap while maintaining the min-heap property.
+ * It compares the deadline of the new task with its parent and moves it up if needed.
+ *
+ * @param heap Pointer to the MinHeap.
+ * @param deadline The new task to be inserted into the heap.
+ * @return Returns 1 if the insertion is successful, or -1 if the heap is full.
+ */
 int insertMinHeap(MinHeap* heap, Assignment deadline) {
     if (heap->size == MAX_HEAP_SIZE) {
         printf("Heap is full\n");
@@ -1154,7 +1630,15 @@ int insertMinHeap(MinHeap* heap, Assignment deadline) {
     return 1;
 }
 
-// Yığının en üstündeki (en yakın deadline'a sahip) görevi çıkartma
+/**
+ * @brief Extracts the task with the earliest deadline from the min-heap.
+ *
+ * The `extractMin` function removes and returns the task with the earliest deadline from the min-heap.
+ * It then re-heapifies the heap to maintain the min-heap property.
+ *
+ * @param heap Pointer to the MinHeap.
+ * @return The task with the earliest deadline, or an empty task if the heap is empty.
+ */
 Assignment extractMin(MinHeap* heap) {
     if (heap->size <= 0) {
         printf("Heap is empty\n");
@@ -1175,6 +1659,15 @@ Assignment extractMin(MinHeap* heap) {
     return root;
 }
 
+/**
+ * @brief Displays the reminder system menu and handles user input.
+ *
+ * The `reminderSystemMenu` function displays a menu for the reminder system,
+ * allowing the user to set reminders or adjust notification settings.
+ * The menu runs in a loop until the user chooses to exit.
+ *
+ * @return Returns 0 when the user chooses to exit the menu.
+ */
 int reminderSystemMenu() {
     int choice;
 
