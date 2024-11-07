@@ -990,10 +990,10 @@ int assign_deadline(Assignment* assignment) {
     return 0;
 }
 
-void viewDeadlines() {
+int viewDeadlines() {
     if (deadlineHeap.size == 0) {
         printf("No deadlines to display.\n");
-        return;
+        return -1;
     }
 
     printf("\n--- Upcoming Deadlines (Sorted by Date) ---\n");
@@ -1018,13 +1018,14 @@ void viewDeadlines() {
 
     printf("-------------------------------------------\n");
     enterToContinue();  // Kullanıcıdan devam etmesini bekle
+    return 1;
 }
 
 int getDateKey(int day, int month, int year) {
     return year * 10000 + month * 100 + day;  // YYYYMMDD formatında bir anahtar oluşturur
 }
 
-void insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
+int insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
     int i = leaf->numKeys - 1;
     while (i >= 0 && leaf->keys[i] > key) {
         leaf->keys[i + 1] = leaf->keys[i];
@@ -1034,9 +1035,10 @@ void insertInLeaf(BPlusTreeNode* leaf, int key, ScheduledTask* task) {
     leaf->keys[i + 1] = key;
     leaf->tasks[i + 1] = task;
     leaf->numKeys++;
+    return 1;
 }
 
-void insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
+int insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
     int key = getDateKey(task->day, task->month, task->year);
     BPlusTreeNode* root = tree->root;
 
@@ -1046,10 +1048,11 @@ void insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
     else {
         printf("Node splitting required. Implement split logic here.\n");
     }
+    return 1;
 }
 
-void searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
-    if (node == NULL) return;
+int searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
+    if (node == NULL) return -1;
 
     int i = 0;
     while (i < node->numKeys && node->keys[i] < startKey) i++;
@@ -1073,9 +1076,10 @@ void searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
             i++;
         }
     }
+    return 1;
 }
 
-void viewDeadlinesInRange(BPlusTree* tree) {
+int viewDeadlinesInRange(BPlusTree* tree) {
     int startDay, startMonth, startYear;
     int endDay, endMonth, endYear;
 
@@ -1091,15 +1095,17 @@ void viewDeadlinesInRange(BPlusTree* tree) {
         startDay, startMonth, startYear, endDay, endMonth, endYear);
 
     searchInDateRange(tree->root, startKey, endKey);
+    return 1;
 }
 
-void swap(Assignment* a, Assignment* b) {
+int swap(Assignment* a, Assignment* b) {
     Assignment temp = *a;
     *a = *b;
     *b = temp;
+    return 1;
 }
 
-void heapify(MinHeap* heap, int i) {
+int heapify(MinHeap* heap, int i) {
     int smallest = i;
     int left = 2 * i + 1;
     int right = 2 * i + 2;
@@ -1123,13 +1129,14 @@ void heapify(MinHeap* heap, int i) {
         swap(&heap->deadlines[i], &heap->deadlines[smallest]);
         heapify(heap, smallest);
     }
+    return 1;
 }
 
 // Yığına görevi deadline sırasına göre ekleme
-void insertMinHeap(MinHeap* heap, Assignment deadline) {
+int insertMinHeap(MinHeap* heap, Assignment deadline) {
     if (heap->size == MAX_HEAP_SIZE) {
         printf("Heap is full\n");
-        return;
+        return -1;
     }
 
     heap->size++;
@@ -1144,6 +1151,7 @@ void insertMinHeap(MinHeap* heap, Assignment deadline) {
         swap(&heap->deadlines[i], &heap->deadlines[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
+    return 1;
 }
 
 // Yığının en üstündeki (en yakın deadline'a sahip) görevi çıkartma
@@ -1201,7 +1209,7 @@ int reminderSystemMenu() {
 
 
 // Hatırlatıcı Ayarlama Fonksiyonu
-void setReminders() {
+int setReminders() {
     clearScreen();
 
     int seconds, minutes, hours, days;
@@ -1222,7 +1230,7 @@ void setReminders() {
     if (totalSeconds <= 0) {
         printf("Invalid duration. Please enter a positive duration.\n");
         enterToContinue();
-        return;
+        return 0;
     }
 
     printf("Setting reminder for %d seconds...\n", totalSeconds);
@@ -1241,22 +1249,24 @@ void setReminders() {
 
     printf("Time's up! Reminder triggered.\n");
     enterToContinue();
+
 }
 
 // Platforma göre uyumlu bekleme fonksiyonu
-void platformSleep(int seconds) {
+int platformSleep(int seconds) {
 #ifdef _WIN32
     Sleep(seconds * 1000);  // Windows: milisaniye cinsinden bekler
 #else
     sleep(seconds);         // Linux/macOS: saniye cinsinden bekler
 #endif
+    return 1;
 }
 
 
 
 
 
-void notificationSettings() {
+int notificationSettings() {
     clearScreen();
 
     // Mevcut bildirim yöntemini göster
@@ -1287,14 +1297,15 @@ void notificationSettings() {
         printf("Invalid choice. Please try again.\n");
         enterToContinue();
         notificationSettings();  // Geçersiz girişte tekrar çağır
-        return;
+        return 1;
     }
 
     enterToContinue();
+    return 0;
 }
 
 // Mevcut bildirim yöntemini ekranda gösterir
-void showCurrentNotificationMethod() {
+int showCurrentNotificationMethod() {
     if (notificationMethod == 0) {
         printf("No notification method selected yet.\n");
     }
@@ -1305,6 +1316,7 @@ void showCurrentNotificationMethod() {
 
         printf("Current notification method: %s\n", methodStr);
     }
+    return 1;
 }
 
 SparseMatrixNode* createNode(int row, int col, int value) {
@@ -1317,27 +1329,30 @@ SparseMatrixNode* createNode(int row, int col, int value) {
 }
 
 // Sparse Matrix'e değer ekleme
-void addNotification(SparseMatrixNode** head, int row, int col, int value) {
+int addNotification(SparseMatrixNode** head, int row, int col, int value) {
     SparseMatrixNode* newNode = createNode(row, col, value);
     newNode->next = *head;
     *head = newNode;
+    return 1;
 }
 
 // Bildirimleri gösterme
-void displayNotifications(SparseMatrixNode* head) {
+int displayNotifications(SparseMatrixNode* head) {
     SparseMatrixNode* temp = head;
     while (temp != NULL) {
         printf("Task ID: %d, Date: %d, Notification Type: %d\n", temp->row, temp->col, temp->value);
         temp = temp->next;
     }
+    return 1;
 }
 
-void updateNotificationMethod(int taskId, int date, int method, SparseMatrixNode** head) {
+int updateNotificationMethod(int taskId, int date, int method, SparseMatrixNode** head) {
     addNotification(head, taskId, date, method);
     printf("Notification method updated for Task ID %d on Date %d\n", taskId, date);
+    return 1;
 }
 
-void showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date) {
+int showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date) {
     SparseMatrixNode* temp = head;
     while (temp != NULL) {
         if (temp->row == taskId && temp->col == date) {
@@ -1345,11 +1360,12 @@ void showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date)
                 (temp->value == 1) ? "SMS" :
                 (temp->value == 2) ? "E-Mail" : "Notification";
             printf("Current notification method for Task ID %d on Date %d: %s\n", taskId, date, methodStr);
-            return;
+            return 1;
         }
         temp = temp->next;
     }
     printf("No notification method selected for Task ID %d on Date %d.\n", taskId, date);
+    return -1;
 }
 
 
