@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <stack>
 #include <string>
@@ -12,12 +11,18 @@
 using namespace std;
 
 
-
+/**
+ * @brief Entry point of the application.
+ *
+ * This function initializes the application by specifying the path to the user database file
+ * and calls the main menu function to start the program.
+ *
+ * @return int Returns 0 to indicate successful execution.
+ */
 int main() {
-	const char* pathFileUsers = "users.bin";
+    const char* pathFileUsers = "users.bin";
 
+    mainMenu(pathFileUsers);
 
-	mainMenu(pathFileUsers);
-
-	return 0;
+    return 0;
 }
