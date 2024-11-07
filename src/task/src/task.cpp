@@ -1208,7 +1208,7 @@ int reminderSystemMenu() {
 
 
 // Hatırlatıcı Ayarlama Fonksiyonu
-void setReminders() {
+int setReminders() {
     clearScreen();
 
     int seconds, minutes, hours, days;
@@ -1229,7 +1229,7 @@ void setReminders() {
     if (totalSeconds <= 0) {
         printf("Invalid duration. Please enter a positive duration.\n");
         enterToContinue();
-        return;
+        return 0;
     }
 
     printf("Setting reminder for %d seconds...\n", totalSeconds);
@@ -1248,22 +1248,24 @@ void setReminders() {
 
     printf("Time's up! Reminder triggered.\n");
     enterToContinue();
+
 }
 
 // Platforma göre uyumlu bekleme fonksiyonu
-void platformSleep(int seconds) {
+int platformSleep(int seconds) {
 #ifdef _WIN32
     Sleep(seconds * 1000);  // Windows: milisaniye cinsinden bekler
 #else
     sleep(seconds);         // Linux/macOS: saniye cinsinden bekler
 #endif
+    return 1;
 }
 
 
 
 
 
-void notificationSettings() {
+int notificationSettings() {
     clearScreen();
 
     // Mevcut bildirim yöntemini göster
@@ -1294,14 +1296,15 @@ void notificationSettings() {
         printf("Invalid choice. Please try again.\n");
         enterToContinue();
         notificationSettings();  // Geçersiz girişte tekrar çağır
-        return;
+        return 1;
     }
 
     enterToContinue();
+    return 0;
 }
 
 // Mevcut bildirim yöntemini ekranda gösterir
-void showCurrentNotificationMethod() {
+int showCurrentNotificationMethod() {
     if (notificationMethod == 0) {
         printf("No notification method selected yet.\n");
     }
@@ -1312,6 +1315,7 @@ void showCurrentNotificationMethod() {
 
         printf("Current notification method: %s\n", methodStr);
     }
+    return 1;
 }
 
 SparseMatrixNode* createNode(int row, int col, int value) {
@@ -1324,27 +1328,30 @@ SparseMatrixNode* createNode(int row, int col, int value) {
 }
 
 // Sparse Matrix'e değer ekleme
-void addNotification(SparseMatrixNode** head, int row, int col, int value) {
+int addNotification(SparseMatrixNode** head, int row, int col, int value) {
     SparseMatrixNode* newNode = createNode(row, col, value);
     newNode->next = *head;
     *head = newNode;
+    return 1;
 }
 
 // Bildirimleri gösterme
-void displayNotifications(SparseMatrixNode* head) {
+int displayNotifications(SparseMatrixNode* head) {
     SparseMatrixNode* temp = head;
     while (temp != NULL) {
         printf("Task ID: %d, Date: %d, Notification Type: %d\n", temp->row, temp->col, temp->value);
         temp = temp->next;
     }
+    return 1;
 }
 
-void updateNotificationMethod(int taskId, int date, int method, SparseMatrixNode** head) {
+int updateNotificationMethod(int taskId, int date, int method, SparseMatrixNode** head) {
     addNotification(head, taskId, date, method);
     printf("Notification method updated for Task ID %d on Date %d\n", taskId, date);
+    return 1;
 }
 
-void showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date) {
+int showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date) {
     SparseMatrixNode* temp = head;
     while (temp != NULL) {
         if (temp->row == taskId && temp->col == date) {
@@ -1352,11 +1359,12 @@ void showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date)
                 (temp->value == 1) ? "SMS" :
                 (temp->value == 2) ? "E-Mail" : "Notification";
             printf("Current notification method for Task ID %d on Date %d: %s\n", taskId, date, methodStr);
-            return;
+            return 1;
         }
         temp = temp->next;
     }
     printf("No notification method selected for Task ID %d on Date %d.\n", taskId, date);
+    return -1;
 }
 
 

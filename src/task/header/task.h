@@ -208,10 +208,15 @@ Assignment extractMin(MinHeap* heap);
 
 
 
-void setReminders();
-void platformSleep(int seconds);
-void showCurrentNotificationMethod();
-void notificationSettings();
+int setReminders();
+int platformSleep(int seconds);
+int showCurrentNotificationMethod();
+int notificationSettings();
+int addNotification();
+int displayNotifications();
+int updateNotificationMethod();
+int showCurrentNotificationMethod();
+
 
 
 
