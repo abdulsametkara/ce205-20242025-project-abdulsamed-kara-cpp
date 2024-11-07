@@ -340,11 +340,11 @@ int addTaskToXORList(Task task) {
     return 1;
 }
 
-void loadTasksToXORList(const char* filename) {
+int loadTasksToXORList(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
         printf("Error: Unable to open tasks file.\n");
-        return;
+        return -1;
     }
 
     Task task;
@@ -354,6 +354,7 @@ void loadTasksToXORList(const char* filename) {
 
     fclose(file);
     printf("Tasks loaded into XOR Linked List successfully!\n");
+    return 1;
 }
 
 void navigateXORList() {
