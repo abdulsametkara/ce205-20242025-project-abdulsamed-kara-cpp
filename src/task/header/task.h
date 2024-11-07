@@ -197,7 +197,7 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out);
 void searchTasksByKeyword();
 void navigateTasks();
 void navigateXORList();
-void loadTasksToXORList(const char* filename);
+int loadTasksToXORList(const char* filename);
 
 
 

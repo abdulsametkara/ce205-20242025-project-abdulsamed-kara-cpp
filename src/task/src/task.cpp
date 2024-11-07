@@ -512,7 +512,7 @@ void loadTasksToXORList(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
         printf("Error: Unable to open tasks file.\n");
-        return;
+        return -1;
     }
 
     Task task;

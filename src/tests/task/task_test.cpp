@@ -203,7 +203,43 @@ TEST_F(TaskAppTest, AddTaskToXORList) {
     EXPECT_EQ(xorTail->task.id, task.id);
     EXPECT_EQ(xorHead, xorTail); // Bu görev ilk görevse baþ ve son ayný olmalý
 }
+///
+TEST_F(TaskAppTest, LoadTasksToXORList) {
+    // Test için geçici bir görev dosyasý oluþtur
+    const char* testFilename = "test_tasks.bin";
 
+    // Test görevlerini oluþtur ve dosyaya kaydet
+    Task testTasks[] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
+        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
+    };
+    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
+
+    FILE* file = fopen(testFilename, "wb");
+    fwrite(testTasks, sizeof(Task), taskCount, file);
+    fclose(file);
+
+    // Fonksiyonu çaðýr ve doðru çalýþýp çalýþmadýðýný kontrol et
+    int result = loadTasksToXORList(testFilename);
+    EXPECT_EQ(result, 1);  // Dosyanýn baþarýyla yüklendiðini kontrol et
+
+    // XOR listesine eklenen görevleri kontrol et
+    XORNode* current = xorHead;
+    for (int i = 0; i < taskCount; ++i) {
+        ASSERT_NE(current, nullptr);  // Düðümlerin mevcut olduðunu kontrol et
+        EXPECT_EQ(current->task.id, testTasks[i].id);
+        EXPECT_STREQ(current->task.name, testTasks[i].name);
+        EXPECT_STREQ(current->task.description, testTasks[i].description);
+        EXPECT_STREQ(current->task.category, testTasks[i].category);
+
+        // XOR baðlantýlý listedeki bir sonraki düðüme geç
+        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
+        current = nextNode;
+    }
+
+    // Test dosyasýný sil
+    remove(testFilename);
+}
 
 
 TEST_F(TaskAppTest, AssignDeadline_ValidInput) {
