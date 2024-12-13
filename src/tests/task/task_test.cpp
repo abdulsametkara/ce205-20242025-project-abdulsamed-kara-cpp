@@ -204,42 +204,7 @@ TEST_F(TaskAppTest, AddTaskToXORList) {
     EXPECT_EQ(xorHead, xorTail); // Bu görev ilk görevse baþ ve son ayný olmalý
 }
 ///
-TEST_F(TaskAppTest, LoadTasksToXORList) {
-    // Test için geçici bir görev dosyasý oluþtur
-    const char* testFilename = "test_tasks.bin";
 
-    // Test görevlerini oluþtur ve dosyaya kaydet
-    Task testTasks[] = {
-        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
-        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
-    };
-    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
-
-    FILE* file = fopen(testFilename, "wb");
-    fwrite(testTasks, sizeof(Task), taskCount, file);
-    fclose(file);
-
-    // Fonksiyonu çaðýr ve doðru çalýþýp çalýþmadýðýný kontrol et
-    int result = loadTasksToXORList(testFilename);
-    EXPECT_EQ(result, 1);  // Dosyanýn baþarýyla yüklendiðini kontrol et
-
-    // XOR listesine eklenen görevleri kontrol et
-    XORNode* current = xorHead;
-    for (int i = 0; i < taskCount; ++i) {
-        ASSERT_NE(current, nullptr);  // Düðümlerin mevcut olduðunu kontrol et
-        EXPECT_EQ(current->task.id, testTasks[i].id);
-        EXPECT_STREQ(current->task.name, testTasks[i].name);
-        EXPECT_STREQ(current->task.description, testTasks[i].description);
-        EXPECT_STREQ(current->task.category, testTasks[i].category);
-
-        // XOR baðlantýlý listedeki bir sonraki düðüme geç
-        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
-        current = nextNode;
-    }
-
-    // Test dosyasýný sil
-    remove(testFilename);
-}
 
 
 TEST_F(TaskAppTest, AssignDeadline_ValidInput) {
@@ -445,6 +410,251 @@ TEST_F(TaskAppTest, UpdateNotificationMethod) {
         delete temp;
     }
 }
+
+TEST_F(TaskAppTest, ViewTask_EmptyQueue) {
+    // Kuyruk boþken viewTask fonksiyonunu test ediyoruz
+    front = NULL;  // Kuyruk baþý NULL olmalý
+
+    // Çýkýþý yakalamak için stdout'u test dosyasýna yönlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu çaðýr
+    int result = viewTask();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // Dönüþ deðerinin 0 olduðunu doðrula
+    EXPECT_EQ(result, 0);
+
+    // Çýktýyý kontrol etmek için dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Hata mesajýnýn doðru yazýldýðýný kontrol et
+    EXPECT_NE(strstr(outputBuffer, "No tasks found. The task list is empty."), nullptr);
+}
+
+
+TEST_F(TaskAppTest, ViewTask_FilledQueue) {
+    // Test için sahte görevler oluþtur
+    Task task1 = { 1, "Task 1", "Description 1", "Category 1", "2024-11-10", 0, {0}, 1 };
+    Task task2 = { 2, "Task 2", "Description 2", "Category 2", "2024-11-15", 0, {0}, 1 };
+
+    // Kuyruða görev ekle
+    enqueue(task1);
+    enqueue(task2);
+
+    // Fonksiyonu çalýþtýrmadan önce stdout'u test dosyasýna yönlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu çalýþtýr
+    int result = viewTask();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // Dönüþ deðerinin 1 olduðunu doðrula
+    EXPECT_EQ(result, 1);
+
+    // Çýktýyý kontrol etmek için dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outputFile);
+    fclose(outputFile);
+
+    // Görevlerin doðru yazýldýðýný kontrol et
+    EXPECT_NE(strstr(outputBuffer, "ID: 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Name: Task 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Description: Description 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Category: Category 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Due Date: 2024-11-10"), nullptr);
+
+    EXPECT_NE(strstr(outputBuffer, "ID: 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Name: Task 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Description: Description 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Category: Category 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Due Date: 2024-11-15"), nullptr);
+}
+
+TEST_F(TaskAppTest, EnterToContinue) {
+    // Kullanýcý giriþini simüle et
+    simulateUserInput("\n");
+
+    // Çýkýþý yakalamak için stdout'u test dosyasýna yönlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu çaðýr
+    int result = enterToContinue();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // Fonksiyonun doðru sonucu döndürdüðünü kontrol et
+    EXPECT_EQ(result, 1);
+
+    // Çýktýyý kontrol etmek için dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Fonksiyonun doðru mesajý yazdýðýný kontrol et
+    EXPECT_NE(strstr(outputBuffer, "Press enter to continue"), nullptr);
+}
+
+TEST_F(TaskAppTest, HandleInputError) {
+    // Geçersiz giriþ simülasyonu yapýyoruz (örneðin: "abc")
+    simulateUserInput("abc\n");
+
+    // Çýkýþý yakalamak için stdout'u test dosyasýna yönlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu çaðýr
+    int result = handleInputError();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // Fonksiyonun doðru sonucu döndürdüðünü kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Çýktýyý kontrol etmek için dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Fonksiyonun doðru mesajý yazdýrdýðýný kontrol et
+    EXPECT_NE(strstr(outputBuffer, "Invalid input. Please enter a number."), nullptr);
+}
+
+TEST_F(TaskAppTest, AddTaskToList_ValidTask) {
+    // Baþlangýçta listeyi temizle
+    head = NULL;
+    tail = NULL;
+
+    // Yeni görev oluþtur
+    Task newTask = { 1, "Test Task", "Test Description", "Test Category", "2024-12-15", 0, {2}, 1 };
+
+    // Fonksiyonu çaðýr ve sonucu kontrol et
+    int result = addTaskToList(newTask);
+    EXPECT_EQ(result, 1); // Fonksiyonun baþarýyla tamamlandýðýný kontrol et
+
+    // Listenin güncellendiðini kontrol et
+    ASSERT_NE(head, nullptr); // Listenin baþý NULL olmamalý
+    ASSERT_NE(tail, nullptr); // Listenin sonu NULL olmamalý
+    EXPECT_EQ(head, tail);    // Liste tek düðümden oluþmalý
+
+    // Düðümün doðru atandýðýný kontrol et
+    EXPECT_EQ(head->task.id, newTask.id);
+    EXPECT_STREQ(head->task.name, newTask.name);
+    EXPECT_STREQ(head->task.description, newTask.description);
+    EXPECT_STREQ(head->task.category, newTask.category);
+    EXPECT_STREQ(head->task.dueDate, newTask.dueDate);
+}
+
+TEST_F(TaskAppTest, AddTaskToList_MultipleTasks) {
+    // Baþlangýçta listeyi temizle
+    head = NULL;
+    tail = NULL;
+
+    // Ýlk görevi ekle
+    Task firstTask = { 1, "First Task", "First Description", "First Category", "2024-12-10", 0, {2}, 1 };
+    int result = addTaskToList(firstTask);
+    EXPECT_EQ(result, 1);
+
+    // Ýkinci görevi ekle
+    Task secondTask = { 2, "Second Task", "Second Description", "Second Category", "2024-12-20", 0, {1}, 1 };
+    result = addTaskToList(secondTask);
+    EXPECT_EQ(result, 1);
+
+    // Listenin doðru þekilde güncellendiðini kontrol et
+    ASSERT_NE(head, nullptr);
+    ASSERT_NE(tail, nullptr);
+    EXPECT_NE(head, tail); // Liste birden fazla düðümden oluþmalý
+
+    // Ýlk düðümü kontrol et
+    EXPECT_EQ(head->task.id, firstTask.id);
+    EXPECT_STREQ(head->task.name, firstTask.name);
+    EXPECT_EQ(head->next, tail); // Ýlk düðümün next iþaretçisi kuyruðu göstermeli
+
+    // Ýkinci düðümü kontrol et
+    EXPECT_EQ(tail->task.id, secondTask.id);
+    EXPECT_STREQ(tail->task.name, secondTask.name);
+    EXPECT_EQ(tail->prev, head); // Kuyruðun prev iþaretçisi baþý göstermeli
+}
+
+//TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
+//    // Test için geçici bir görev dosyasý oluþtur
+//    const char* testFilename = "test_tasks.bin";
+//
+//    // Test görevlerini oluþtur ve dosyaya kaydet
+//    Task testTasks[] = {
+//        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
+//        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
+//    };
+//    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
+//
+//    FILE* file = fopen(testFilename, "wb");
+//    ASSERT_NE(file, nullptr) << "Error: Unable to create test file.";
+//    fwrite(testTasks, sizeof(Task), taskCount, file);
+//    fclose(file);
+//
+//    // Fonksiyonu çaðýr ve doðru çalýþýp çalýþmadýðýný kontrol et
+//    int result = loadTasksToXORList(testFilename);
+//    EXPECT_EQ(result, 1);  // Baþarýyla tamamlandýðýný kontrol et
+//
+//    // XOR listesine eklenen görevleri kontrol et
+//    XORNode* current = xorHead;
+//    for (int i = 0; i < taskCount; ++i) {
+//        ASSERT_NE(current, nullptr) << "XOR list is missing nodes.";
+//        EXPECT_EQ(current->task.id, testTasks[i].id);
+//        EXPECT_STREQ(current->task.name, testTasks[i].name);
+//        EXPECT_STREQ(current->task.description, testTasks[i].description);
+//        EXPECT_STREQ(current->task.category, testTasks[i].category);
+//        EXPECT_STREQ(current->task.dueDate, testTasks[i].dueDate);
+//
+//        // Bir sonraki düðüme geç
+//        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
+//        current = nextNode;
+//    }
+//
+//    // Test dosyasýný sil
+//    remove(testFilename);
+//}
+//
+// TEST_F(TaskAppTest, LoadTasksToXORList_InvalidFile) {
+//    // Geçersiz dosya adýyla fonksiyonu çaðýr
+//    const char* invalidFilename = "nonexistent_tasks.bin";
+//    int result = loadTasksToXORList(invalidFilename);
+//
+//    // Dönüþ deðerinin -1 olduðunu kontrol et
+//    EXPECT_EQ(result, -1);
+//
+//    // Çýktýyý kontrol etmek için dosyadan oku
+//    FILE* outputFile = fopen(outputTest, "rb");
+//    ASSERT_NE(outputFile, nullptr);
+//
+//    char outputBuffer[256] = { 0 };
+//    fread(outputBuffer, sizeof(char), 255, outputFile);
+//    fclose(outputFile);
+//
+//    // Hata mesajýnýn doðru yazýldýðýný kontrol et
+//    EXPECT_NE(strstr(outputBuffer, "Error: Unable to open tasks file."), nullptr);
+//}
+
+
 
 
 

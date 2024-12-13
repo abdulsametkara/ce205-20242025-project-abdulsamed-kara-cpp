@@ -620,14 +620,14 @@ int loadTasksToXORList(const char* filename) {
  * Navigation is based on XOR pointers to efficiently traverse in both directions.
  */
 
-void navigateXORList() {
+int navigateXORList() {
     XORNode* current = xorHead;
     XORNode* prev = NULL;
     XORNode* next;
 
     if (current == NULL) {
         printf("No tasks found in the list.\n");
-        return;
+        return -1; // Hata: XOR listesi boş
     }
 
     int choice;
@@ -641,6 +641,11 @@ void navigateXORList() {
 
         printf("Press 1 to go forward, 2 to go backward, or 0 to exit: ");
         choice = getInput();
+
+        if (choice == -2) { // Hatalı giriş
+            handleInputError();
+            continue;
+        }
 
         if (choice == 1) {
             next = (XORNode*)((uintptr_t)prev ^ (uintptr_t)current->xorPtr);
@@ -660,7 +665,9 @@ void navigateXORList() {
     } while (choice != 0);
 
     printf("Exiting navigation.\n");
+    return 1; // Başarı durumu
 }
+
 
 /**
  * @brief Adds a new task to the doubly linked list of tasks.
@@ -671,7 +678,7 @@ void navigateXORList() {
  * @param newTask The task to be added to the doubly linked list.
  */
 
-void addTaskToList(Task newTask) {
+int addTaskToList(Task newTask) {
     TaskNode* newNode = (TaskNode*)malloc(sizeof(TaskNode));
     newNode->task = newTask;
     newNode->next = NULL;
@@ -684,6 +691,7 @@ void addTaskToList(Task newTask) {
         head = newNode;
     }
     tail = newNode;
+    return 1;
 }
 
 
@@ -802,11 +810,11 @@ void navigateTasks() {
  * The `viewTask` function displays all tasks currently stored in the queue by dequeuing them one by one.
  * If no tasks are found, it notifies the user that the task list is empty.
  */
-void viewTask() {
+int viewTask() {
     if (front == NULL) {
         printf("No tasks found. The task list is empty.\n");
         enterToContinue();
-        return;
+        return 0; // Hata durumu: Kuyruk boş
     }
 
     printf("\n--- List of Tasks ---\n");
@@ -820,7 +828,9 @@ void viewTask() {
         printf("---------------------------\n");
     }
     enterToContinue();
+    return 1; // Başarı durumu
 }
+
 
 /**
  * @brief Displays tasks filtered by a specific category.
