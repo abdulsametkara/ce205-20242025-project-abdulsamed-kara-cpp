@@ -1,1 +1,15 @@
-SCC #1: 2 1 0 
+       MAIN MENU - TASK MANAGER     
+========================================
+1. Create Task
+2. Deadline Settings
+3. Reminder System
+4. Task Prioritization
+5. Algorithms
+6. Exit
+========================================
+Please enter your choice: [       OK ] TaskAppTest.taskprecorrectwittasks (58 ms)
+[----------] 25 tests from TaskAppTest (7830 ms total)
+
+[----------] Global test environment tear-down
+[==========] 25 tests from 1 test suite ran. (7831 ms total)
+[  PASSED  ] 25 tests.

@@ -596,6 +596,92 @@ TEST_F(TaskAppTest, AddTaskToList_MultipleTasks) {
     EXPECT_STREQ(tail->task.name, secondTask.name);
     EXPECT_EQ(tail->prev, head); // Kuyruðun prev iþaretçisi baþý göstermeli
 }
+//TEST_F(TaskAppTest, LoginUserMenu_SuccessfulLogin) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Kullanýcý giriþini simüle et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Doðru sonucu kontrol et
+//    EXPECT_EQ(result, 1);
+//}
+
+// Yanlýþ e-posta ile giriþ denendiðinde baþarýsýz dönmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongEmail) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlýþ e-posta girdisini simüle et
+//    simulateUserInput("wrong@example.com\npassword123\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlýþ giriþ olduðu için 0 dönmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Yanlýþ þifre ile giriþ denendiðinde baþarýsýz dönmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongPassword) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlýþ þifre girdisini simüle et
+//    simulateUserInput("john@example.com\nwrongpassword\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlýþ giriþ olduðu için 0 dönmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Eksik dosya ile giriþ denendiðinde baþarýsýz dönmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_MissingFile) {
+//    const char* invalidFile = "nonexistent_users.bin";
+//
+//    // Kullanýcý giriþini simüle et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(invalidFile);
+//
+//    // Dosya bulunmadýðý için 0 dönmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+
+TEST_F(TaskAppTest, LoginRegistermenuTest) {
+    const char* testuserfile = "userFile.bin";
+
+    simulateUserInput("2\nasd\nasd\nasd\nasd\n\n1\nasd\nasd\n\n6\n3\n");
+
+    int result = mainMenu(testuserfile);
+
+    EXPECT_EQ(result, 0);
+}
+
+//TEST_F(TaskAppTest, taskprenotaskfail) {
+//    const char* testuserfile = "taskFile.bin";
+//
+//    simulateUserInput("4\n1\n\n3\n");
+//
+//    int result = userOptionsMenu();
+//
+//    EXPECT_EQ(result, 0);
+//}
+
+TEST_F(TaskAppTest, taskprecorrectwittasks) {
+    const char* testuserfile = "taskFile.bin";
+    createTestUserFile();
+
+    simulateUserInput("4\n1\nTask 1\n2\n\n3\n6\n3\n");
+
+    int result = userOptionsMenu();
+
+    EXPECT_EQ(result, 0);
+}
+
 
 //TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
 //    // Test için geçici bir görev dosyasý oluþtur
