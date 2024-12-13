@@ -1,1 +1,48 @@
-Invalid input. Please enter a number.
+========================================
+        MAIN MENU - TASK MANAGER     
+========================================
+1. Create Task
+2. Deadline Settings
+3. Reminder System
+4. Task Prioritization
+5. Algorithms
+6. Exit
+========================================
+Please enter your choice: ========================================
+       TASK PRIORITIZATION MENU       
+========================================
+1. Mark Task Importance
+2. Importance Ordering
+3. Exit
+========================================
+Please enter your choice : 2 tasks loaded successfully!
+Tasks loaded:
+ID: 1, Name: Task 1, Importance: Unmarked
+ID: 2, Name: Task 2, Importance: Low
+
+Enter the name of the task to mark importance: Enter the importance ID (1: Low, 2: Medium, 3: High): Tasks saved successfully!
+Importance level of 'Task 1' marked successfully as 2.
+
+Press enter to continue========================================
+       TASK PRIORITIZATION MENU       
+========================================
+1. Mark Task Importance
+2. Importance Ordering
+3. Exit
+========================================
+Please enter your choice : ========================================
+        MAIN MENU - TASK MANAGER     
+========================================
+1. Create Task
+2. Deadline Settings
+3. Reminder System
+4. Task Prioritization
+5. Algorithms
+6. Exit
+========================================
+Please enter your choice: [       OK ] TaskAppTest.taskprecorrectwittasks (58 ms)
+[----------] 25 tests from TaskAppTest (7830 ms total)
+
+[----------] Global test environment tear-down
+[==========] 25 tests from 1 test suite ran. (7831 ms total)
+[  PASSED  ] 25 tests.
