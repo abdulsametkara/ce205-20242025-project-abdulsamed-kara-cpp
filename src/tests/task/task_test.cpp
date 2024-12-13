@@ -87,9 +87,8 @@ protected:
             fclose(file);
         }
     }
-
-
 };
+
 
 TEST_F(TaskAppTest, openingScreenMenu) {
     bool result = openingScreenMenu();
@@ -1551,6 +1550,129 @@ TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
 
 
 
+//TEST_F(TaskAppTest, LoginUserMenu_SuccessfulLogin) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Kullanýcý giriþini simüle et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Doðru sonucu kontrol et
+//    EXPECT_EQ(result, 1);
+//}
+
+// Yanlýþ e-posta ile giriþ denendiðinde baþarýsýz dönmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongEmail) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlýþ e-posta girdisini simüle et
+//    simulateUserInput("wrong@example.com\npassword123\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlýþ giriþ olduðu için 0 dönmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Yanlýþ þifre ile giriþ denendiðinde baþarýsýz dönmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongPassword) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlýþ þifre girdisini simüle et
+//    simulateUserInput("john@example.com\nwrongpassword\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlýþ giriþ olduðu için 0 dönmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Eksik dosya ile giriþ denendiðinde baþarýsýz dönmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_MissingFile) {
+//    const char* invalidFile = "nonexistent_users.bin";
+//
+//    // Kullanýcý giriþini simüle et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu çaðýr
+//    int result = loginUserMenu(invalidFile);
+//
+//    // Dosya bulunmadýðý için 0 dönmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//TEST_F(TaskAppTest, taskprenotaskfail) {
+//    const char* testuserfile = "taskFile.bin";
+//
+//    simulateUserInput("4\n1\n\n3\n");
+//
+//    int result = userOptionsMenu();
+//
+//    EXPECT_EQ(result, 0);
+//}
+
+
+//TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
+//    // Test için geçici bir görev dosyasý oluþtur
+//    const char* testFilename = "test_tasks.bin";
+//
+//    // Test görevlerini oluþtur ve dosyaya kaydet
+//    Task testTasks[] = {
+//        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
+//        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
+//    };
+//    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
+//
+//    FILE* file = fopen(testFilename, "wb");
+//    ASSERT_NE(file, nullptr) << "Error: Unable to create test file.";
+//    fwrite(testTasks, sizeof(Task), taskCount, file);
+//    fclose(file);
+//
+//    // Fonksiyonu çaðýr ve doðru çalýþýp çalýþmadýðýný kontrol et
+//    int result = loadTasksToXORList(testFilename);
+//    EXPECT_EQ(result, 1);  // Baþarýyla tamamlandýðýný kontrol et
+//
+//    // XOR listesine eklenen görevleri kontrol et
+//    XORNode* current = xorHead;
+//    for (int i = 0; i < taskCount; ++i) {
+//        ASSERT_NE(current, nullptr) << "XOR list is missing nodes.";
+//        EXPECT_EQ(current->task.id, testTasks[i].id);
+//        EXPECT_STREQ(current->task.name, testTasks[i].name);
+//        EXPECT_STREQ(current->task.description, testTasks[i].description);
+//        EXPECT_STREQ(current->task.category, testTasks[i].category);
+//        EXPECT_STREQ(current->task.dueDate, testTasks[i].dueDate);
+//
+//        // Bir sonraki düðüme geç
+//        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
+//        current = nextNode;
+//    }
+//
+//    // Test dosyasýný sil
+//    remove(testFilename);
+//}
+//
+// TEST_F(TaskAppTest, LoadTasksToXORList_InvalidFile) {
+//    // Geçersiz dosya adýyla fonksiyonu çaðýr
+//    const char* invalidFilename = "nonexistent_tasks.bin";
+//    int result = loadTasksToXORList(invalidFilename);
+//
+//    // Dönüþ deðerinin -1 olduðunu kontrol et
+//    EXPECT_EQ(result, -1);
+//
+//    // Çýktýyý kontrol etmek için dosyadan oku
+//    FILE* outputFile = fopen(outputTest, "rb");
+//    ASSERT_NE(outputFile, nullptr);
+//
+//    char outputBuffer[256] = { 0 };
+//    fread(outputBuffer, sizeof(char), 255, outputFile);
+//    fclose(outputFile);
+//
+//    // Hata mesajýnýn doðru yazýldýðýný kontrol et
+//    EXPECT_NE(strstr(outputBuffer, "Error: Unable to open tasks file."), nullptr);
+//}
 
 
 
