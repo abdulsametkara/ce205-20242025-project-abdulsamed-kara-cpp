@@ -392,7 +392,7 @@ int loginUserMenu(const char* pathFileUsers);
 
 
 int addTask(Task taskList[], int* taskCount, int maxTasks);
-void viewTask();
+int viewTask();
 void categorizeTask();
 int loadTasks(Task taskList[], int maxTasks);
 void saveTasks(const Task taskList[], int taskCount);
@@ -403,7 +403,7 @@ void printDependencies(Task taskList[], int taskCount, int startTaskId);
 int analyzeSCC(Task taskList[], int taskCount, FILE* out);
 void searchTasksByKeyword();
 void navigateTasks();
-void navigateXORList();
+int navigateXORList();
 int loadTasksToXORList(const char* filename);
 
 
