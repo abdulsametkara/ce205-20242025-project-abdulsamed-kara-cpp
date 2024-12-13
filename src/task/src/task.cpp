@@ -979,11 +979,16 @@ Task dequeue() {
  *
  * @param task The task to be added to the stack.
  */
-void push(Task task) {
+int push(Task task) {
     StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed for StackNode.\n");
+        return -1; // Bellek tahsisi başarısız
+    }
     newNode->task = task;
     newNode->next = stackTop;
     stackTop = newNode;
+    return 1; // Başarılı
 }
 
 
@@ -1020,18 +1025,20 @@ Task pop() {
  * @param taskList The list of tasks.
  * @param taskCount Pointer to the current count of tasks.
  */
-void undoLastTask(Task taskList[], int* taskCount) {
-    Task lastTask = pop();
-    if (lastTask.id == -1) {
+int undoLastTask(Task taskList[], int* taskCount) {
+    Task lastTask = pop(); // Son görevi yığından çıkar
+    if (lastTask.id == -1) { // Eğer yığın boşsa
         printf("No tasks to undo.\n");
-        return;
+        return -1; // Hata: Undo işlemi yapılamadı
     }
 
-    (*taskCount)--;
+    (*taskCount)--; // Görev sayısını azalt
     printf("Last task '%s' undone successfully.\n", lastTask.name);
 
-    saveTasks(taskList, *taskCount);
+    saveTasks(taskList, *taskCount); // Güncellenmiş görevleri kaydet
+    return 1; // Başarı durumu
 }
+
 
 /**
  * @brief Utility function to print the dependencies of a given task using DFS.
@@ -1044,21 +1051,32 @@ void undoLastTask(Task taskList[], int* taskCount) {
  * @param taskId The ID of the task for which dependencies are being printed.
  * @param visited Array to keep track of visited tasks to avoid cycles.
  */
-void printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
+int printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
     if (visited[taskId]) {
-        return;
+        return 1; // Daha önce ziyaret edildi, işleme devam etmeyin
     }
     visited[taskId] = true;
 
-    Task task = taskList[taskId - 1]; 
+    Task task = taskList[taskId - 1]; // Görevi al
+
+    if (task.dependencyCount == 0) {
+        return 1; // Hiç bağımlılığı yok, işleme devam etmeyin
+    }
 
     for (int i = 0; i < task.dependencyCount; i++) {
         int dependencyId = task.dependencies[i];
         printf("Task %d depends on Task %d\n", task.id, dependencyId);
 
-        printDependenciesUtil(taskList, dependencyId, visited);
+        // Rekürsif olarak bağımlılıkları kontrol et
+        int result = printDependenciesUtil(taskList, dependencyId, visited);
+        if (result == -1) {
+            return -1; // Alt bağımlılıklarda bir hata oluştu
+        }
     }
+
+    return 1; // Başarıyla tamamlandı
 }
+
 
 /**
  * @brief Prints all dependencies of a given task.
@@ -1070,11 +1088,20 @@ void printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
  * @param taskCount The number of tasks in the list.
  * @param startTaskId The ID of the task for which dependencies are to be printed.
  */
-void printDependencies(Task taskList[], int taskCount, int startTaskId) {
-    bool visited[MAX_TASKS] = { false };
 
+int printDependencies(Task taskList[], int taskCount, int startTaskId) {
+    if (startTaskId <= 0 || startTaskId > taskCount) {
+        printf("Invalid task ID: %d. Task ID must be between 1 and %d.\n", startTaskId, taskCount);
+        return -1; // Hata: Geçersiz task ID
+    }
+
+    bool visited[MAX_TASKS] = { false };
     printf("Dependencies for Task %d:\n", startTaskId);
+
+    // Bağımlılıkları yazdır
     printDependenciesUtil(taskList, startTaskId, visited);
+
+    return 1; // Başarı durumu
 }
 
 /**
@@ -1085,11 +1112,16 @@ void printDependencies(Task taskList[], int taskCount, int startTaskId) {
  *
  * @param v The vertex to be added to the SCC stack.
  */
-void pushSccStack(int v) {
+int pushSccStack(int v) {
     AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed for AdjacencyNode.\n");
+        return -1;
+    }
     newNode->data = v;
     newNode->next = sccStack;
     sccStack = newNode;
+    return 1;
 }
 
 /**
@@ -1120,9 +1152,14 @@ int popSccStack() {
  * @param adj The adjacency list representing the graph.
  * @param component Pointer to the SCC stack for storing vertices in the current component.
  */
-void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** component) {
+int dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** component) {
+    if (visited[v]) {
+        return 0; // Düğüm zaten ziyaret edilmiş
+    }
+
     visited[v] = 1;
-    pushSccStack(v);
+    pushSccStack(v); // SCC yığınına ekle
+
     AdjacencyNode* temp = adj[v];
     while (temp != NULL) {
         if (!visited[temp->data]) {
@@ -1130,6 +1167,8 @@ void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** compone
         }
         temp = temp->next;
     }
+
+    return 1; // DFS başarıyla tamamlandı
 }
 
 /**
@@ -1143,21 +1182,32 @@ void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** compone
  * @param adj The adjacency list representing the graph.
  * @param out The output file where SCCs are printed.
  */
-void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
+int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
+    if (V <= 0 || adj == NULL || out == NULL) {
+        fprintf(stderr, "Invalid input parameters.\n");
+        return -1; // Hata durumu
+    }
+
     int visited[MAX_TASKS] = { 0 };
 
+    // Orijinal graf üzerinde DFS
     for (int i = 0; i < V; i++) {
         if (!visited[i]) {
             dfsUtil(i, visited, adj, NULL);
         }
     }
 
+    // Transpoz graf oluşturma
     AdjacencyNode* transpose[MAX_TASKS] = { NULL };
     for (int v = 0; v < V; v++) {
         AdjacencyNode* temp = adj[v];
         while (temp != NULL) {
             int u = temp->data;
             AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+            if (!newNode) {
+                fprintf(stderr, "Memory allocation failed.\n");
+                return -1; // Hata durumu
+            }
             newNode->data = v;
             newNode->next = transpose[u];
             transpose[u] = newNode;
@@ -1168,6 +1218,7 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
     memset(visited, 0, sizeof(visited));
     int numSCC = 0;
 
+    // Transpoz graf üzerinde DFS
     while (sccStack != NULL) {
         int v = popSccStack();
 
@@ -1181,6 +1232,7 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
         }
     }
 
+    // Transpoz grafı temizle
     for (int i = 0; i < V; i++) {
         while (transpose[i] != NULL) {
             AdjacencyNode* temp = transpose[i];
@@ -1188,7 +1240,10 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
             free(temp);
         }
     }
+
+    return 1; // Başarılı durum
 }
+
 
 /**
  * @brief Analyzes Strongly Connected Components (SCCs) in the task dependency graph.
@@ -1203,21 +1258,37 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
  * @return Always returns 1 to indicate successful analysis.
  */
 int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
+    if (taskList == NULL || taskCount <= 0 || out == NULL) {
+        fprintf(stderr, "Invalid input parameters.\n");
+        return -1; // Hata durumu
+    }
+
     AdjacencyNode* adj[MAX_TASKS] = { NULL };
 
+    // Görevlerin bağımlılıklarını oluştur
     for (int i = 0; i < taskCount; i++) {
         Task task = taskList[i];
         for (int j = 0; j < task.dependencyCount; j++) {
             int dep = task.dependencies[j];
             AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+            if (!newNode) {
+                fprintf(stderr, "Memory allocation failed.\n");
+                return -1; // Bellek tahsisi hatası
+            }
             newNode->data = dep - 1;
             newNode->next = adj[task.id - 1];
             adj[task.id - 1] = newNode;
         }
     }
 
-    findSCCs(taskCount, adj, out);
+    // SCC'leri analiz et
+    int result = findSCCs(taskCount, adj, out);
+    if (result != 1) {
+        fprintf(stderr, "Failed to find SCCs.\n");
+        return -1; // SCC analiz hatası
+    }
 
+    // Bağımlılık listesini temizle
     for (int i = 0; i < taskCount; i++) {
         while (adj[i] != NULL) {
             AdjacencyNode* temp = adj[i];
@@ -1225,8 +1296,10 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
             free(temp);
         }
     }
-    return 1;
+
+    return 1; // Başarı durumu
 }
+
 
 
 /**
@@ -1239,20 +1312,27 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
  * @param prefixTable The prefix table to be filled.
  * @param patternLength The length of the pattern.
  */
-void computePrefixTable(const char* pattern, int* prefixTable, int patternLength) {
+int computePrefixTable(const char* pattern, int* prefixTable, int patternLength) {
+    if (pattern == NULL || prefixTable == NULL || patternLength <= 0) {
+        return -1; // Error: Invalid input parameters
+    }
+
     int length = 0;
-    prefixTable[0] = 0;  
+    prefixTable[0] = 0;
 
     for (int i = 1; i < patternLength; i++) {
         while (length > 0 && pattern[i] != pattern[length]) {
             length = prefixTable[length - 1];
         }
+
         if (pattern[i] == pattern[length]) {
             length++;
         }
         prefixTable[i] = length;
     }
+    return 1; // Success
 }
+
 
 /**
  * @brief Searches for a pattern in the given text using the Knuth-Morris-Pratt (KMP) algorithm.
@@ -1265,22 +1345,34 @@ void computePrefixTable(const char* pattern, int* prefixTable, int patternLength
  * @return Returns 1 if the pattern is found, otherwise returns 0.
  */
 int KMPsearch(const char* text, const char* pattern) {
+    if (text == NULL || pattern == NULL) {
+        return -1; // Error: Invalid input
+    }
+
     int textLength = strlen(text);
     int patternLength = strlen(pattern);
 
+    if (patternLength == 0 || textLength == 0) {
+        return -1; // Error: Invalid input (empty text or pattern)
+    }
+
     int* prefixTable = (int*)malloc(sizeof(int) * patternLength);
+    if (!prefixTable) {
+        return -2; // Error: Memory allocation failed
+    }
+
     computePrefixTable(pattern, prefixTable, patternLength);
 
-    int i = 0;  
-    int j = 0;  
+    int i = 0;
+    int j = 0;
     while (i < textLength) {
         if (pattern[j] == text[i]) {
             j++;
             i++;
         }
         if (j == patternLength) {
-            free(prefixTable);  
-            return 1; 
+            free(prefixTable);
+            return 1; // Match found
         }
         else if (i < textLength && pattern[j] != text[i]) {
             if (j != 0) {
@@ -1291,9 +1383,10 @@ int KMPsearch(const char* text, const char* pattern) {
             }
         }
     }
-    free(prefixTable);  
-    return 0;  
+    free(prefixTable);
+    return 0; // Match not found
 }
+
 
 
 /**

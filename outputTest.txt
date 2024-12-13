@@ -1,1 +1,1 @@
-Invalid input. Please enter a number.
+SCC #1: 2 1 0 
