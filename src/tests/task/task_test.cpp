@@ -1548,7 +1548,143 @@ TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
     EXPECT_EQ(result, 0);
 }
 
+TEST_F(TaskAppTest, AlgorithmsMenu_ValidChoices) {
+    // 1'den 8'e kadar olan geçerli seçimleri simüle ediyoruz.
+    simulateUserInput("1\n2\n2\n2\n2\n\n2\n2\n2\n2\n2\n\n3\n2\n2\n2\n2\n\n4\n2\n2\n2\n2\n\n6\n2\n2\n2\n2\n\n7\n2\n2\n2\n2\n\n8\n");           
 
+    // algorithmsMenu fonksiyonunu çaðýr ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun baþarýlý bir þekilde çýktýðýný kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenu_InvalidChoice) {
+    // Geçersiz seçimler için test: -1 ve harf giriþi
+    simulateUserInput("-1\na\n8\n");
+
+    // algorithmsMenu fonksiyonunu çaðýr ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun baþarýlý bir þekilde çýktýðýný kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+
+    // Çýktýyý kontrol etmek için dosyadan oku
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outputFile);
+    fclose(outputFile);
+
+    // "Invalid choice" mesajýnýn olduðunu doðrula
+    EXPECT_NE(strstr(outputBuffer, "Invalid choice"), nullptr);
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenu_ExitChoice) {
+    // Çýkýþ seçeneðini simüle et (8)
+    simulateUserInput("8\n");
+
+    // algorithmsMenu fonksiyonunu çaðýr ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun baþarýlý bir þekilde çýktýðýný kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+}
+TEST_F(TaskAppTest, FindTaskByName_TaskFound) {
+    // Test için görev listesi hazýrlýyoruz
+    taskCount = 3;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+    tasks[2] = { 3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0 };
+
+    // Kullanýcý giriþini simüle ediyoruz
+    simulateUserInput("Task 2\n");
+
+    // Fonksiyonu çaðýrýyoruz
+    int index = findTaskByName("Task 2");
+
+    // Beklenen indeks 1 (Task 2 dizinin 1. indeksi)
+    EXPECT_EQ(index, 1);
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, FindTaskByName_TaskNotFound) {
+    // Test için görev listesi hazýrlýyoruz
+    taskCount = 2;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+
+    // Kullanýcý giriþini simüle ediyoruz
+    simulateUserInput("Task 4\n");
+
+    // Fonksiyonu çaðýrýyoruz
+    int index = findTaskByName("Task 4");
+
+    // Beklenen deðer -1 (bulunamadý)
+    EXPECT_EQ(index, -1);
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, FindTaskByName_EmptyTaskName) {
+    // Test için görev listesi hazýrlýyoruz
+    taskCount = 2;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+
+    // Kullanýcý giriþini simüle ediyoruz
+    simulateUserInput("\n");
+
+    // Fonksiyonu çaðýrýyoruz
+    int index = findTaskByName("");
+
+    // Beklenen deðer -1 (bulunamadý)
+    EXPECT_EQ(index, -1);
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, FindTaskByName_NullInput) {
+    // Test için görev listesi hazýrlýyoruz
+    taskCount = 2;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+
+    // Kullanýcý giriþini simüle ediyoruz
+    simulateUserInput("null\n");
+
+    // Null bir input ile arama yapýyoruz
+    int index = findTaskByName(nullptr);
+
+    // Beklenen deðer -1 (hata durumu)
+    EXPECT_EQ(index, -1);
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, FindTaskByName_MultipleTasks) {
+    // Test için daha geniþ görev listesi hazýrlýyoruz
+    taskCount = 5;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+    tasks[2] = { 3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0 };
+    tasks[3] = { 4, "Task 4", "Description 4", "Category 4", "2024-12-04", 0, {0}, 0 };
+    tasks[4] = { 5, "Task 5", "Description 5", "Category 5", "2024-12-05", 0, {0}, 0 };
+
+    // Kullanýcý giriþini simüle ediyoruz
+    simulateUserInput("Task 5\n");
+
+    // Fonksiyonu çaðýrýyoruz
+    int index = findTaskByName("Task 5");
+
+    // Beklenen indeks 4 (Task 5 dizinin 4. indeksi)
+    EXPECT_EQ(index, 4);
+    resetStdinStdout();
+}
 
 //TEST_F(TaskAppTest, LoginUserMenu_SuccessfulLogin) {
 //    const char* mockUserFile = "mock_users.bin";

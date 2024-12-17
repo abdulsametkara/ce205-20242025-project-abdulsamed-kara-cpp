@@ -370,7 +370,7 @@ int taskPrioritizationMenu();
 int userOptionsMenu();
 
 int mainMenu(const char* pathFileUsers);
-void algorithmsMenu();
+int algorithmsMenu();
 
 
 

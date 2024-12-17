@@ -3368,8 +3368,9 @@ int userOptionsMenu() {
  *
  * @return void This function returns to the main menu when the user chooses to exit.
  */
-void algorithmsMenu() {
+int algorithmsMenu() {
     int choice;
+
     while (1) {
         printAlgorithmsMenu();
         choice = getInput();
@@ -3403,7 +3404,7 @@ void algorithmsMenu() {
             brentsMethodDemo();
             break;
         case 8:
-            return;  // Return to main menu
+            return 1;  // Başarılı çıkış
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -3411,7 +3412,9 @@ void algorithmsMenu() {
             break;
         }
     }
+    return 0; // Bu nokta normal şartlarda erişilmez ancak güvenlik için eklenmiştir
 }
+
 
 /**
  * @brief Displays the main menu for the application.
