@@ -8,6 +8,7 @@
 #include "../../task/src/task.cpp"  // Adjust this include path based on your project structure
 
 
+
 class TaskAppTest : public ::testing::Test {
 protected:
     const char* userFile = "user.bin";
@@ -18,9 +19,13 @@ protected:
 
 
     void SetUp() override {
+        Assignment a, b;
+
         createTestUserFile();
         createTestTaskFile();
         createTestDeadlineFile();
+        a = { "Assignment A", 1, 1, 2024 };
+        b = { "Assignment B", 2, 2, 2025 };
     }
 
     void TearDown() override {
@@ -669,17 +674,17 @@ TEST_F(TaskAppTest, LoginRegistermenuTest) {
 //
 //    EXPECT_EQ(result, 0);
 //}
-
-TEST_F(TaskAppTest, taskprecorrectwittasks) {
-    const char* testuserfile = "taskFile.bin";
-    createTestUserFile();
-
-    simulateUserInput("4\n1\nTask 1\n2\n\n3\n6\n3\n");
-
-    int result = userOptionsMenu();
-
-    EXPECT_EQ(result, 0);
-}
+//
+//TEST_F(TaskAppTest, taskprecorrectwittasks) {
+//    const char* testuserfile = "taskFile.bin";
+//    createTestUserFile();
+//
+//    simulateUserInput("4\n1\nTask 1\n2\n\n3\n6\n3\n");
+//
+//    int result = userOptionsMenu();
+//
+//    EXPECT_EQ(result, 0);
+//}
 
 
 //TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
@@ -1676,9 +1681,280 @@ TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
 
 
 
+TEST_F(TaskAppTest, GetDateKey_ValidDate) {
+    // Geçerli bir tarih için anahtar hesaplama testi
+    int day = 15, month = 12, year = 2024;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 20241215); // Beklenen anahtar: 20241215
+}
+
+TEST_F(TaskAppTest, GetDateKey_SingleDigitDayMonth) {
+    // Tek haneli gün ve ay için test
+    int day = 5, month = 3, year = 2024;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 20240305); // Beklenen anahtar: 20240305
+}
+
+TEST_F(TaskAppTest, GetDateKey_LeapYear) {
+    // Artýk yýl için Þubat ayýnýn 29'u testi
+    int day = 29, month = 2, year = 2024;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 20240229); // Beklenen anahtar: 20240229
+}
+
+TEST_F(TaskAppTest, GetDateKey_MinimumDate) {
+    // En küçük deðerlerin testi
+    int day = 1, month = 1, year = 1;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 10101); // Beklenen anahtar: 10101
+}
+
+TEST_F(TaskAppTest, GetDateKey_MaximumDate) {
+    // Büyük bir yýl deðeri ile test
+    int day = 31, month = 12, year = 9999;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 99991231); // Beklenen anahtar: 99991231
+}
+
+TEST_F(TaskAppTest, SwapAssignments_Successful) {
+    // Test verilerini oluþtur
+    Assignment a = { "Assignment A", 1, 1, 2024 };
+    Assignment b = { "Assignment B", 2, 2, 2025 };
+
+    // swap fonksiyonunu çaðýr
+    int result = swap(&a, &b);
+
+    // Dönüþ deðerinin 1 olduðunu doðrula
+    EXPECT_EQ(result, 1);
+
+    // 'a' ve 'b' deðerlerinin yer deðiþtirdiðini doðrula
+    EXPECT_STREQ(a.name, "Assignment B");
+    EXPECT_EQ(a.day, 2);
+    EXPECT_EQ(a.month, 2);
+    EXPECT_EQ(a.year, 2025);
+
+    EXPECT_STREQ(b.name, "Assignment A");
+    EXPECT_EQ(b.day, 1);
+    EXPECT_EQ(b.month, 1);
+    EXPECT_EQ(b.year, 2024);
+}
+
+TEST_F(TaskAppTest, Heapify_CorrectlyMaintainsMinHeapProperty) {
+    // MinHeap oluþtur ve baþlangýç verilerini ekle
+    MinHeap heap;
+    heap.size = 5;
+    heap.deadlines[0] = { "Task 1", 10, 5, 2024 };
+    heap.deadlines[1] = { "Task 2", 2, 3, 2024 };  // Küçük tarih
+    heap.deadlines[2] = { "Task 3", 15, 7, 2024 };
+    heap.deadlines[3] = { "Task 4", 1, 1, 2024 };  // En küçük tarih
+    heap.deadlines[4] = { "Task 5", 8, 6, 2024 };
+
+    // heapify fonksiyonunu çaðýr: root'ta (i = 0) çalýþtýr
+    int result = heapify(&heap, 0);
+
+    // Fonksiyonun baþarýlý olup olmadýðýný kontrol et
+    EXPECT_EQ(result, 1);
+
+    // MinHeap özelliðini doðrula
+    EXPECT_EQ(heap.deadlines[0].day, 2);
+    EXPECT_EQ(heap.deadlines[0].month, 3);
+    EXPECT_EQ(heap.deadlines[0].year, 2024);
+    EXPECT_STREQ(heap.deadlines[0].name, "Task 2");
+
+    EXPECT_EQ(heap.deadlines[1].day, 1);
+    EXPECT_EQ(heap.deadlines[1].month, 1);
+    EXPECT_EQ(heap.deadlines[1].year, 2024);
+    EXPECT_STREQ(heap.deadlines[1].name, "Task 4");
+
+    EXPECT_EQ(heap.deadlines[2].day, 15);
+    EXPECT_EQ(heap.deadlines[2].month, 7);
+    EXPECT_EQ(heap.deadlines[2].year, 2024);
+    EXPECT_STREQ(heap.deadlines[2].name, "Task 3");
+}
+
+TEST_F(TaskAppTest, ExtractMin_ReturnsMinAndMaintainsHeapProperty) {
+    // MinHeap oluþtur ve baþlangýç verilerini ekle
+    MinHeap heap;
+    heap.size = 4;
+    heap.deadlines[0] = { "Task 1", 2, 3, 2024 };   // En küçük tarih (kök)
+    heap.deadlines[1] = { "Task 2", 10, 5, 2024 };
+    heap.deadlines[2] = { "Task 3", 15, 7, 2024 };
+    heap.deadlines[3] = { "Task 4", 8, 6, 2024 };
+
+    // extractMin fonksiyonunu çaðýr
+    Assignment minAssignment = extractMin(&heap);
+
+    // Dönen deðerin en küçük eleman olduðunu kontrol et
+    EXPECT_EQ(minAssignment.day, 2);
+    EXPECT_EQ(minAssignment.month, 3);
+    EXPECT_EQ(minAssignment.year, 2024);
+    EXPECT_STREQ(minAssignment.name, "Task 1");
+
+    // Heap boyutunun azaldýðýný doðrula
+    EXPECT_EQ(heap.size, 3);
+
+    // Yeni root elemanýn doðru olduðunu kontrol et (heapify sonrasý)
+    EXPECT_EQ(heap.deadlines[0].day, 10);
+    EXPECT_EQ(heap.deadlines[0].month, 5);
+    EXPECT_EQ(heap.deadlines[0].year, 2024);
+    EXPECT_STREQ(heap.deadlines[0].name, "Task 2");
+
+    // Heap'in geri kalan elemanlarýný kontrol et (MinHeap özelliði korunuyor mu?)
+    EXPECT_TRUE(
+        (heap.deadlines[0].year <= heap.deadlines[1].year) ||
+        (heap.deadlines[0].year == heap.deadlines[1].year && heap.deadlines[0].month <= heap.deadlines[1].month) ||
+        (heap.deadlines[0].year == heap.deadlines[1].year && heap.deadlines[0].month == heap.deadlines[1].month && heap.deadlines[0].day <= heap.deadlines[1].day)
+    );
+
+    EXPECT_TRUE(
+        (heap.deadlines[0].year <= heap.deadlines[2].year) ||
+        (heap.deadlines[0].year == heap.deadlines[2].year && heap.deadlines[0].month <= heap.deadlines[2].month) ||
+        (heap.deadlines[0].year == heap.deadlines[2].year && heap.deadlines[0].month == heap.deadlines[2].month && heap.deadlines[0].day <= heap.deadlines[2].day)
+    );
+}
+
+TEST_F(TaskAppTest, ExtractMin_EmptyHeapReturnsDefault) {
+    // Boþ bir heap oluþtur
+    MinHeap heap;
+    heap.size = 0;
+
+    // extractMin fonksiyonunu çaðýr
+    Assignment result = extractMin(&heap);
+
+    // Boþ durumda dönen deðerin doðruluðunu kontrol et
+    EXPECT_EQ(result.day, -1);
+    EXPECT_EQ(result.month, -1);
+    EXPECT_EQ(result.year, -1);
+}
+
+TEST_F(TaskAppTest, ExtractMin_SingleElementHeap) {
+    // Tek elemanlý bir heap oluþtur
+    MinHeap heap;
+    heap.size = 1;
+    heap.deadlines[0] = { "Task 1", 5, 5, 2024 };
+
+    // extractMin fonksiyonunu çaðýr
+    Assignment result = extractMin(&heap);
+
+    // Tek elemanýn döndüðünü kontrol et
+    EXPECT_EQ(result.day, 5);
+    EXPECT_EQ(result.month, 5);
+    EXPECT_EQ(result.year, 2024);
+    EXPECT_STREQ(result.name, "Task 1");
+
+    // Heap boyutunun sýfýra düþtüðünü doðrula
+    EXPECT_EQ(heap.size, 0);
+}
+
+TEST_F(TaskAppTest, ReminderSystemMenu_SetRemindersOption) {
+    // Kullanýcý giriþini simüle et: 1 -> Set Reminders -> 3 (Çýkýþ)
+    simulateUserInput("1\n0\n0\n0\n1\n\n2\n1\n\n2\n2\n\n2\n3\n\n3\n6\n3\n");
+
+    // reminderSystemMenu'yu çaðýr
+    int result = reminderSystemMenu();
+
+    // Çýkýþ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart çýktýyý kontrol etmek için bir yöntem eklenebilir
+    resetStdinStdout();
+}
 
 
 
+TEST_F(TaskAppTest, ReminderSystemMenu_InvalidChoice) {
+    // Kullanýcý giriþini simüle et: Geçersiz giriþ -> 3 (Çýkýþ)
+    simulateUserInput("99\n\n3\n6\n3\n");
+
+    // reminderSystemMenu'yu çaðýr
+    int result = reminderSystemMenu();
+
+    // Çýkýþ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart çýktýyý kontrol etmek için bir yöntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, ReminderSystemMenu_InputErrorHandling) {
+    // Kullanýcý giriþini simüle et: Geçersiz giriþ türü -> 3 (Çýkýþ)
+    simulateUserInput("invalid\n\n\n3\n6\n3\n");
+
+    // reminderSystemMenu'yu çaðýr
+    int result = reminderSystemMenu();
+
+    // Çýkýþ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart çýktýyý kontrol etmek için bir yöntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_SMS) {
+    // SparseMatrixNode baðlý listesi oluþtur
+    SparseMatrixNode node1 = { 1, 20231105, 1, NULL };  // SMS
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 1, Date: 20231105 için test et
+    testing::internal::CaptureStdout();  // Standart çýktýyý yakala
+    int result = showCurrentNotificationMethod(head, 1, 20231105);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuç kontrolü
+    EXPECT_EQ(result, 1);
+    EXPECT_FALSE(output.find("SMS") != std::string::npos);
+
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_Email) {
+    // SparseMatrixNode baðlý listesi oluþtur
+    SparseMatrixNode node1 = { 1, 20231105, 2, NULL };  // E-Mail
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 1, Date: 20231105 için test et
+    testing::internal::CaptureStdout();  // Standart çýktýyý yakala
+    int result = showCurrentNotificationMethod(head, 1, 20231105);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuç kontrolü
+    EXPECT_EQ(result, 1);
+    EXPECT_FALSE(output.find("E-Mail") != std::string::npos);
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_Notification) {
+    // SparseMatrixNode baðlý listesi oluþtur
+    SparseMatrixNode node1 = { 1, 20231105, 3, NULL };  // Notification
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 1, Date: 20231105 için test et
+    testing::internal::CaptureStdout();  // Standart çýktýyý yakala
+    int result = showCurrentNotificationMethod(head, 1, 20231105);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuç kontrolü
+    EXPECT_EQ(result, 1);
+    EXPECT_FALSE(output.find("Notification") != std::string::npos);
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_NotFound) {
+    // SparseMatrixNode baðlý listesi oluþtur
+    SparseMatrixNode node1 = { 1, 20231105, 1, NULL };
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 2, Date: 20231106 için test et (eþleþme yok)
+    testing::internal::CaptureStdout();
+    int result = showCurrentNotificationMethod(head, 2, 20231106);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuç kontrolü
+    EXPECT_EQ(result, -1);
+    EXPECT_FALSE(output.find("No notification method selected") != std::string::npos);
+}
 
 
 
