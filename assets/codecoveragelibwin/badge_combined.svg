@@ -110,4 +110,5 @@
         <rect class="branchcoverage" x="90" y="0" width="65" height="20" fill-opacity="0"><title>Branch coverage</title></rect>
         <rect class="methodcoverage" x="90" y="0" width="65" height="20" fill-opacity="0"><title>Method coverage</title></rect>
     </g>
+
 </svg>

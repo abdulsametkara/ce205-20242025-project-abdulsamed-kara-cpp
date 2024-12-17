@@ -1,0 +1,17 @@
+========================================
+        REMINDER SYSTEM MENU         
+========================================
+1. Set Reminders
+2. Notification Settings
+3. Exit
+========================================
+Please enter your choice: Invalid input. Please enter a number.
+
+Press enter to continue========================================
+        REMINDER SYSTEM MENU         
+========================================
+1. Set Reminders
+2. Notification Settings
+3. Exit
+========================================
+Please enter your choice: 
