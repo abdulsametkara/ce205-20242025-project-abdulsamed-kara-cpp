@@ -1953,8 +1953,235 @@ TEST_F(TaskAppTest, ShowCurrentNotificationMethod_NotFound) {
 
     // Sonu� kontrol�
     EXPECT_EQ(result, -1);
-    EXPECT_FALSE(output.find("No notification method selected") != std::string::npos);
+    EXPECT_FALSE    (output.find("No notification method selected") != std::string::npos);
 }
+
+TEST_F(TaskAppTest, AlgorithmsMenu_ValidChoices) {
+    // 1'den 8'e kadar olan geçerli seçimleri simüle ediyoruz.
+    simulateUserInput("1\n2\n2\n2\n2\n\n2\n2\n2\n2\n2\n\n3\n2\n2\n2\n2\n\n4\n2\n2\n2\n2\n\n6\n2\n2\n2\n2\n\n7\n2\n2\n2\n2\n\n8\n");
+
+    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenu_InvalidChoice) {
+    // Geçersiz seçimler için test: -1 ve harf girişi
+    simulateUserInput("-1\na\n8\n");
+
+    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+
+    // Çıktıyı kontrol etmek için dosyadan oku
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outputFile);
+    fclose(outputFile);
+
+    // "Invalid choice" mesajının olduğunu doğrula
+    EXPECT_NE(strstr(outputBuffer, "Invalid choice"), nullptr);
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenu_ExitChoice) {
+    // Çıkış seçeneğini simüle et (8)
+    simulateUserInput("8\n");
+
+    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+}
+TEST_F(TaskAppTest, FindTaskByName_TaskFound) {
+    // Test için görev listesi hazırlıyoruz
+    taskCount = 3;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+    tasks[2] = { 3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0 };
+
+    // Kullanıcı girişini simüle ediyoruz
+    simulateUserInput("Task 2\n");
+
+    // Fonksiyonu çağırıyoruz
+    int index = findTaskByName("Task 2");
+
+    // Beklenen indeks 1 (Task 2 dizinin 1. indeksi)
+    EXPECT_EQ(index, 1);
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, FindTaskByName_TaskNotFound) {
+    // Test için görev listesi hazırlıyoruz
+    taskCount = 2;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+
+    // Kullanıcı girişini simüle ediyoruz
+    simulateUserInput("Task 4\n");
+
+    // Fonksiyonu çağırıyoruz
+    int index = findTaskByName("Task 4");
+
+    // Beklenen değer -1 (bulunamadı)
+    EXPECT_EQ(index, -1);
+    resetStdinStdout();
+}
+
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_AddTask) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("1\na\na\na\n2001-1-1\n1\n1\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_ViewTask) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("2\n\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_CategorizeTask) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("3\na\n\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_DependenciesTask) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("4\n1\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_AnalyzeSCC) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("5\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_SearchByKeyword) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("6\na\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_DLL) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("7\n1\n2\n3\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_XOR) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("8\n1\n2\n0\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, Deatline_Assign) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("2\n1\na\n\n\na\n2 1 2000\n\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = deadlineSettingsMenu();
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, Deatline_View) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("2\n2\n\n\n\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = deadlineSettingsMenu();
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+
 
 
 
