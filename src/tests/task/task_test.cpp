@@ -418,22 +418,22 @@ TEST_F(TaskAppTest, UpdateNotificationMethod) {
 }
 
 TEST_F(TaskAppTest, ViewTask_EmptyQueue) {
-    // Kuyruk bo�ken viewTask fonksiyonunu test ediyoruz
-    front = NULL;  // Kuyruk ba�� NULL olmal�
+    // Kuyruk bo ken viewTask fonksiyonunu test ediyoruz
+    front = NULL;  // Kuyruk ba   NULL olmal 
 
-    // ��k��� yakalamak i�in stdout'u test dosyas�na y�nlendir
+    //   k    yakalamak i in stdout'u test dosyas na y nlendir
     freopen(outputTest, "wb", stdout);
 
-    // Fonksiyonu �a��r
+    // Fonksiyonu  a  r
     int result = viewTask();
 
     // Stdout'u eski haline getir
     resetStdinStdout();
 
-    // D�n�� de�erinin 0 oldu�unu do�rula
+    // D n   de erinin 0 oldu unu do rula
     EXPECT_EQ(result, 0);
 
-    // ��kt�y� kontrol etmek i�in dosyadan oku
+    //   kt y  kontrol etmek i in dosyadan oku
     FILE* outputFile = fopen(outputTest, "rb");
     ASSERT_NE(outputFile, nullptr);
 
@@ -441,33 +441,32 @@ TEST_F(TaskAppTest, ViewTask_EmptyQueue) {
     fread(outputBuffer, sizeof(char), 255, outputFile);
     fclose(outputFile);
 
-    // Hata mesaj�n�n do�ru yaz�ld���n� kontrol et
+    // Hata mesaj n n do ru yaz ld   n  kontrol et
     EXPECT_NE(strstr(outputBuffer, "No tasks found. The task list is empty."), nullptr);
 }
 
-
 TEST_F(TaskAppTest, ViewTask_FilledQueue) {
-    // Test i�in sahte g�revler olu�tur
+    // Test i in sahte g revler olu tur
     Task task1 = { 1, "Task 1", "Description 1", "Category 1", "2024-11-10", 0, {0}, 1 };
     Task task2 = { 2, "Task 2", "Description 2", "Category 2", "2024-11-15", 0, {0}, 1 };
 
-    // Kuyru�a g�rev ekle
+    // Kuyru a g rev ekle
     enqueue(task1);
     enqueue(task2);
 
-    // Fonksiyonu �al��t�rmadan �nce stdout'u test dosyas�na y�nlendir
+    // Fonksiyonu  al  t rmadan  nce stdout'u test dosyas na y nlendir
     freopen(outputTest, "wb", stdout);
 
-    // Fonksiyonu �al��t�r
+    // Fonksiyonu  al  t r
     int result = viewTask();
 
     // Stdout'u eski haline getir
     resetStdinStdout();
 
-    // D�n�� de�erinin 1 oldu�unu do�rula
+    // D n   de erinin 1 oldu unu do rula
     EXPECT_EQ(result, 1);
 
-    // ��kt�y� kontrol etmek i�in dosyadan oku
+    //   kt y  kontrol etmek i in dosyadan oku
     FILE* outputFile = fopen(outputTest, "rb");
     ASSERT_NE(outputFile, nullptr);
 
@@ -475,7 +474,7 @@ TEST_F(TaskAppTest, ViewTask_FilledQueue) {
     fread(outputBuffer, sizeof(char), 511, outputFile);
     fclose(outputFile);
 
-    // G�revlerin do�ru yaz�ld���n� kontrol et
+    // G revlerin do ru yaz ld   n  kontrol et
     EXPECT_NE(strstr(outputBuffer, "ID: 1"), nullptr);
     EXPECT_NE(strstr(outputBuffer, "Name: Task 1"), nullptr);
     EXPECT_NE(strstr(outputBuffer, "Description: Description 1"), nullptr);
@@ -488,6 +487,8 @@ TEST_F(TaskAppTest, ViewTask_FilledQueue) {
     EXPECT_NE(strstr(outputBuffer, "Category: Category 2"), nullptr);
     EXPECT_NE(strstr(outputBuffer, "Due Date: 2024-11-15"), nullptr);
 }
+
+
 
 TEST_F(TaskAppTest, EnterToContinue) {
     // Kullan�c� giri�ini sim�le et
@@ -2155,7 +2156,7 @@ TEST_F(TaskAppTest, CreateTaskMenuTest_XOR) {
 
 TEST_F(TaskAppTest, Deatline_Assign) {
     // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
-    simulateUserInput("2\n1\na\n\n\na\n2 1 2000\n\n3\n");
+    simulateUserInput("2\n1\na\n\n2 1 2000\n3\n6\n3\n\n");
 
     // reminderSystemMenu'yu �a��r
     int result = deadlineSettingsMenu();
@@ -2169,7 +2170,7 @@ TEST_F(TaskAppTest, Deatline_Assign) {
 
 TEST_F(TaskAppTest, Deatline_View) {
     // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
-    simulateUserInput("2\n2\n\n\n\n3\n");
+    simulateUserInput("2\n2\n\n3\n6\n3\n\n");
 
     // reminderSystemMenu'yu �a��r
     int result = deadlineSettingsMenu();
