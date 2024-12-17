@@ -1,17 +1,48 @@
 ========================================
-        REMINDER SYSTEM MENU         
+           CREATE TASK MENU          
 ========================================
-1. Set Reminders
-2. Notification Settings
-3. Exit
+1. Add Task
+2. View Tasks
+3. Categorize Tasks
+4. Dependencies of Functions
+5. Analyze SCC
+6. Search By Keyword
+7. Double Linked List
+8. XOR Linked List
+9. Exit
 ========================================
-Please enter your choice: Invalid input. Please enter a number.
+Please enter your choice: Tasks loaded into XOR Linked List successfully!
+ID: 3
+Name: Task 3
+Description: Description 3
+Category: Category 3
+Due Date: 2024-12-01
+---------------------------
+Press 1 to go forward, 2 to go backward, or 0 to exit: ID: 1
+Name: Task 1
+Description: Description 1
+Category: Category 1
+Due Date: 2024-11-05
+---------------------------
+Press 1 to go forward, 2 to go backward, or 0 to exit: ID: 2
+Name: Task 2
+Description: Description 2
+Category: Category 2
+Due Date: 2024-11-10
+---------------------------
+Press 1 to go forward, 2 to go backward, or 0 to exit: Exiting navigation.
 
 Press enter to continue========================================
-        REMINDER SYSTEM MENU         
+           CREATE TASK MENU          
 ========================================
-1. Set Reminders
-2. Notification Settings
-3. Exit
+1. Add Task
+2. View Tasks
+3. Categorize Tasks
+4. Dependencies of Functions
+5. Analyze SCC
+6. Search By Keyword
+7. Double Linked List
+8. XOR Linked List
+9. Exit
 ========================================
 Please enter your choice: 
