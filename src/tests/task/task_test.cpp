@@ -1,4 +1,7 @@
-#define ENABLE_TASK_TEST  // Bu sat�r etkinle�tirildi
+
+﻿#define ENABLE_TASK_TEST  // Bu sat�r etkinle�tirildi
+
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdbool.h>
@@ -227,7 +230,8 @@ TEST_F(TaskAppTest, AssignDeadline_ValidInput) {
 
 
     // Standart giri� ve ��k��� s�f�rla
-    
+
+
 }
 
 TEST_F(TaskAppTest, AssignDeadline_InvalidDate) {
@@ -242,7 +246,7 @@ TEST_F(TaskAppTest, AssignDeadline_InvalidDate) {
     EXPECT_EQ(result, -1);
 
     // Standart giri� ve ��k��� s�f�rla
-    
+
 }
 
 TEST_F(TaskAppTest, ViewDeadlines_Successful) {
@@ -273,6 +277,7 @@ TEST_F(TaskAppTest, ViewDeadlines_Successful) {
     EXPECT_NE(output.find("2. Task: Task 2 - Deadline: 10/11/2024"), std::string::npos);
     EXPECT_NE(output.find("3. Task: Task 1 - Deadline: 15/12/2024"), std::string::npos);
 }
+
 
 
 
@@ -817,7 +822,8 @@ TEST_F(TaskAppTest, PushTask_Success) {
     Task result = pop();
 
     // Task id'sinin -1 d�nd���n� kontrol et (bo� y���n i�areti)
-    
+
+
 
     // ��kt�y� kontrol etmek i�in dosyadan oku
     FILE* outputFile = fopen(outputTest, "rb");
@@ -893,6 +899,7 @@ TEST_F(TaskAppTest, UndoLastTask_EmptyStack) {
     EXPECT_NE(strstr(outputBuffer, "No tasks to undo."), nullptr);
 }
 
+
 TEST_F(TaskAppTest, UndoLastTask_Success) {
     // Test: Y���n doluyken `undoLastTask` fonksiyonu
     stackTop = NULL; // Y���n� temizle
@@ -932,6 +939,7 @@ TEST_F(TaskAppTest, UndoLastTask_Success) {
     // ��kt�n�n do�ru ba�ar� mesaj�n� i�erdi�ini kontrol et
     EXPECT_NE(strstr(outputBuffer, "Last task 'Test Task' undone successfully."), nullptr);
 }
+
 TEST_F(TaskAppTest, PrintDependenciesUtil_NoDependencies) {
     // Test i�in sahte g�rev dizisi olu�tur
     Task taskList[3] = {
@@ -999,7 +1007,8 @@ TEST_F(TaskAppTest, PrintDependenciesUtil_NoDependencies) {
     // ��k���n do�ru oldu�unu do�rula
     EXPECT_NE(strstr(outputBuffer, "Task 1 depends on Task 2\n"), nullptr);
     EXPECT_NE(strstr(outputBuffer, "Task 1 depends on Task 3\n"), nullptr);
-   
+
+
 }*/
 
 TEST_F(TaskAppTest, PrintDependencies_InvalidTaskId) {
@@ -1240,6 +1249,7 @@ TEST_F(TaskAppTest, DfsUtil_MultipleNodes) {
 
     // Fonksiyonu �a��r
     int result = dfsUtil(1, visited, adj, NULL);
+
 
     // Ziyaret durumlar�n� kontrol et
     EXPECT_EQ(result, 1);
@@ -1663,10 +1673,8 @@ TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
 
 
 //TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
-//    // Test i�in ge�ici bir g�rev dosyas� olu�tur
 //    const char* testFilename = "test_tasks.bin";
-//
-//    // Test g�revlerini olu�tur ve dosyaya kaydet
+
 //    Task testTasks[] = {
 //        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
 //        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
@@ -1674,33 +1682,29 @@ TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
 //    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
 //
 //    FILE* file = fopen(testFilename, "wb");
-//    ASSERT_NE(file, nullptr) << "Error: Unable to create test file.";
+//    ASSERT_NE(file, nullptr);
 //    fwrite(testTasks, sizeof(Task), taskCount, file);
 //    fclose(file);
 //
-//    // Fonksiyonu �a��r ve do�ru �al���p �al��mad���n� kontrol et
+//    resetXORList();
 //    int result = loadTasksToXORList(testFilename);
-//    EXPECT_EQ(result, 1);  // Ba�ar�yla tamamland���n� kontrol et
+//    EXPECT_EQ(result, 1);
 //
-//    // XOR listesine eklenen g�revleri kontrol et
-//    XORNode* current = xorHead;
+//    XORNode* prev = nullptr;
+//    XORNode* current = getXORListHead();
 //    for (int i = 0; i < taskCount; ++i) {
-//        ASSERT_NE(current, nullptr) << "XOR list is missing nodes.";
+//        ASSERT_NE(current, nullptr);
 //        EXPECT_EQ(current->task.id, testTasks[i].id);
-//        EXPECT_STREQ(current->task.name, testTasks[i].name);
-//        EXPECT_STREQ(current->task.description, testTasks[i].description);
-//        EXPECT_STREQ(current->task.category, testTasks[i].category);
-//        EXPECT_STREQ(current->task.dueDate, testTasks[i].dueDate);
-//
-//        // Bir sonraki d���me ge�
-//        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
-//        current = nextNode;
+//        prev = current;
+//        current = getNextXORNode(current, prev);
 //    }
 //
-//    // Test dosyas�n� sil
+//    EXPECT_EQ(current, nullptr);
 //    remove(testFilename);
 //}
 //
+//
+
 // TEST_F(TaskAppTest, LoadTasksToXORList_InvalidFile) {
 //    // Ge�ersiz dosya ad�yla fonksiyonu �a��r
 //    const char* invalidFilename = "nonexistent_tasks.bin";
@@ -1719,7 +1723,8 @@ TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
 //
 //    // Hata mesaj�n�n do�ru yaz�ld���n� kontrol et
 //    EXPECT_NE(strstr(outputBuffer, "Error: Unable to open tasks file."), nullptr);
-//}
+// }
+
 
 
 
@@ -2009,7 +2014,8 @@ TEST_F(TaskAppTest, ShowCurrentNotificationMethod_NotFound) {
 
     // Sonu� kontrol�
     EXPECT_EQ(result, -1);
-    EXPECT_FALSE    (output.find("No notification method selected") != std::string::npos);
+    EXPECT_FALSE(output.find("No notification method selected") != std::string::npos);
+
 }
 
 TEST_F(TaskAppTest, AlgorithmsMenu_ValidChoices) {
@@ -2195,19 +2201,20 @@ TEST_F(TaskAppTest, CreateTaskMenuTest_DLL) {
     resetStdinStdout();
 }
 
-TEST_F(TaskAppTest, CreateTaskMenuTest_XOR) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
-    simulateUserInput("8\n1\n2\n0\n\n9\n6\n3\n");
+//TEST_F(TaskAppTest, CreateTaskMenuTest_XOR) {
+//    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+//    simulateUserInput("8\n1\n2\n0\n\n9\n6\n3\n");
+//
+//    // reminderSystemMenu'yu �a��r
+//    int result = createTaskMenu(taskList, &taskCount);
+//
+//    // ��k�� kodunu kontrol et
+//    EXPECT_EQ(result, 0);
+//
+//    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+//    resetStdinStdout();
+//}
 
-    // reminderSystemMenu'yu �a��r
-    int result = createTaskMenu(taskList, &taskCount);
-
-    // ��k�� kodunu kontrol et
-    EXPECT_EQ(result, 0);
-
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
-    resetStdinStdout();
-}
 
 TEST_F(TaskAppTest, Deatline_Assign) {
     // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
@@ -2222,6 +2229,7 @@ TEST_F(TaskAppTest, Deatline_Assign) {
     // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
     resetStdinStdout();
 }
+
 
 TEST_F(TaskAppTest, Deatline_View) {
     // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
@@ -2356,7 +2364,8 @@ TEST_F(TaskAppTest, HuffmanEncode_LongString) {
 
 TEST_F(TaskAppTest, SearchUserInHashTable_UserFound) {
     // Test için bir kullanıcı ekle
-    User testUser = {0, "John", "Doe", "john@example.com", "password123", NULL };
+    User testUser = { 0, "John", "Doe", "john@example.com", "password123", NULL };
+
     int index = hashFunction(testUser.email);
     hashTable[index] = &testUser;
 

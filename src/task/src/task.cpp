@@ -234,7 +234,8 @@ int getInput() {
     char line[256];
     int choice, result;
 
-    if (fgets(line, sizeof(line), stdin) == NULL) { return -1;}
+    if (fgets(line, sizeof(line), stdin) == NULL) { return -1; }
+
 
     result = sscanf(line, "%d", &choice);
     if (result != 1) {
@@ -461,7 +462,9 @@ int getNewUserId(User users[], int userCount) {
 int loadUsers(const char* pathFileUsers, User** users) {
     FILE* file = fopen(pathFileUsers, "rb");
     if (!file) {
-        *users = NULL;return 0;}
+        *users = NULL; return 0;
+    }
+
 
     int count;
     fread(&count, sizeof(int), 1, file);
@@ -522,7 +525,8 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             if (taskId > 0 && taskId <= *taskCount) {
                 printDependencies(taskList, *taskCount, taskId);
             }
-            else {printf("Invalid task ID.\n");}
+            else { printf("Invalid task ID.\n"); }
+
             enterToContinue();
             break;
         }
@@ -531,16 +535,16 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             enterToContinue();
             break;
         case 6:
-            searchTasksByKeyword(); 
+            searchTasksByKeyword();
             enterToContinue();
             break;
         case 7:
-            navigateTasks();  
+            navigateTasks();
             enterToContinue();
             break;
         case 8:
-            loadTasksToXORList("tasks.bin");  
-            navigateXORList();  
+            loadTasksToXORList("tasks.bin");
+            navigateXORList();
             enterToContinue();
             break;
         case 9:
@@ -568,14 +572,14 @@ int createTaskMenu(Task taskList[], int* taskCount) {
 int addTaskToXORList(Task task) {
     XORNode* newNode = (XORNode*)malloc(sizeof(XORNode));
     newNode->task = task;
-    newNode->xorPtr = xorTail; 
+    newNode->xorPtr = xorTail;
 
     if (xorHead == NULL) {
-        xorHead = xorTail = newNode; 
+        xorHead = xorTail = newNode;
     }
     else {
-        xorTail->xorPtr = (XORNode*)((uintptr_t)(xorTail->xorPtr) ^ (uintptr_t)newNode); 
-        xorTail = newNode; 
+        xorTail->xorPtr = (XORNode*)((uintptr_t)(xorTail->xorPtr) ^ (uintptr_t)newNode);
+        xorTail = newNode;
     }
     return 1;
 }
@@ -591,11 +595,12 @@ int addTaskToXORList(Task task) {
 
 int loadTasksToXORList(const char* filename) {
     FILE* file = fopen(filename, "rb");
-    if (!file) {printf("Error: Unable to open tasks file.\n");return -1;}
+    if (!file) { printf("Error: Unable to open tasks file.\n"); return -1; }
+
 
     Task task;
     while (fread(&task, sizeof(Task), 1, file)) {
-        addTaskToXORList(task); 
+        addTaskToXORList(task);
     }
 
     fclose(file);
@@ -616,7 +621,8 @@ int navigateXORList() {
     XORNode* prev = NULL;
     XORNode* next;
 
-    if (current == NULL) {printf("No tasks found in the list.\n");return -1;}
+    if (current == NULL) { printf("No tasks found in the list.\n"); return -1; }
+
 
     int choice;
     do {
@@ -640,13 +646,10 @@ int navigateXORList() {
             prev = current;
             current = next;
         }
-        else if (choice == 2) {
-            next = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)prev);
-            prev = current;
-            current = next;
-        }
+        else if (choice == 2) { next = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)prev); prev = current; current = next; }
 
-        if (current == NULL) {printf("No more tasks in this direction.\n");break;}
+        if (current == NULL) { printf("No more tasks in this direction.\n"); break; }
+
     } while (choice != 0);
 
     printf("Exiting navigation.\n");
@@ -689,7 +692,8 @@ int addTaskToList(Task newTask) {
  * @return 1: Başarıyla eklendi, 0: Liste dolu.
  */
 int addTask(Task taskList[], int* taskCount, int maxTasks) {
-    if (*taskCount >= maxTasks) {printf("Task list is full. Cannot add more tasks.\n");return 0;}
+    if (*taskCount >= maxTasks) { printf("Task list is full. Cannot add more tasks.\n"); return 0; }
+
 
     Task newTask;
     newTask.id = *taskCount + 1;
@@ -742,7 +746,8 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
  * It provides a convenient way to view the details of each task sequentially.
  */
 void navigateTasks() {
-    if (!head) {printf("No tasks available for navigation.\n");return;}
+    if (!head) { printf("No tasks available for navigation.\n"); return; }
+
 
     TaskNode* current = head;
     int choice;
@@ -762,13 +767,15 @@ void navigateTasks() {
             if (current->next) {
                 current = current->next;
             }
-            else {printf("This is the last task.\n");}
+            else { printf("This is the last task.\n"); }
+
         }
         else if (choice == 2) {
             if (current->prev) {
                 current = current->prev;
             }
-            else {printf("This is the first task.\n");}
+            else { printf("This is the first task.\n"); }
+
         }
         else if (choice == 3) {
             break;}
@@ -814,28 +821,30 @@ int viewTask() {
  * @note The function prompts the user to enter the category name to filter tasks.
  */
 void categorizeTask() {
-    FILE* file = fopen("tasks.bin", "rb");  
+    FILE* file = fopen("tasks.bin", "rb");
+
     if (!file) { printf("Error: Could not open tasks file or no tasks found.\n"); enterToContinue(); return; }
 
     char category[50];
     printf("Enter category to filter: ");
     fgets(category, sizeof(category), stdin);
-    category[strcspn(category, "\n")] = 0;  
+    category[strcspn(category, "\n")] = 0;
 
     Task task;
-    int found = 0;  
+    int found = 0;
 
     printf("\n--- Tasks in Category '%s' ---\n", category);
     while (fread(&task, sizeof(Task), 1, file)) {
-        if (strcmp(task.category, category) == 0) {  printf("ID: %d\n", task.id);  printf("Name: %s\n", task.name); printf("Description: %s\n", task.description); printf("Due Date: %s\n", task.dueDate); printf("---------------------------\n"); found = 1;}
+        if (strcmp(task.category, category) == 0) { printf("ID: %d\n", task.id);  printf("Name: %s\n", task.name); printf("Description: %s\n", task.description); printf("Due Date: %s\n", task.dueDate); printf("---------------------------\n"); found = 1; }
+
     }
 
     if (!found) {
         printf("No tasks found in this category.\n");
     }
 
-    fclose(file);  
-    enterToContinue();  
+    fclose(file);
+    enterToContinue();
 }
 
 
@@ -850,7 +859,8 @@ void categorizeTask() {
  */
 void saveTasks(const Task taskList[], int taskCount) {
     FILE* file = fopen("tasks.bin", "wb");
-    if (file == NULL) {  printf("Error opening file for saving tasks.\n"); return; }
+    if (file == NULL) { printf("Error opening file for saving tasks.\n"); return; }
+
 
     fwrite(taskList, sizeof(Task), taskCount, file);
     fclose(file);
@@ -871,14 +881,15 @@ void saveTasks(const Task taskList[], int taskCount) {
  * @return The number of tasks successfully loaded.
  */
 int loadTasks(Task taskList[], int maxTasks) {
-    FILE* file = fopen("tasks.bin", "rb");  
-    if (file == NULL) { printf("No previous tasks found.\n"); return 0;  }
+    FILE* file = fopen("tasks.bin", "rb");
+    if (file == NULL) { printf("No previous tasks found.\n"); return 0; }
+
 
     int taskCount = fread(taskList, sizeof(Task), maxTasks, file);
     fclose(file);
 
     printf("%d tasks loaded successfully!\n", taskCount);
-    return taskCount;  
+    return taskCount;
 }
 
 /**
@@ -911,7 +922,8 @@ void enqueue(Task task) {
  * @return The task removed from the front of the queue.
  */
 Task dequeue() {
-    if (front == NULL) {  printf("Queue is empty\n"); Task emptyTask;  emptyTask.id = -1;  return emptyTask; }
+    if (front == NULL) { printf("Queue is empty\n"); Task emptyTask;  emptyTask.id = -1;  return emptyTask; }
+
     QueueNode* temp = front;
     Task task = temp->task;
     front = front->next;
@@ -952,7 +964,7 @@ Task pop() {
     if (stackTop == NULL) {
         printf("Stack is empty\n");
         Task emptyTask;
-        emptyTask.id = -1; 
+        emptyTask.id = -1;
         return emptyTask;
     }
     StackNode* temp = stackTop;
@@ -1000,7 +1012,8 @@ int undoLastTask(Task taskList[], int* taskCount) {
  * @param visited Array to keep track of visited tasks to avoid cycles.
  */
 int printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
-    if (visited[taskId]) { return 1;  }
+    if (visited[taskId]) { return 1; }
+
     visited[taskId] = true;
 
     Task task = taskList[taskId - 1]; // Görevi al
@@ -1058,7 +1071,8 @@ int printDependencies(Task taskList[], int taskCount, int startTaskId) {
  */
 int pushSccStack(int v) {
     AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
-    if (newNode == NULL) {  printf("Memory allocation failed for AdjacencyNode.\n");return -1; }
+    if (newNode == NULL) { printf("Memory allocation failed for AdjacencyNode.\n"); return -1; }
+
     newNode->data = v;
     newNode->next = sccStack;
     sccStack = newNode;
@@ -1094,7 +1108,8 @@ int popSccStack() {
  * @param component Pointer to the SCC stack for storing vertices in the current component.
  */
 int dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** component) {
-    if (visited[v]) { return 0;  }
+    if (visited[v]) { return 0; }
+
 
     visited[v] = 1;
     pushSccStack(v); // SCC yığınına ekle
@@ -1143,7 +1158,8 @@ int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
         while (temp != NULL) {
             int u = temp->data;
             AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
-            if (!newNode) { fprintf(stderr, "Memory allocation failed.\n"); return -1;  }
+            if (!newNode) { fprintf(stderr, "Memory allocation failed.\n"); return -1; }
+
             newNode->data = v;
             newNode->next = transpose[u];
             transpose[u] = newNode;
@@ -1207,7 +1223,8 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
         for (int j = 0; j < task.dependencyCount; j++) {
             int dep = task.dependencies[j];
             AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
-            if (!newNode) {  fprintf(stderr, "Memory allocation failed.\n");  return -1;  }
+            if (!newNode) { fprintf(stderr, "Memory allocation failed.\n");  return -1; }
+
             newNode->data = dep - 1;
             newNode->next = adj[task.id - 1];
             adj[task.id - 1] = newNode;
@@ -1216,7 +1233,8 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
 
     // SCC'leri analiz et
     int result = findSCCs(taskCount, adj, out);
-    if (result != 1) { fprintf(stderr, "Failed to find SCCs.\n"); return -1;  }
+    if (result != 1) { fprintf(stderr, "Failed to find SCCs.\n"); return -1; }
+
 
     // Bağımlılık listesini temizle
     for (int i = 0; i < taskCount; i++) {
@@ -1287,7 +1305,8 @@ int KMPsearch(const char* text, const char* pattern) {
     }
 
     int* prefixTable = (int*)malloc(sizeof(int) * patternLength);
-    if (!prefixTable) { return -2;  }
+    if (!prefixTable) { return -2; }
+
 
     computePrefixTable(pattern, prefixTable, patternLength);
 
@@ -1300,7 +1319,9 @@ int KMPsearch(const char* text, const char* pattern) {
         }
         if (j == patternLength) {
             free(prefixTable);
-            return 1;  }
+            return 1;
+        }
+
         else if (i < textLength && pattern[j] != text[i]) {
             if (j != 0) {
                 j = prefixTable[j - 1];
@@ -1332,7 +1353,7 @@ void searchTasksByKeyword() {
     char keyword[256];
     printf("Enter the keyword to search in task descriptions: ");
     fgets(keyword, sizeof(keyword), stdin);
-    keyword[strcspn(keyword, "\n")] = 0;  
+    keyword[strcspn(keyword, "\n")] = 0;
 
     Task task;
     int found = 0;
@@ -1365,7 +1386,7 @@ void searchTasksByKeyword() {
  */
 int deadlineSettingsMenu() {
     int choice;
-    Assignment assignment;  
+    Assignment assignment;
 
     while (1) {
         printDeadlineSettingsMenu();
@@ -1387,7 +1408,7 @@ int deadlineSettingsMenu() {
             enterToContinue();
             break;
         case 3:
-            return 0;  
+            return 0;
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -1420,12 +1441,13 @@ int assign_deadline(Assignment* assignment) {
     int day, month, year;
 
     printf("Enter Task Name: ");
-    while (getchar() != '\n');  
-    if (fgets(taskName, MAX_ASSIGNMENT_NAME, stdin) == NULL) {  printf("Error reading task name.\n"); return -1;}
-    taskName[strcspn(taskName, "\n")] = '\0';  
+    while (getchar() != '\n');
+    if (fgets(taskName, MAX_ASSIGNMENT_NAME, stdin) == NULL) { printf("Error reading task name.\n"); return -1; }
+    taskName[strcspn(taskName, "\n")] = '\0';
 
     printf("Enter Deadline (day month year): ");
-    if (scanf("%d %d %d", &day, &month, &year) != 3) {  printf("Invalid input! Please try again.\n");  while (getchar() != '\n');   return -1; }
+    if (scanf("%d %d %d", &day, &month, &year) != 3) { printf("Invalid input! Please try again.\n");  while (getchar() != '\n');   return -1; }
+
 
     if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
         printf("Invalid date! Please enter a valid date.\n");
@@ -1433,7 +1455,7 @@ int assign_deadline(Assignment* assignment) {
     }
 
     strncpy(assignment->name, taskName, MAX_ASSIGNMENT_NAME - 1);
-    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  
+    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';
 
     assignment->day = day;
     assignment->month = month;
@@ -1469,7 +1491,7 @@ int viewDeadlines() {
     printf("\n--- Upcoming Deadlines (Sorted by Date) ---\n");
     printf("-------------------------------------------\n");
 
-    MinHeap tempHeap = deadlineHeap;  
+    MinHeap tempHeap = deadlineHeap;
 
     int taskCount = 0;
     while (tempHeap.size > 0) {
@@ -1485,7 +1507,7 @@ int viewDeadlines() {
     if (taskCount == 0) { printf("No deadlines to display.\n"); }
 
     printf("-------------------------------------------\n");
-    enterToContinue();  
+    enterToContinue();
     return 1;
 }
 
@@ -1502,7 +1524,7 @@ int viewDeadlines() {
  * @return Returns an integer representing the date in YYYYMMDD format.
  */
 int getDateKey(int day, int month, int year) {
-    return year * 10000 + month * 100 + day;  
+    return year * 10000 + month * 100 + day;
 }
 
 
@@ -1547,7 +1569,8 @@ int insertInBPlusTree(BPlusTree* tree, ScheduledTask* task) {
     if (root->numKeys < MAX_KEYS) {
         insertInLeaf(root, key, task);
     }
-    else {  printf("Node splitting required. Implement split logic here.\n"); }
+    else { printf("Node splitting required. Implement split logic here.\n"); }
+
     return 1;
 }
 
@@ -1580,7 +1603,9 @@ int searchInDateRange(BPlusTreeNode* node, int startKey, int endKey) {
         if (node->next != NULL && node->keys[node->numKeys - 1] <= endKey) { searchInDateRange(node->next, startKey, endKey); }
     }
     else {
-        while (i <= node->numKeys) {  searchInDateRange(node->children[i], startKey, endKey); i++;  } }
+        while (i <= node->numKeys) { searchInDateRange(node->children[i], startKey, endKey); i++; }
+    }
+
     return 1;
 }
 
@@ -2995,23 +3020,14 @@ int registerUser(User user, const char* pathFileUser, bool isTestMode) {
         fread(&userCount, sizeof(int), 1, file);
 
         User tempUser;
-        for (int i = 0; i < userCount; ++i) {
-            fread(&tempUser, sizeof(User), 1, file);
-            if (strcmp(tempUser.email, user.email) == 0) {
-                printf("User already exists.\n");
-                fclose(file);
-                if (!isTestMode) enterToContinue();  // Test modunda bekleme yapılmaz
-                return 0;
-            }
+        for (int i = 0; i < userCount; ++i) { fread(&tempUser, sizeof(User), 1, file); if (strcmp(tempUser.email, user.email) == 0) { printf("User already exists.\n"); fclose(file); if (!isTestMode) enterToContinue();  return 0; }
+
         }
         fseek(file, 0, SEEK_END);
     }
     else {
         file = fopen(pathFileUser, "wb+");
-        if (!file) {
-            printf("Failed to open or create user file.\n");
-            return 0;
-        }
+        if (!file) {  printf("Failed to open or create user file.\n"); return 0; }
     }
 
     user.id = userCount + 1;
@@ -3122,14 +3138,16 @@ int loginUser(User loginUser, const char* pathFileUsers) {
     if (!file) { printf("Failed to open user file.\n"); return 0; }
 
     int userCount = 0;
-    if (fread(&userCount, sizeof(int), 1, file) != 1) {   printf("Failed to read user count from file.\n");  fclose(file); return 0; }
+    if (fread(&userCount, sizeof(int), 1, file) != 1) { printf("Failed to read user count from file.\n");  fclose(file); return 0; }
+
 
     int found = 0;
     User tempUser;
 
     for (int i = 0; i < userCount; ++i) {
         // Read user data from the file
-        if (fread(&tempUser, sizeof(User), 1, file) != 1) {  printf("Error reading user data from file.\n"); break; }
+        if (fread(&tempUser, sizeof(User), 1, file) != 1) { printf("Error reading user data from file.\n"); break; }
+
 
         // Decode email and password using Huffman decoding
         char* decodedEmail = huffmanDecode(tempUser.email);
@@ -3154,7 +3172,8 @@ int loginUser(User loginUser, const char* pathFileUsers) {
 
     fclose(file);
 
-    if (!found) {  printf("Incorrect email or password.\n");  enterToContinue();  return 0; }
+    if (!found) { printf("Incorrect email or password.\n");  enterToContinue();  return 0; }
+
 
     enterToContinue();
     return 1;
