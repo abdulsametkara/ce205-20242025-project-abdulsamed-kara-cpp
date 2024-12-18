@@ -370,13 +370,13 @@ int taskPrioritizationMenu();
 int userOptionsMenu();
 
 int mainMenu(const char* pathFileUsers);
-void algorithmsMenu();
+int algorithmsMenu();
 
 
 
 
 
-int registerUser(User user, const char* pathFileUser);
+int registerUser(User user, const char* pathFileUser, bool isTestMode);
 
 int registerUserMenu(const char* pathFileUsers);
 
@@ -392,18 +392,18 @@ int loginUserMenu(const char* pathFileUsers);
 
 
 int addTask(Task taskList[], int* taskCount, int maxTasks);
-void viewTask();
+int viewTask();
 void categorizeTask();
 int loadTasks(Task taskList[], int maxTasks);
 void saveTasks(const Task taskList[], int taskCount);
 void enqueue(Task task);
-void push(Task task);
+int push(Task task);
 Task dequeue();
-void printDependencies(Task taskList[], int taskCount, int startTaskId);
+int printDependencies(Task taskList[], int taskCount, int startTaskId);
 int analyzeSCC(Task taskList[], int taskCount, FILE* out);
 void searchTasksByKeyword();
 void navigateTasks();
-void navigateXORList();
+int navigateXORList();
 int loadTasksToXORList(const char* filename);
 
 
@@ -428,7 +428,7 @@ int showCurrentNotificationMethod();
 
 
 int findTaskByName(const char* name);
-void markTaskImportance();
+int markTaskImportance(const char* taskNameInput, int importanceIdInput);
 
 
 
