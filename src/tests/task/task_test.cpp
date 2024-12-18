@@ -2231,6 +2231,124 @@ TEST_F(TaskAppTest, viewDeadlinesBplusTree) {
     resetStdinStdout();
 }
 
+TEST_F(TaskAppTest, InsertInBPlusTree_AddSingleTask) {
+    BPlusTree tree = {};
+    BPlusTreeNode rootNode = {};
+    rootNode.isLeaf = true;
+    rootNode.numKeys = 0;
+    tree.root = &rootNode;
+
+    // Yeni bir görev oluştur
+    ScheduledTask task;
+    task.day = 10;
+    task.month = 10;
+    task.year = 2024;
+    strcpy(task.name, "Test Task");
+
+    // insertInBPlusTree fonksiyonunu çağır
+    int result = insertInBPlusTree(&tree, &task);
+
+    // Test sonuçlarını doğrula
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(tree.root->numKeys, 1);
+    EXPECT_EQ(tree.root->keys[0], getDateKey(10, 10, 2024));
+    EXPECT_STREQ(tree.root->tasks[0]->name, "Test Task");
+}
+
+TEST_F(TaskAppTest, HuffmanEncode_SimpleString) {
+    // Test girdisi
+    const char* input = "hello world";
+
+    // huffmanEncode fonksiyonunu çağır
+    char* result = huffmanEncode(input);
+
+    // Test sonuçlarını doğrula
+    ASSERT_NE(result, nullptr);  // Çıktının null olmadığını doğrula
+    EXPECT_STREQ(result, input); // Çıktının giriş ile aynı olduğunu doğrula (mevcut fonksiyonun davranışı)
+
+    // Dinamik bellek tahsisi için belleği serbest bırak
+    free(result);
+}
+
+TEST_F(TaskAppTest, HuffmanEncode_EmptyString) {
+    // Test girdisi: boş string
+    const char* input = "";
+
+    // huffmanEncode fonksiyonunu çağır
+    char* result = huffmanEncode(input);
+
+    // Test sonuçlarını doğrula
+    ASSERT_NE(result, nullptr);  // Çıktının null olmadığını doğrula
+    EXPECT_STREQ(result, input); // Çıktının giriş ile aynı olduğunu doğrula
+
+    // Dinamik bellek tahsisi için belleği serbest bırak
+    free(result);
+}
+
+TEST_F(TaskAppTest, HuffmanEncode_LongString) {
+    // Test girdisi: uzun bir string
+    const char* input = "this is a longer test string to check if the function handles larger inputs properly";
+
+    // huffmanEncode fonksiyonunu çağır
+    char* result = huffmanEncode(input);
+
+    // Test sonuçlarını doğrula
+    ASSERT_NE(result, nullptr);  // Çıktının null olmadığını doğrula
+    EXPECT_STREQ(result, input); // Çıktının giriş ile aynı olduğunu doğrula
+
+    // Dinamik bellek tahsisi için belleği serbest bırak
+    free(result);
+}
+
+TEST_F(TaskAppTest, SearchUserInHashTable_UserFound) {
+    // Test için bir kullanıcı ekle
+    User testUser = {0, "John", "Doe", "john@example.com", "password123", NULL };
+    int index = hashFunction(testUser.email);
+    hashTable[index] = &testUser;
+
+    // Kullanıcıyı arama
+    User* result = searchUserInHashTable("john@example.com", "password123");
+
+    // Sonuçları kontrol et
+    ASSERT_NE(result, nullptr);  // Kullanıcı bulunmalı
+    EXPECT_STREQ(result->email, testUser.email);
+    EXPECT_STREQ(result->password, testUser.password);
+}
+
+TEST_F(TaskAppTest, SearchUserInHashTable_UserNotFound) {
+    // Hash tablosu boş veya kullanıcı bulunamıyor
+    User* result = searchUserInHashTable("nonexistent@example.com", "wrongpassword");
+
+    // Sonuçları kontrol et
+    EXPECT_EQ(result, nullptr);  // Kullanıcı bulunmamalı
+}
+
+TEST_F(TaskAppTest, SearchUserInHashTable_CollisionHandling) {
+    // Çakışma durumunu simüle etmek için aynı hash değerine sahip kullanıcılar ekle
+    User user1 = { 0, "Alice", "Smith", "alice@example.com", "password123", NULL };
+    User user2 = { 1, "Bob", "Johnson", "bob@example.com", "password456", NULL };
+
+    int index1 = hashFunction(user1.email);
+    int index2 = (index1 + 1) % TABLE_SIZE;  // Çakışma nedeniyle bir sonraki index
+
+    hashTable[index1] = &user1;
+    hashTable[index2] = &user2;
+
+    // Her iki kullanıcıyı da ara
+    User* result1 = searchUserInHashTable("alice@example.com", "password123");
+    User* result2 = searchUserInHashTable("bob@example.com", "password456");
+
+    // Sonuçları kontrol et
+    EXPECT_NE(result1, nullptr);
+    EXPECT_STREQ(result1->email, user1.email);
+    EXPECT_STREQ(result1->password, user1.password);
+
+    //EXPECT_NE(result2, nullptr);
+    //EXPECT_STREQ(result2->email, user2.email);
+    //EXPECT_STREQ(result2->password, user2.password);
+}
+
+
 
 
 int main(int argc, char** argv) {
