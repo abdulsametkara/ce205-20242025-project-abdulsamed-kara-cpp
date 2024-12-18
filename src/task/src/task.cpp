@@ -2187,13 +2187,43 @@ int taskPrioritizationMenu() {
         }
 
         switch (choice) {
-        case 1:
-            markTaskImportance();  // Mark the importance of a task
+        case 1: {
+            char taskName[100];
+            int importanceId;
+
+            // Kullanıcıdan Task Name al
+            printf("Enter the name of the task to mark importance: ");
+            scanf(" %[^\n]%*c", taskName);
+
+            // Kullanıcıdan Importance ID al
+            while (1) {
+                printf("Enter the importance ID (1: Low, 2: Medium, 3: High): ");
+                if (scanf("%d", &importanceId) == 1 && importanceId >= 1 && importanceId <= 3) {
+                    break;
+                }
+                else {
+                    printf("Invalid importance ID! Please enter 1, 2, or 3.\n");
+                    while (getchar() != '\n');  // Hatalı giriş sonrası input'u temizle
+                }
+            }
+
+            // Fonksiyonu çağır
+            int result = markTaskImportance(taskName, importanceId);
+            if (result == 1) {
+                printf("Task importance updated successfully.\n");
+            }
+            else {
+                printf("Failed to update task importance. Task not found or invalid input.\n");
+            }
+            enterToContinue();
             break;
+        }
         case 2:
+            printf("Other task prioritization features not implemented yet.\n");
+            enterToContinue();
             break;
         case 3:
-            return 0;  // Exit the menu
+            return 0;  // Menüden çıkış
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -2202,6 +2232,7 @@ int taskPrioritizationMenu() {
         }
     }
 }
+
 
 /**
  * @brief Marks the importance level of a selected task.
@@ -2226,16 +2257,15 @@ int taskPrioritizationMenu() {
  *     markTaskImportance();
  * @endcode
  */
-void markTaskImportance() {
+int markTaskImportance(const char* taskNameInput, int importanceIdInput) {
     clearScreen();
 
-    Task tasks[100];  
-    int taskCount = loadTasks(tasks, 100);  
+    Task tasks[100];
+    int taskCount = loadTasks(tasks, 100);
 
     if (taskCount <= 0) {
         printf("No tasks available. Please add tasks first.\n");
-        enterToContinue();
-        return;
+        return -1;
     }
 
     printf("Tasks loaded:\n");
@@ -2248,48 +2278,32 @@ void markTaskImportance() {
             tasks[i].id, tasks[i].name, importanceStr);
     }
 
-    char taskName[100];
     Task* selectedTask = NULL;
 
-    while (1) {
-        printf("\nEnter the name of the task to mark importance: ");
-        scanf(" %[^\n]%*c", taskName);  
-
-        for (int i = 0; i < taskCount; ++i) {
-            if (strcmp(tasks[i].name, taskName) == 0) {
-                selectedTask = &tasks[i];
-                break;
-            }
-        }
-
-        if (selectedTask) {
-            break;  
-        }
-        else {
-            printf("Task not found! Please enter a valid task name.\n");
+    for (int i = 0; i < taskCount; ++i) {
+        if (strcmp(tasks[i].name, taskNameInput) == 0) {
+            selectedTask = &tasks[i];
+            break;
         }
     }
 
-    int importanceId;
-    while (1) {
-        printf("Enter the importance ID (1: Low, 2: Medium, 3: High): ");
-        importanceId = getInput();
-
-        if (importanceId >= 1 && importanceId <= 3) {
-            break; 
-        }
-        else {
-            printf("Invalid importance value! Please enter 1, 2, or 3.\n");
-        }
+    if (!selectedTask) {
+        printf("Task not found! Please enter a valid task name.\n");
+        return -1;
     }
 
-    selectedTask->impid = importanceId;
+    if (importanceIdInput < 1 || importanceIdInput > 3) {
+        printf("Invalid importance value! Please enter 1, 2, or 3.\n");
+        return -1;
+    }
+
+    selectedTask->impid = importanceIdInput;
 
     saveTasks(tasks, taskCount);
 
     printf("Importance level of '%s' marked successfully as %d.\n",
-        selectedTask->name, importanceId);
-    enterToContinue();
+        selectedTask->name, importanceIdInput);
+    return 1;  // Success
 }
 
 

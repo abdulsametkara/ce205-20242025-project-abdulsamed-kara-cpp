@@ -428,7 +428,7 @@ int showCurrentNotificationMethod();
 
 
 int findTaskByName(const char* name);
-void markTaskImportance();
+int markTaskImportance(const char* taskNameInput, int importanceIdInput);
 
 
 
