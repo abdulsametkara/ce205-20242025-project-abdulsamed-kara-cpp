@@ -376,7 +376,7 @@ int algorithmsMenu();
 
 
 
-int registerUser(User user, const char* pathFileUser);
+int registerUser(User user, const char* pathFileUser, bool isTestMode);
 
 int registerUserMenu(const char* pathFileUsers);
 

@@ -1,2 +1,14 @@
-Enter start date (day month year): Enter end date (day month year): 
---- Tasks between 10/10/0010 and 11/11/1111 ---
+ID: 3
+Name: Task 3
+Description: Description 3
+Category: Category 3
+Due Date: 2024-12-01
+---------------------------
+Press 1 to go forward, 2 to go backward, or 0 to exit: Invalid input. Please enter a number.
+ID: 3
+Name: Task 3
+Description: Description 3
+Category: Category 3
+Due Date: 2024-12-01
+---------------------------
+Press 1 to go forward, 2 to go backward, or 0 to exit: Exiting navigation.

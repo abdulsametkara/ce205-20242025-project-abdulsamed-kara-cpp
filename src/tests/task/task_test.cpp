@@ -245,6 +245,38 @@ TEST_F(TaskAppTest, AssignDeadline_InvalidDate) {
     
 }
 
+TEST_F(TaskAppTest, ViewDeadlines_Successful) {
+    // Heap'i dolduruyoruz
+    deadlineHeap.size = 3;
+    deadlineHeap.deadlines[0] = { "Task 3", 5, 10, 2024 };
+    deadlineHeap.deadlines[1] = { "Task 2", 10, 11, 2024 };
+    deadlineHeap.deadlines[2] = { "Task 1", 15, 12, 2024 };
+
+    // viewDeadlines fonksiyonunu çağırıyoruz ve çıktıyı dosyaya yönlendiriyoruz
+    simulateUserInput("\n"); // Boş girdi simüle ediyoruz
+    int result = viewDeadlines();
+    resetStdinStdout();
+
+    // Fonksiyonun 1 döndürdüğünü kontrol ediyoruz
+    EXPECT_EQ(result, 1);
+
+    // Çıktıyı kontrol ediyoruz
+    FILE* outputFile = fopen(outputTest, "rb");
+    char outputBuffer[1024] = { 0 };
+    fread(outputBuffer, sizeof(char), 1024, outputFile);
+    fclose(outputFile);
+
+    std::string output(outputBuffer);
+
+    // Çıktının sıralı olduğunu kontrol ediyoruz
+    EXPECT_NE(output.find("1. Task: Task 3 - Deadline: 05/10/2024"), std::string::npos);
+    EXPECT_NE(output.find("2. Task: Task 2 - Deadline: 10/11/2024"), std::string::npos);
+    EXPECT_NE(output.find("3. Task: Task 1 - Deadline: 15/12/2024"), std::string::npos);
+}
+
+
+
+
 TEST_F(TaskAppTest, ViewDeadlines_NoDeadlines) {
     // Y���n� bo� hale getiriyoruz
     deadlineHeap.size = 0;
@@ -271,6 +303,8 @@ TEST_F(TaskAppTest, ViewDeadlines_NoDeadlines) {
 TEST_F(TaskAppTest, PlatformSleep_ReturnsCorrectValue) {
     // Set a test duration in seconds
     int testDuration = 1;
+
+    simulateUserInput("\n");
 
     // Call platformSleep and verify it returns 1 as expected
     int result = platformSleep(testDuration);
@@ -425,6 +459,8 @@ TEST_F(TaskAppTest, ViewTask_EmptyQueue) {
     //   k    yakalamak i in stdout'u test dosyas na y nlendir
     freopen(outputTest, "wb", stdout);
 
+    simulateUserInput("\n");
+
     // Fonksiyonu  a  r
     int result = viewTask();
 
@@ -457,6 +493,8 @@ TEST_F(TaskAppTest, ViewTask_FilledQueue) {
 
     // Fonksiyonu  al  t rmadan  nce stdout'u test dosyas na y nlendir
     freopen(outputTest, "wb", stdout);
+
+    simulateUserInput("\n");
 
     // Fonksiyonu  al  t r
     int result = viewTask();
@@ -666,6 +704,8 @@ TEST_F(TaskAppTest, LoginRegistermenuTest) {
 
     EXPECT_EQ(result, 0);
 }
+
+
 
 //TEST_F(TaskAppTest, taskprenotaskfail) {
 //    const char* testuserfile = "taskFile.bin";
@@ -1867,6 +1907,20 @@ TEST_F(TaskAppTest, ReminderSystemMenu_SetRemindersOption) {
     resetStdinStdout();
 }
 
+TEST_F(TaskAppTest, ReminderSystemMenu_SetRemindersOptionInvalid) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("1\n0\n0\n0\n-11\n\n3\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = reminderSystemMenu();
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
 
 
 TEST_F(TaskAppTest, ReminderSystemMenu_InvalidChoice) {
@@ -2347,6 +2401,179 @@ TEST_F(TaskAppTest, SearchUserInHashTable_CollisionHandling) {
     //EXPECT_STREQ(result2->email, user2.email);
     //EXPECT_STREQ(result2->password, user2.password);
 }
+
+TEST_F(TaskAppTest, userOptionsMenuTest) {
+    // Kullan�c� giri�ini sim�le et: Ge�ersiz giri� -> 3 (��k��)
+    simulateUserInput("1\n9\n2\n3\n3\n3\n4\n3\n5\n8\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = userOptionsMenu();
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, AssignDeadline_All) {
+    // Ge�erli bir g�rev ad� ve tarih girdisini sim�le et
+    simulateUserInput("23\n\n3\n6\n3\n");
+
+    // Fonksiyonu �al��t�r ve beklenen de�eri kontrol et
+    int result = deadlineSettingsMenu();
+    resetStdinStdout();
+    EXPECT_EQ(result, 0);  // Fonksiyonun ba�ar�yla �al��mas� bekleniyor
+
+
+    // Standart giri� ve ��k��� s�f�rla
+
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_Invalid) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("23\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, userOptionsMenu_Invalid) {
+
+    simulateUserInput("23\n\n6\n3\n");
+
+    int result = userOptionsMenu();
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, mainMenuTest_Invalid) {
+    const char* testuserfile = "userFile.bin";
+
+    simulateUserInput("23\n\n3\n");
+
+    int result = mainMenu(testuserfile);
+
+    EXPECT_EQ(result, 0);
+    resetStdinStdout();
+
+}
+
+TEST_F(TaskAppTest, mainMenuTest_InputError) {
+    const char* testuserfile = "userFile.bin";
+
+    simulateUserInput("-2\n\n\n3\n");
+
+    int result = mainMenu(testuserfile);
+
+    EXPECT_EQ(result, 0);
+    resetStdinStdout();
+
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenuTest_InputError) {
+    // 1'den 8'e kadar olan geçerli seçimleri simüle ediyoruz.
+    simulateUserInput("-2\n\n\n8\n6\n3\n");
+
+    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, userOptionsMenu_InputError) {
+
+    simulateUserInput("-2\n\n\n6\n6\n3\n");
+
+    int result = userOptionsMenu();
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_InputError) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("-2\n\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, navigateXORListTest_InputError) {
+
+    simulateUserInput("-2\n\n0\n\n9\n6\n3\n");
+
+    int result = navigateXORList();
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 1);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+
+TEST_F(TaskAppTest, RegisterUser_UserAddedSuccessfully) {
+    // Test verileri
+    User testUser = { 0, "John", "Doe", "john.doe@example.com", "securepassword", NULL };
+    const char* userFilePath = "test_users.bin";
+
+    // Test dosyasını baştan oluştur
+    FILE* file = fopen(userFilePath, "wb");
+    if (file) {
+        int userCount = 0;
+        fwrite(&userCount, sizeof(int), 1, file);
+        fclose(file);
+    }
+
+    // Kullanıcıyı kaydet
+    int result = registerUser(testUser, userFilePath, true);  // Test modu etkin
+
+    // Testlerin doğrulanması
+    EXPECT_EQ(result, 1); // Kullanıcının başarıyla eklendiğini doğrula
+
+    // Dosyadan kullanıcıyı doğrula
+    file = fopen(userFilePath, "rb");
+    ASSERT_TRUE(file != NULL);
+
+    int userCount;
+    fread(&userCount, sizeof(int), 1, file);
+    EXPECT_EQ(userCount, 1); // Kullanıcı sayısını kontrol et
+
+    User loadedUser;
+    fread(&loadedUser, sizeof(User), 1, file);
+    fclose(file);
+
+    EXPECT_EQ(loadedUser.id, 1); // Kullanıcı ID'sini kontrol et
+    EXPECT_STREQ(loadedUser.name, "John"); // Kullanıcı adı kontrolü
+    EXPECT_STREQ(loadedUser.surname, "Doe"); // Kullanıcı soyadı kontrolü
+    EXPECT_STREQ(loadedUser.email, "john.doe@example.com"); // Kullanıcı e-posta kontrolü
+    EXPECT_STREQ(loadedUser.password, "securepassword"); // Kullanıcı şifre kontrolü
+
+    // Test dosyasını temizle
+    remove(userFilePath);
+}
+
+
 
 
 
