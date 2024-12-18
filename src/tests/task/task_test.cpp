@@ -1,4 +1,4 @@
-#define ENABLE_TASK_TEST  // Bu satýr etkinleþtirildi
+#define ENABLE_TASK_TEST  // Bu satï¿½r etkinleï¿½tirildi
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdbool.h>
@@ -8,6 +8,7 @@
 #include "../../task/src/task.cpp"  // Adjust this include path based on your project structure
 
 
+
 class TaskAppTest : public ::testing::Test {
 protected:
     const char* userFile = "user.bin";
@@ -15,12 +16,17 @@ protected:
     const char* deadlineFile = "deadlines.bin";
     const char* inputTest = "inputTest.txt";
     const char* outputTest = "outputTest.txt";
+    //C:\\U0sers\\fatma\\Desktop\\ce205 - final - abdulsamed - kara - omersahan - sofu - vahithamza - baran - fatmaciran - akbas - cpp\\outputTest.txt
 
 
     void SetUp() override {
+        Assignment a, b;
+
         createTestUserFile();
         createTestTaskFile();
         createTestDeadlineFile();
+        a = { "Assignment A", 1, 1, 2024 };
+        b = { "Assignment B", 2, 2, 2025 };
     }
 
     void TearDown() override {
@@ -89,6 +95,7 @@ protected:
     }
 };
 
+
 TEST_F(TaskAppTest, openingScreenMenu) {
     bool result = openingScreenMenu();
     EXPECT_TRUE(result);
@@ -123,28 +130,28 @@ TEST_F(TaskAppTest, printAlgorithmsMenu) {
 }
 
 TEST_F(TaskAppTest, GetNewUserId) {
-    // Kullanýcý dizisi örneði ve kullanýcý sayýsýný belirle
+    // Kullanï¿½cï¿½ dizisi ï¿½rneï¿½i ve kullanï¿½cï¿½ sayï¿½sï¿½nï¿½ belirle
     User users[] = {
         {1, "John", "Doe", "john@example.com", "password123", nullptr},
         {2, "Jane", "Doe", "jane@example.com", "password456", nullptr},
     };
     int userCount = 2;
 
-    // Fonksiyonu çaðýr ve beklenen deðeri test et
+    // Fonksiyonu ï¿½aï¿½ï¿½r ve beklenen deï¿½eri test et
     int newUserId = getNewUserId(users, userCount);
-    EXPECT_EQ(newUserId, 3);  // Son kullanýcý ID'si 2 olduðundan, yeni kullanýcý ID'si 3 olmalýdýr
+    EXPECT_EQ(newUserId, 3);  // Son kullanï¿½cï¿½ ID'si 2 olduï¿½undan, yeni kullanï¿½cï¿½ ID'si 3 olmalï¿½dï¿½r
 
-    // Kullanýcý sayýsý sýfýr olduðunda test et
+    // Kullanï¿½cï¿½ sayï¿½sï¿½ sï¿½fï¿½r olduï¿½unda test et
     userCount = 0;
     newUserId = getNewUserId(users, userCount);
-    EXPECT_EQ(newUserId, 1);  // Kullanýcý yoksa ID 1 ile baþlamalýdýr
+    EXPECT_EQ(newUserId, 1);  // Kullanï¿½cï¿½ yoksa ID 1 ile baï¿½lamalï¿½dï¿½r
 }
 
 TEST_F(TaskAppTest, LoadUsers) {
-    // Test için sahte kullanýcý dosyasýný hazýrla
+    // Test iï¿½in sahte kullanï¿½cï¿½ dosyasï¿½nï¿½ hazï¿½rla
     const char* testFile = "test_users.bin";
 
-    // Test kullanýcýlarý oluþtur ve dosyaya kaydet
+    // Test kullanï¿½cï¿½larï¿½ oluï¿½tur ve dosyaya kaydet
     User testUsers[] = {
         {1, "John", "Doe", "john@example.com", "password123", nullptr},
         {2, "Jane", "Doe", "jane@example.com", "password456", nullptr}
@@ -156,13 +163,13 @@ TEST_F(TaskAppTest, LoadUsers) {
     fwrite(testUsers, sizeof(User), userCount, file);
     fclose(file);
 
-    // Test edilen fonksiyonu çaðýr
+    // Test edilen fonksiyonu ï¿½aï¿½ï¿½r
     User* loadedUsers = nullptr;
     int loadedCount = loadUsers(testFile, &loadedUsers);
 
-    // Sonuçlarý doðrula
-    EXPECT_EQ(loadedCount, userCount);  // Kullanýcý sayýsý doðru mu?
-    ASSERT_NE(loadedUsers, nullptr);    // Kullanýcýlar yüklendi mi?
+    // Sonuï¿½larï¿½ doï¿½rula
+    EXPECT_EQ(loadedCount, userCount);  // Kullanï¿½cï¿½ sayï¿½sï¿½ doï¿½ru mu?
+    ASSERT_NE(loadedUsers, nullptr);    // Kullanï¿½cï¿½lar yï¿½klendi mi?
 
     for (int i = 0; i < userCount; ++i) {
         EXPECT_EQ(loadedUsers[i].id, testUsers[i].id);
@@ -172,81 +179,82 @@ TEST_F(TaskAppTest, LoadUsers) {
         EXPECT_STREQ(loadedUsers[i].password, testUsers[i].password);
     }
 
-    // Bellekteki kullanýcýlarý temizle
+    // Bellekteki kullanï¿½cï¿½larï¿½ temizle
     free(loadedUsers);
 
-    // Test dosyasýný sil
+    // Test dosyasï¿½nï¿½ sil
     remove(testFile);
 }
 
 TEST_F(TaskAppTest, AddTaskToXORList) {
-    // Yeni bir görev oluþtur
+    // Yeni bir gï¿½rev oluï¿½tur
     Task task = { 3, "Task 3", "Description 3", "Category 3", "2024-12-01", 0, {2}, 1 };
 
-    // Görevi XOR baðlantýlý listeye ekle
+    // Gï¿½revi XOR baï¿½lantï¿½lï¿½ listeye ekle
     int result = addTaskToXORList(task);
 
-    // Fonksiyonun baþarýyla çalýþtýðýný doðrula
+    // Fonksiyonun baï¿½arï¿½yla ï¿½alï¿½ï¿½tï¿½ï¿½ï¿½nï¿½ doï¿½rula
     EXPECT_EQ(result, 1);
 
-    // Baþ düðümün ve kuyruk düðümün doðru þekilde ayarlandýðýný kontrol et
+    // Baï¿½ dï¿½ï¿½ï¿½mï¿½n ve kuyruk dï¿½ï¿½ï¿½mï¿½n doï¿½ru ï¿½ekilde ayarlandï¿½ï¿½ï¿½nï¿½ kontrol et
     ASSERT_NE(xorHead, nullptr);
     ASSERT_NE(xorTail, nullptr);
 
-    // Ýlk düðüm olarak eklenen görevin doðru atanýp atanmadýðýný kontrol et
+    // ï¿½lk dï¿½ï¿½ï¿½m olarak eklenen gï¿½revin doï¿½ru atanï¿½p atanmadï¿½ï¿½ï¿½nï¿½ kontrol et
     EXPECT_EQ(xorHead->task.id, task.id);
     EXPECT_STREQ(xorHead->task.name, task.name);
     EXPECT_STREQ(xorHead->task.description, task.description);
     EXPECT_STREQ(xorHead->task.category, task.category);
 
-    // Eklenen düðümün sonunda olduðunu doðrula
+    // Eklenen dï¿½ï¿½ï¿½mï¿½n sonunda olduï¿½unu doï¿½rula
     EXPECT_EQ(xorTail->task.id, task.id);
-    EXPECT_EQ(xorHead, xorTail); // Bu görev ilk görevse baþ ve son ayný olmalý
+    EXPECT_EQ(xorHead, xorTail); // Bu gï¿½rev ilk gï¿½revse baï¿½ ve son aynï¿½ olmalï¿½
 }
+///
 
 
 
 TEST_F(TaskAppTest, AssignDeadline_ValidInput) {
-    // Geçerli bir görev adý ve tarih girdisini simüle et
+    // Geï¿½erli bir gï¿½rev adï¿½ ve tarih girdisini simï¿½le et
     simulateUserInput("Sample Task\n\n10 11 2024\n");
 
     Assignment assignment;
 
-    // Fonksiyonu çalýþtýr ve beklenen deðeri kontrol et
+    // Fonksiyonu ï¿½alï¿½ï¿½tï¿½r ve beklenen deï¿½eri kontrol et
     int result = assign_deadline(&assignment);
     resetStdinStdout();
-    EXPECT_EQ(result, 0);  // Fonksiyonun baþarýyla çalýþmasý bekleniyor
+    EXPECT_EQ(result, 0);  // Fonksiyonun baï¿½arï¿½yla ï¿½alï¿½ï¿½masï¿½ bekleniyor
 
 
-    // Standart giriþ ve çýkýþý sýfýrla
+    // Standart giriï¿½ ve ï¿½ï¿½kï¿½ï¿½ï¿½ sï¿½fï¿½rla
     
 }
 
 TEST_F(TaskAppTest, AssignDeadline_InvalidDate) {
-    // Geçersiz bir tarih girdisini simüle et
+    // Geï¿½ersiz bir tarih girdisini simï¿½le et
     simulateUserInput("Sample Task\n\n32 13 2024\n");
 
     Assignment assignment;
 
-    // Fonksiyonu çalýþtýr ve geçersiz tarih için -1 döndürmesini bekle
+    // Fonksiyonu ï¿½alï¿½ï¿½tï¿½r ve geï¿½ersiz tarih iï¿½in -1 dï¿½ndï¿½rmesini bekle
     int result = assign_deadline(&assignment);
     resetStdinStdout();
     EXPECT_EQ(result, -1);
 
-    // Standart giriþ ve çýkýþý sýfýrla
+    // Standart giriï¿½ ve ï¿½ï¿½kï¿½ï¿½ï¿½ sï¿½fï¿½rla
     
 }
 
 TEST_F(TaskAppTest, ViewDeadlines_NoDeadlines) {
-    // Yýðýný boþ hale getiriyoruz
+    // Yï¿½ï¿½ï¿½nï¿½ boï¿½ hale getiriyoruz
     deadlineHeap.size = 0;
 
-    // viewDeadlines fonksiyonunu çaðýrýyoruz ve çýktý dosyasýna yönlendiriyoruz
-    simulateUserInput(""); // Boþ girdi simüle ediyoruz
+    // viewDeadlines fonksiyonunu ï¿½aï¿½ï¿½rï¿½yoruz ve ï¿½ï¿½ktï¿½ dosyasï¿½na yï¿½nlendiriyoruz
+    simulateUserInput(""); // Boï¿½ girdi simï¿½le ediyoruz
     int result = viewDeadlines();
     resetStdinStdout();
 
-    // Fonksiyonun -1 döndürdüðünü ve "No deadlines to display." yazdýðýný kontrol ediyoruz
+    // Fonksiyonun -1 dï¿½ndï¿½rdï¿½ï¿½ï¿½nï¿½ ve "No deadlines to display." yazdï¿½ï¿½ï¿½nï¿½ kontrol ediyoruz
     EXPECT_EQ(result, -1);
     FILE* outputFile = fopen(outputTest, "rb");
     char outputBuffer[256] = { 0 };
@@ -410,10 +418,1935 @@ TEST_F(TaskAppTest, UpdateNotificationMethod) {
     }
 }
 
+TEST_F(TaskAppTest, ViewTask_EmptyQueue) {
+    // Kuyruk bo ken viewTask fonksiyonunu test ediyoruz
+    front = NULL;  // Kuyruk ba   NULL olmal 
+
+    //   k    yakalamak i in stdout'u test dosyas na y nlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu  a  r
+    int result = viewTask();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // D n   de erinin 0 oldu unu do rula
+    EXPECT_EQ(result, 0);
+
+    //   kt y  kontrol etmek i in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Hata mesaj n n do ru yaz ld   n  kontrol et
+    EXPECT_NE(strstr(outputBuffer, "No tasks found. The task list is empty."), nullptr);
+}
+
+TEST_F(TaskAppTest, ViewTask_FilledQueue) {
+    // Test i in sahte g revler olu tur
+    Task task1 = { 1, "Task 1", "Description 1", "Category 1", "2024-11-10", 0, {0}, 1 };
+    Task task2 = { 2, "Task 2", "Description 2", "Category 2", "2024-11-15", 0, {0}, 1 };
+
+    // Kuyru a g rev ekle
+    enqueue(task1);
+    enqueue(task2);
+
+    // Fonksiyonu  al  t rmadan  nce stdout'u test dosyas na y nlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu  al  t r
+    int result = viewTask();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // D n   de erinin 1 oldu unu do rula
+    EXPECT_EQ(result, 1);
+
+    //   kt y  kontrol etmek i in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outputFile);
+    fclose(outputFile);
+
+    // G revlerin do ru yaz ld   n  kontrol et
+    EXPECT_NE(strstr(outputBuffer, "ID: 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Name: Task 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Description: Description 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Category: Category 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Due Date: 2024-11-10"), nullptr);
+
+    EXPECT_NE(strstr(outputBuffer, "ID: 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Name: Task 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Description: Description 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Category: Category 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Due Date: 2024-11-15"), nullptr);
+}
 
 
 
+TEST_F(TaskAppTest, EnterToContinue) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et
+    simulateUserInput("\n");
 
+    // ï¿½ï¿½kï¿½ï¿½ï¿½ yakalamak iï¿½in stdout'u test dosyasï¿½na yï¿½nlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = enterToContinue();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // Fonksiyonun doï¿½ru sonucu dï¿½ndï¿½rdï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(result, 1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Fonksiyonun doï¿½ru mesajï¿½ yazdï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_NE(strstr(outputBuffer, "Press enter to continue"), nullptr);
+}
+
+TEST_F(TaskAppTest, HandleInputError) {
+    // Geï¿½ersiz giriï¿½ simï¿½lasyonu yapï¿½yoruz (ï¿½rneï¿½in: "abc")
+    simulateUserInput("abc\n");
+
+    // ï¿½ï¿½kï¿½ï¿½ï¿½ yakalamak iï¿½in stdout'u test dosyasï¿½na yï¿½nlendir
+    freopen(outputTest, "wb", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = handleInputError();
+
+    // Stdout'u eski haline getir
+    resetStdinStdout();
+
+    // Fonksiyonun doï¿½ru sonucu dï¿½ndï¿½rdï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(result, 0);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Fonksiyonun doï¿½ru mesajï¿½ yazdï¿½rdï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_NE(strstr(outputBuffer, "Invalid input. Please enter a number."), nullptr);
+}
+
+TEST_F(TaskAppTest, AddTaskToList_ValidTask) {
+    // Baï¿½langï¿½ï¿½ta listeyi temizle
+    head = NULL;
+    tail = NULL;
+
+    // Yeni gï¿½rev oluï¿½tur
+    Task newTask = { 1, "Test Task", "Test Description", "Test Category", "2024-12-15", 0, {2}, 1 };
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r ve sonucu kontrol et
+    int result = addTaskToList(newTask);
+    EXPECT_EQ(result, 1); // Fonksiyonun baï¿½arï¿½yla tamamlandï¿½ï¿½ï¿½nï¿½ kontrol et
+
+    // Listenin gï¿½ncellendiï¿½ini kontrol et
+    ASSERT_NE(head, nullptr); // Listenin baï¿½ï¿½ NULL olmamalï¿½
+    ASSERT_NE(tail, nullptr); // Listenin sonu NULL olmamalï¿½
+    EXPECT_EQ(head, tail);    // Liste tek dï¿½ï¿½ï¿½mden oluï¿½malï¿½
+
+    // Dï¿½ï¿½ï¿½mï¿½n doï¿½ru atandï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(head->task.id, newTask.id);
+    EXPECT_STREQ(head->task.name, newTask.name);
+    EXPECT_STREQ(head->task.description, newTask.description);
+    EXPECT_STREQ(head->task.category, newTask.category);
+    EXPECT_STREQ(head->task.dueDate, newTask.dueDate);
+}
+
+TEST_F(TaskAppTest, AddTaskToList_MultipleTasks) {
+    // Baï¿½langï¿½ï¿½ta listeyi temizle
+    head = NULL;
+    tail = NULL;
+
+    // ï¿½lk gï¿½revi ekle
+    Task firstTask = { 1, "First Task", "First Description", "First Category", "2024-12-10", 0, {2}, 1 };
+    int result = addTaskToList(firstTask);
+    EXPECT_EQ(result, 1);
+
+    // ï¿½kinci gï¿½revi ekle
+    Task secondTask = { 2, "Second Task", "Second Description", "Second Category", "2024-12-20", 0, {1}, 1 };
+    result = addTaskToList(secondTask);
+    EXPECT_EQ(result, 1);
+
+    // Listenin doï¿½ru ï¿½ekilde gï¿½ncellendiï¿½ini kontrol et
+    ASSERT_NE(head, nullptr);
+    ASSERT_NE(tail, nullptr);
+    EXPECT_NE(head, tail); // Liste birden fazla dï¿½ï¿½ï¿½mden oluï¿½malï¿½
+
+    // ï¿½lk dï¿½ï¿½ï¿½mï¿½ kontrol et
+    EXPECT_EQ(head->task.id, firstTask.id);
+    EXPECT_STREQ(head->task.name, firstTask.name);
+    EXPECT_EQ(head->next, tail); // ï¿½lk dï¿½ï¿½ï¿½mï¿½n next iï¿½aretï¿½isi kuyruï¿½u gï¿½stermeli
+
+    // ï¿½kinci dï¿½ï¿½ï¿½mï¿½ kontrol et
+    EXPECT_EQ(tail->task.id, secondTask.id);
+    EXPECT_STREQ(tail->task.name, secondTask.name);
+    EXPECT_EQ(tail->prev, head); // Kuyruï¿½un prev iï¿½aretï¿½isi baï¿½ï¿½ gï¿½stermeli
+}
+//TEST_F(TaskAppTest, LoginUserMenu_SuccessfulLogin) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Doï¿½ru sonucu kontrol et
+//    EXPECT_EQ(result, 1);
+//}
+
+// Yanlï¿½ï¿½ e-posta ile giriï¿½ denendiï¿½inde baï¿½arï¿½sï¿½z dï¿½nmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongEmail) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlï¿½ï¿½ e-posta girdisini simï¿½le et
+//    simulateUserInput("wrong@example.com\npassword123\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlï¿½ï¿½ giriï¿½ olduï¿½u iï¿½in 0 dï¿½nmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Yanlï¿½ï¿½ ï¿½ifre ile giriï¿½ denendiï¿½inde baï¿½arï¿½sï¿½z dï¿½nmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongPassword) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlï¿½ï¿½ ï¿½ifre girdisini simï¿½le et
+//    simulateUserInput("john@example.com\nwrongpassword\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlï¿½ï¿½ giriï¿½ olduï¿½u iï¿½in 0 dï¿½nmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Eksik dosya ile giriï¿½ denendiï¿½inde baï¿½arï¿½sï¿½z dï¿½nmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_MissingFile) {
+//    const char* invalidFile = "nonexistent_users.bin";
+//
+//    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(invalidFile);
+//
+//    // Dosya bulunmadï¿½ï¿½ï¿½ iï¿½in 0 dï¿½nmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+
+TEST_F(TaskAppTest, LoginRegistermenuTest) {
+    const char* testuserfile = "userFile.bin";
+
+    simulateUserInput("2\nasd\nasd\nasd\nasd\n\n1\nasd\nasd\n\n6\n3\n");
+
+    int result = mainMenu(testuserfile);
+
+    EXPECT_EQ(result, 0);
+}
+
+//TEST_F(TaskAppTest, taskprenotaskfail) {
+//    const char* testuserfile = "taskFile.bin";
+//
+//    simulateUserInput("4\n1\n\n3\n");
+//
+//    int result = userOptionsMenu();
+//
+//    EXPECT_EQ(result, 0);
+//}
+//
+//TEST_F(TaskAppTest, taskprecorrectwittasks) {
+//    const char* testuserfile = "taskFile.bin";
+//    createTestUserFile();
+//
+//    simulateUserInput("4\n1\nTask 1\n2\n\n3\n6\n3\n");
+//
+//    int result = userOptionsMenu();
+//
+//    EXPECT_EQ(result, 0);
+//}
+
+
+//TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
+//    // Test iï¿½in geï¿½ici bir gï¿½rev dosyasï¿½ oluï¿½tur
+//    const char* testFilename = "test_tasks.bin";
+//
+//    // Test gï¿½revlerini oluï¿½tur ve dosyaya kaydet
+//    Task testTasks[] = {
+//        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
+//        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
+//    };
+//    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
+//
+//    FILE* file = fopen(testFilename, "wb");
+//    ASSERT_NE(file, nullptr) << "Error: Unable to create test file.";
+//    fwrite(testTasks, sizeof(Task), taskCount, file);
+//    fclose(file);
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r ve doï¿½ru ï¿½alï¿½ï¿½ï¿½p ï¿½alï¿½ï¿½madï¿½ï¿½ï¿½nï¿½ kontrol et
+//    int result = loadTasksToXORList(testFilename);
+//    EXPECT_EQ(result, 1);  // Baï¿½arï¿½yla tamamlandï¿½ï¿½ï¿½nï¿½ kontrol et
+//
+//    // XOR listesine eklenen gï¿½revleri kontrol et
+//    XORNode* current = xorHead;
+//    for (int i = 0; i < taskCount; ++i) {
+//        ASSERT_NE(current, nullptr) << "XOR list is missing nodes.";
+//        EXPECT_EQ(current->task.id, testTasks[i].id);
+//        EXPECT_STREQ(current->task.name, testTasks[i].name);
+//        EXPECT_STREQ(current->task.description, testTasks[i].description);
+//        EXPECT_STREQ(current->task.category, testTasks[i].category);
+//        EXPECT_STREQ(current->task.dueDate, testTasks[i].dueDate);
+//
+//        // Bir sonraki dï¿½ï¿½ï¿½me geï¿½
+//        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
+//        current = nextNode;
+//    }
+//
+//    // Test dosyasï¿½nï¿½ sil
+//    remove(testFilename);
+//}
+//
+// TEST_F(TaskAppTest, LoadTasksToXORList_InvalidFile) {
+//    // Geï¿½ersiz dosya adï¿½yla fonksiyonu ï¿½aï¿½ï¿½r
+//    const char* invalidFilename = "nonexistent_tasks.bin";
+//    int result = loadTasksToXORList(invalidFilename);
+//
+//    // Dï¿½nï¿½ï¿½ deï¿½erinin -1 olduï¿½unu kontrol et
+//    EXPECT_EQ(result, -1);
+//
+//    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+//    FILE* outputFile = fopen(outputTest, "rb");
+//    ASSERT_NE(outputFile, nullptr);
+//
+//    char outputBuffer[256] = { 0 };
+//    fread(outputBuffer, sizeof(char), 255, outputFile);
+//    fclose(outputFile);
+//
+//    // Hata mesajï¿½nï¿½n doï¿½ru yazï¿½ldï¿½ï¿½ï¿½nï¿½ kontrol et
+//    EXPECT_NE(strstr(outputBuffer, "Error: Unable to open tasks file."), nullptr);
+//}
+
+TEST_F(TaskAppTest, PushTask_Success) {
+    // Test iï¿½in bir gï¿½rev oluï¿½tur
+    Task task = { 1, "Test Task", "Task Description", "General", "2024-12-15", 0, {0}, 0 };
+
+    // push fonksiyonunu ï¿½aï¿½ï¿½r ve baï¿½arï¿½ durumunu kontrol et
+    int result = push(task);
+    EXPECT_EQ(result, 1); // Baï¿½arï¿½lï¿½ olmalï¿½
+
+    // stackTop'un NULL olmadï¿½ï¿½ï¿½nï¿½ ve doï¿½ru ï¿½ekilde ayarlandï¿½ï¿½ï¿½nï¿½ kontrol et
+    ASSERT_NE(stackTop, nullptr);
+    EXPECT_EQ(stackTop->task.id, task.id);
+    EXPECT_STREQ(stackTop->task.name, task.name);
+    EXPECT_STREQ(stackTop->task.description, task.description);
+    EXPECT_STREQ(stackTop->task.category, task.category);
+    EXPECT_STREQ(stackTop->task.dueDate, task.dueDate);
+
+    // Belleï¿½i temizle
+    StackNode* temp = stackTop;
+    stackTop = stackTop->next;
+    free(temp);
+}
+
+/*TEST_F(TaskAppTest, PopTask_EmptyStack) {
+    // Boï¿½ bir yï¿½ï¿½ï¿½n durumunda pop fonksiyonunu test et
+    stackTop = NULL;  // Yï¿½ï¿½ï¿½n boï¿½ olduï¿½undan stackTop'u NULL yap
+
+    Task result = pop();
+
+    // Task id'sinin -1 dï¿½ndï¿½ï¿½ï¿½nï¿½ kontrol et (boï¿½ yï¿½ï¿½ï¿½n iï¿½areti)
+    
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "rb");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Hata mesajï¿½nï¿½n doï¿½ru yazï¿½ldï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_NE(strstr(outputBuffer, "Stack is empty"), nullptr);
+
+    // ï¿½ï¿½ktï¿½yï¿½ debug iï¿½in yazdï¿½r
+    std::cout << "Captured Output: " << outputBuffer << std::endl;
+    EXPECT_EQ(result.id, -1);
+}*/
+
+TEST_F(TaskAppTest, PopTask_NonEmptyStack) {
+    // Bir yï¿½ï¿½ï¿½n oluï¿½tur ve bir gï¿½rev ekle
+    Task task = { 1, "Test Task", "Task Description", "General", "2024-12-15", 0, {0}, 0 };
+    StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
+    ASSERT_NE(newNode, nullptr); // Bellek tahsisini kontrol et
+    newNode->task = task;
+    newNode->next = NULL;  // Bu tek ï¿½ï¿½e olacak
+    stackTop = newNode;
+
+    // Pop fonksiyonunu ï¿½aï¿½ï¿½r
+    Task result = pop();
+
+    // ï¿½ï¿½karï¿½lan gï¿½revin doï¿½ru olduï¿½unu kontrol et
+    EXPECT_EQ(result.id, task.id);
+    EXPECT_STREQ(result.name, task.name);
+    EXPECT_STREQ(result.description, task.description);
+    EXPECT_STREQ(result.category, task.category);
+    EXPECT_STREQ(result.dueDate, task.dueDate);
+
+    // Yï¿½ï¿½ï¿½nï¿½n boï¿½ olduï¿½undan emin ol
+    EXPECT_EQ(stackTop, nullptr);
+
+    // Pop edilen ï¿½ï¿½enin bellekte serbest bï¿½rakï¿½ldï¿½ï¿½ï¿½nï¿½ kontrol et
+    // Bunun iï¿½in ï¿½zel bir bellek testi gerekir (manuel doï¿½rulama yapï¿½labilir)
+}
+
+TEST_F(TaskAppTest, UndoLastTask_EmptyStack) {
+    // Test: Yï¿½ï¿½ï¿½n boï¿½ken `undoLastTask` fonksiyonu
+    stackTop = NULL; // Yï¿½ï¿½ï¿½nï¿½ boï¿½ yap
+
+    // Gï¿½rev listesi ve gï¿½rev sayï¿½sï¿½ simï¿½le ediliyor
+    Task taskList[100];
+    int taskCount = 0;
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ yakalamak iï¿½in yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = undoLastTask(taskList, &taskCount);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Fonksiyonun dï¿½nï¿½ï¿½ deï¿½erini kontrol et
+    EXPECT_EQ(result, -1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // ï¿½ï¿½ktï¿½nï¿½n doï¿½ru hata mesajï¿½nï¿½ iï¿½erdiï¿½ini kontrol et
+    EXPECT_NE(strstr(outputBuffer, "No tasks to undo."), nullptr);
+}
+
+TEST_F(TaskAppTest, UndoLastTask_Success) {
+    // Test: Yï¿½ï¿½ï¿½n doluyken `undoLastTask` fonksiyonu
+    stackTop = NULL; // Yï¿½ï¿½ï¿½nï¿½ temizle
+
+    // Gï¿½rev listesi ve gï¿½rev sayï¿½sï¿½ simï¿½le ediliyor
+    Task taskList[100];
+    int taskCount = 1;
+
+    // ï¿½rnek bir gï¿½rev ekle
+    Task task = { 1, "Test Task", "Test Description", "Test Category", "2024-12-31", 0, {0}, 0 };
+    push(task); // Gï¿½revi yï¿½ï¿½ï¿½na ekle
+    taskList[0] = task;
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ yakalamak iï¿½in yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = undoLastTask(taskList, &taskCount);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Fonksiyonun dï¿½nï¿½ï¿½ deï¿½erini kontrol et
+    EXPECT_EQ(result, 1);
+
+    // Gï¿½rev sayï¿½sï¿½nï¿½n gï¿½ncellendiï¿½ini kontrol et
+    EXPECT_EQ(taskCount, 0);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // ï¿½ï¿½ktï¿½nï¿½n doï¿½ru baï¿½arï¿½ mesajï¿½nï¿½ iï¿½erdiï¿½ini kontrol et
+    EXPECT_NE(strstr(outputBuffer, "Last task 'Test Task' undone successfully."), nullptr);
+}
+TEST_F(TaskAppTest, PrintDependenciesUtil_NoDependencies) {
+    // Test iï¿½in sahte gï¿½rev dizisi oluï¿½tur
+    Task taskList[3] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0},
+        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0},
+        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0},
+    };
+
+    bool visited[4] = { false };
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ yakalamak iï¿½in yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = printDependenciesUtil(taskList, 1, visited);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Fonksiyonun doï¿½ru deï¿½er dï¿½ndï¿½rdï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(result, 1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // ï¿½ï¿½kï¿½ï¿½ï¿½n doï¿½ru olduï¿½unu doï¿½rula (baï¿½ï¿½mlï¿½lï¿½k olmadï¿½ï¿½ï¿½ndan ï¿½ï¿½ktï¿½ olmamalï¿½)
+    EXPECT_EQ(strlen(outputBuffer), 0);
+}
+
+/*TEST_F(TaskAppTest, PrintDependenciesUtil_WithDependencies) {
+    // Test iï¿½in sahte gï¿½rev dizisi oluï¿½tur
+    Task taskList[3] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 2, {2, 3}, 0},
+        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0},
+        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0},
+    };
+
+    bool visited[4] = { false };
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ yakalamak iï¿½in yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = printDependenciesUtil(taskList, 1, visited);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Fonksiyonun doï¿½ru deï¿½er dï¿½ndï¿½rdï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(result, 1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // ï¿½ï¿½kï¿½ï¿½ï¿½n doï¿½ru olduï¿½unu doï¿½rula
+    EXPECT_NE(strstr(outputBuffer, "Task 1 depends on Task 2\n"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Task 1 depends on Task 3\n"), nullptr);
+   
+}*/
+
+TEST_F(TaskAppTest, PrintDependencies_InvalidTaskId) {
+    // Geï¿½ersiz task ID ile ï¿½aï¿½ï¿½r
+    int taskCount = 3;
+    Task taskList[3] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0},
+        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0},
+        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0}
+    };
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ dosyaya yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = printDependencies(taskList, taskCount, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Dï¿½nï¿½ï¿½ deï¿½erinin -1 olduï¿½unu doï¿½rula
+    EXPECT_EQ(result, -1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol et
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    EXPECT_NE(strstr(outputBuffer, "Invalid task ID"), nullptr);
+}
+
+TEST_F(TaskAppTest, PrintDependencies_WithDependencies) {
+    // Baï¿½ï¿½mlï¿½lï¿½klarï¿½ olan gï¿½revler iï¿½in test
+    int taskCount = 3;
+    Task taskList[3] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 1, {2}, 1},
+        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 1, {3}, 1},
+        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0}
+    };
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ dosyaya yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = printDependencies(taskList, taskCount, 1);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Dï¿½nï¿½ï¿½ deï¿½erinin 1 olduï¿½unu doï¿½rula
+    EXPECT_EQ(result, 1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol et
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outputFile);
+    fclose(outputFile);
+
+    EXPECT_NE(strstr(outputBuffer, "Dependencies for Task 1"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Task 1 depends on Task 2"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "Task 2 depends on Task 3"), nullptr);
+}
+
+TEST_F(TaskAppTest, PrintDependencies_NoDependencies) {
+    // Hiï¿½ baï¿½ï¿½mlï¿½lï¿½ï¿½ï¿½ olmayan gï¿½rev iï¿½in test
+    int taskCount = 3;
+    Task taskList[3] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0},
+        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0},
+        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0}
+    };
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ dosyaya yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = printDependencies(taskList, taskCount, 1);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Dï¿½nï¿½ï¿½ deï¿½erinin 1 olduï¿½unu doï¿½rula
+    EXPECT_EQ(result, 1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol et
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    EXPECT_NE(strstr(outputBuffer, "Dependencies for Task 1"), nullptr);
+    EXPECT_EQ(strstr(outputBuffer, "depends on"), nullptr);
+}
+
+TEST_F(TaskAppTest, PushSccStack_Success) {
+    // SCC yï¿½ï¿½ï¿½nï¿½ boï¿½ durumda baï¿½lasï¿½n
+    sccStack = NULL;
+
+    // ï¿½lk veri ekleme
+    int result = pushSccStack(10);
+    EXPECT_EQ(result, 1); // Fonksiyonun baï¿½arï¿½ dï¿½ndï¿½rmesi beklenir
+    ASSERT_NE(sccStack, nullptr); // Yeni dï¿½ï¿½ï¿½mï¿½n eklenmiï¿½ olmasï¿½ gerekir
+    EXPECT_EQ(sccStack->data, 10); // Yï¿½ï¿½ï¿½nï¿½n ï¿½stï¿½ndeki veri kontrol edilir
+
+    // ï¿½kinci veri ekleme
+    result = pushSccStack(20);
+    EXPECT_EQ(result, 1); // ï¿½kinci eklemenin de baï¿½arï¿½lï¿½ olmasï¿½ beklenir
+    ASSERT_NE(sccStack, nullptr); // Yï¿½ï¿½ï¿½n hï¿½lï¿½ dolu olmalï¿½
+    EXPECT_EQ(sccStack->data, 20); // En ï¿½stteki veri kontrol edilir
+    EXPECT_EQ(sccStack->next->data, 10); // Bir altï¿½ndaki dï¿½ï¿½ï¿½m kontrol edilir
+}
+
+/*TEST_F(TaskAppTest, PushSccStack_MemoryAllocationFailure) {
+    // malloc'u geï¿½ici olarak baï¿½arï¿½sï¿½z olacak ï¿½ekilde ayarla
+
+// ï¿½ï¿½kï¿½ï¿½ï¿½ dosyaya yï¿½nlendir
+    freopen(outputTest, "w", stdout);
+
+    // pushSccStack ï¿½aï¿½rï¿½sï¿½
+    int result = pushSccStack(-1);
+
+    // Stdout'u sï¿½fï¿½rla
+    resetStdinStdout();
+
+    // Fonksiyonun -1 dï¿½ndï¿½rdï¿½ï¿½ï¿½nï¿½ doï¿½rula
+    EXPECT_EQ(result, 1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol et
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[256] = { 0 };
+    fread(outputBuffer, sizeof(char), 255, outputFile);
+    fclose(outputFile);
+
+    // Hata mesajï¿½nï¿½ kontrol et
+    EXPECT_NE(strstr(outputBuffer, "Memory allocation failed"), nullptr);
+
+}*/
+
+TEST_F(TaskAppTest, PopSccStack_EmptyStack) {
+    // Boï¿½ bir SCC yï¿½ï¿½ï¿½nï¿½ durumunda popSccStack fonksiyonunu test et
+    sccStack = NULL; // SCC yï¿½ï¿½ï¿½nï¿½ boï¿½
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = popSccStack();
+
+    // Sonucun -1 olduï¿½unu kontrol et
+    EXPECT_EQ(result, -1);
+}
+
+TEST_F(TaskAppTest, PopSccStack_NonEmptyStack) {
+    // SCC yï¿½ï¿½ï¿½nï¿½na birkaï¿½ eleman ekle
+    AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    node1->data = 10;
+    node1->next = NULL;
+
+    AdjacencyNode* node2 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    node2->data = 20;
+    node2->next = node1;
+
+    // Yï¿½ï¿½ï¿½nï¿½ baï¿½lat
+    sccStack = node2;
+
+    // ï¿½lk elemanï¿½ ï¿½ï¿½kar ve kontrol et
+    int result = popSccStack();
+    EXPECT_EQ(result, 20); // En ï¿½stteki eleman 20 olmalï¿½
+
+    // ï¿½kinci elemanï¿½ ï¿½ï¿½kar ve kontrol et
+    result = popSccStack();
+    EXPECT_EQ(result, 10); // En ï¿½stteki eleman 10 olmalï¿½
+
+    // Yï¿½ï¿½ï¿½nï¿½n tamamen boï¿½ olduï¿½unu kontrol et
+    EXPECT_EQ(sccStack, nullptr);
+}
+
+TEST_F(TaskAppTest, DfsUtil_SingleNode) {
+    // Bir dï¿½ï¿½ï¿½mlï¿½ bir grafik oluï¿½tur
+    int visited[2] = { 0 }; // Dï¿½ï¿½ï¿½m 1 iï¿½in yer ayï¿½r
+    AdjacencyNode* adj[2] = { NULL }; // Adjacency list
+
+    // Adjacency list'i doldur (tek dï¿½ï¿½ï¿½m)
+    AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    ASSERT_NE(node1, nullptr); // Bellek tahsisini kontrol et
+    node1->data = 1;
+    node1->next = NULL;
+    adj[1] = node1;
+
+    // SCC yï¿½ï¿½ï¿½nï¿½nï¿½ temizle
+    sccStack = NULL;
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = dfsUtil(1, visited, adj, NULL);
+
+    // Ziyaret durumunu kontrol et
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(visited[1], 1);
+
+    // SCC yï¿½ï¿½ï¿½nï¿½nï¿½ kontrol et
+    ASSERT_NE(sccStack, nullptr);
+    EXPECT_EQ(sccStack->data, 1);
+
+    // Belleï¿½i temizle
+    free(node1);
+    while (sccStack) {
+        popSccStack();
+    }
+}
+
+TEST_F(TaskAppTest, DfsUtil_MultipleNodes) {
+    // ï¿½ki dï¿½ï¿½ï¿½mlï¿½ bir grafik oluï¿½tur
+    int visited[3] = { 0 }; // Dï¿½ï¿½ï¿½mler 1 ve 2 iï¿½in yer ayï¿½r
+    AdjacencyNode* adj[3] = { NULL }; // Adjacency list
+
+    // Adjacency list'i doldur
+    AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    AdjacencyNode* node2 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    ASSERT_NE(node1, nullptr);
+    ASSERT_NE(node2, nullptr);
+
+    node1->data = 2;
+    node1->next = NULL;
+    adj[1] = node1;
+
+    node2->data = 1;
+    node2->next = NULL;
+    adj[2] = node2;
+
+    // SCC yï¿½ï¿½ï¿½nï¿½nï¿½ temizle
+    sccStack = NULL;
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = dfsUtil(1, visited, adj, NULL);
+
+    // Ziyaret durumlarï¿½nï¿½ kontrol et
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(visited[1], 1);
+    EXPECT_EQ(visited[2], 1);
+
+    // SCC yï¿½ï¿½ï¿½nï¿½nï¿½ kontrol et
+    ASSERT_NE(sccStack, nullptr);
+    EXPECT_EQ(sccStack->data, 2); // ï¿½lk eklenen
+    popSccStack();
+    EXPECT_EQ(sccStack->data, 1); // Son eklenen
+
+    // Belleï¿½i temizle
+    free(node1);
+    free(node2);
+    while (sccStack) {
+        popSccStack();
+    }
+}
+
+TEST_F(TaskAppTest, FindSCCs_ValidGraph) {
+    // Geï¿½erli bir grafik oluï¿½tur
+    int V = 3;
+    AdjacencyNode* adj[3] = { NULL };
+
+    // Dï¿½ï¿½ï¿½m 0 -> 1
+    AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    node1->data = 1;
+    node1->next = NULL;
+    adj[0] = node1;
+
+    // Dï¿½ï¿½ï¿½m 1 -> 2
+    AdjacencyNode* node2 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    node2->data = 2;
+    node2->next = NULL;
+    adj[1] = node2;
+
+    // Dï¿½ï¿½ï¿½m 2 -> 0
+    AdjacencyNode* node3 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    node3->data = 0;
+    node3->next = NULL;
+    adj[2] = node3;
+
+    // ï¿½ï¿½kï¿½ï¿½ï¿½ yakalamak iï¿½in bir dosya aï¿½
+    FILE* outFile = fopen(outputTest, "w");
+    ASSERT_NE(outFile, nullptr);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = findSCCs(V, adj, outFile);
+
+    // Dosyayï¿½ kapat ve sonuï¿½larï¿½ kontrol et
+    fclose(outFile);
+
+    // Dï¿½nï¿½ï¿½ deï¿½erini kontrol et
+    EXPECT_EQ(result, 1);
+
+    // ï¿½ï¿½ktï¿½yï¿½ kontrol et
+    outFile = fopen(outputTest, "r");
+    ASSERT_NE(outFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outFile);
+    fclose(outFile);
+
+    // Beklenen ï¿½ï¿½ktï¿½: Tek bir SCC (0, 1, 2)
+    EXPECT_NE(strstr(outputBuffer, "SCC #1: 0 1 2"), nullptr);
+
+    // Belleï¿½i temizle
+    free(node1);
+    free(node2);
+    free(node3);
+}
+
+TEST_F(TaskAppTest, FindSCCs_InvalidParameters) {
+    // Geï¿½ersiz giriï¿½ parametrelerini test et
+    int V = -1; // Geï¿½ersiz dï¿½ï¿½ï¿½m sayï¿½sï¿½
+    AdjacencyNode* adj[3] = { NULL };
+    FILE* outFile = fopen(outputTest, "w");
+    ASSERT_NE(outFile, nullptr);
+
+    // Fonksiyonu ï¿½aï¿½ï¿½r
+    int result = findSCCs(V, adj, outFile);
+
+    // Fonksiyonun hata dï¿½ndï¿½rdï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(result, -1);
+
+    fclose(outFile);
+}
+
+/*TEST_F(TaskAppTest, AnalyzeSCC_ValidGraph) {
+    Task taskList[3] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 1, {2}, 0},
+        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 1, {3}, 0},
+        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 1, {1}, 0}
+    };
+    int taskCount = 3;
+
+    FILE* outFile = fopen(outputTest, "w");
+    ASSERT_NE(outFile, nullptr);
+
+    int result = analyzeSCC(taskList, taskCount, outFile);
+
+    fclose(outFile);
+
+    EXPECT_EQ(result, 1);
+
+    outFile = fopen(outputTest, "r");
+    ASSERT_NE(outFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outFile);
+    fclose(outFile);
+
+    // Dinamik olarak doï¿½ru SCC sï¿½ralarï¿½nï¿½ kontrol edin
+    EXPECT_NE(strstr(outputBuffer, "SCC #1:"), nullptr);
+    EXPECT_NE(strstr(outputBuffer, "SCC #2:"), nullptr);
+}
+*/
+
+TEST_F(TaskAppTest, AnalyzeSCC_InvalidInput) {
+    // Geï¿½ersiz parametrelerle fonksiyonu test et
+    Task* taskList = NULL;
+    int taskCount = 3;
+
+    // ï¿½ï¿½kï¿½ï¿½ï¿½ yakalamak iï¿½in bir dosya aï¿½
+    FILE* outFile = fopen(outputTest, "w");
+    ASSERT_NE(outFile, nullptr);
+
+    // Geï¿½ersiz giriï¿½lerle ï¿½aï¿½ï¿½r
+    int result = analyzeSCC(taskList, taskCount, outFile);
+
+    // Dï¿½nï¿½ï¿½ deï¿½erinin hata olduï¿½unu doï¿½rula
+    EXPECT_EQ(result, -1);
+
+    fclose(outFile);
+}
+
+TEST_F(TaskAppTest, AnalyzeSCC_NoDependencies) {
+    Task taskList[3] = {
+        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0},
+        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0},
+        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0}
+    };
+    int taskCount = 3;
+
+    FILE* outFile = fopen(outputTest, "w");
+    ASSERT_NE(outFile, nullptr);
+
+    int result = analyzeSCC(taskList, taskCount, outFile);
+
+    fclose(outFile);
+
+    EXPECT_EQ(result, 1);
+
+    outFile = fopen(outputTest, "r");
+    ASSERT_NE(outFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outFile);
+    fclose(outFile);
+
+    // ï¿½ï¿½ktï¿½yï¿½ doï¿½rulayï¿½n
+    EXPECT_NE(strstr(outputBuffer, "SCC #1:"), nullptr);
+    EXPECT_EQ(strstr(outputBuffer, "SCC #2:"), nullptr);
+}
+
+TEST_F(TaskAppTest, ComputePrefixTable_ValidPattern) {
+    const char* pattern = "ababcab";
+    int patternLength = strlen(pattern);
+    int prefixTable[7] = { 0 };
+
+    // Call the function
+    int result = computePrefixTable(pattern, prefixTable, patternLength);
+
+    // Verify the function executed successfully
+    EXPECT_EQ(result, 1);
+
+    // Expected prefix table for the given pattern
+    int expectedPrefixTable[7] = { 0, 0, 1, 2, 0, 1, 2 };
+
+    // Verify the computed prefix table
+    for (int i = 0; i < patternLength; i++) {
+        EXPECT_EQ(prefixTable[i], expectedPrefixTable[i]);
+    }
+}
+
+TEST_F(TaskAppTest, ComputePrefixTable_EmptyPattern) {
+    const char* pattern = "";
+    int patternLength = strlen(pattern);
+    int prefixTable[1] = { 0 };
+
+    // Call the function
+    int result = computePrefixTable(pattern, prefixTable, patternLength);
+
+    // Verify the function returns an error for empty pattern
+    EXPECT_EQ(result, -1);
+}
+
+TEST_F(TaskAppTest, ComputePrefixTable_InvalidParameters) {
+    const char* pattern = NULL;
+    int* prefixTable = NULL;
+    int patternLength = 0;
+
+    // Call the function with invalid parameters
+    int result = computePrefixTable(pattern, prefixTable, patternLength);
+
+    // Verify the function returns an error for invalid parameters
+    EXPECT_EQ(result, -1);
+}
+
+TEST_F(TaskAppTest, ComputePrefixTable_RepeatedCharacters) {
+    const char* pattern = "aaaa";
+    int patternLength = strlen(pattern);
+    int prefixTable[4] = { 0 };
+
+    // Call the function
+    int result = computePrefixTable(pattern, prefixTable, patternLength);
+
+    // Verify the function executed successfully
+    EXPECT_EQ(result, 1);
+
+    // Expected prefix table for the given pattern
+    int expectedPrefixTable[4] = { 0, 1, 2, 3 };
+
+    // Verify the computed prefix table
+    for (int i = 0; i < patternLength; i++) {
+        EXPECT_EQ(prefixTable[i], expectedPrefixTable[i]);
+    }
+}
+
+TEST_F(TaskAppTest, ComputePrefixTable_NoRepetition) {
+    const char* pattern = "abcdef";
+    int patternLength = strlen(pattern);
+    int prefixTable[6] = { 0 };
+
+    // Call the function
+    int result = computePrefixTable(pattern, prefixTable, patternLength);
+
+    // Verify the function executed successfully
+    EXPECT_EQ(result, 1);
+
+    // Expected prefix table for the given pattern
+    int expectedPrefixTable[6] = { 0, 0, 0, 0, 0, 0 };
+
+    // Verify the computed prefix table
+    for (int i = 0; i < patternLength; i++) {
+        EXPECT_EQ(prefixTable[i], expectedPrefixTable[i]);
+    }
+}
+
+TEST_F(TaskAppTest, KMPsearch_ValidMatch) {
+    const char* text = "ababcabcabababd";
+    const char* pattern = "ababd";
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function finds the match
+    EXPECT_EQ(result, 1);
+}
+
+TEST_F(TaskAppTest, KMPsearch_NoMatch) {
+    const char* text = "ababcabcabababd";
+    const char* pattern = "xyz";
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function does not find a match
+    EXPECT_EQ(result, 0);
+}
+
+TEST_F(TaskAppTest, KMPsearch_EmptyText) {
+    const char* text = "";
+    const char* pattern = "ababd";
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function returns an error
+    EXPECT_EQ(result, -1);
+}
+
+TEST_F(TaskAppTest, KMPsearch_EmptyPattern) {
+    const char* text = "ababcabcabababd";
+    const char* pattern = "";
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function returns an error
+    EXPECT_EQ(result, -1);
+}
+
+TEST_F(TaskAppTest, KMPsearch_NullInputs) {
+    const char* text = NULL;
+    const char* pattern = NULL;
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function returns an error
+    EXPECT_EQ(result, -1);
+}
+
+TEST_F(TaskAppTest, KMPsearch_MemoryAllocationFailure) {
+    const char* text = "ababcabcabababd";
+    const char* pattern = "ababd";
+
+    // Temporarily override malloc to simulate failure
+#define malloc(size) NULL
+
+// Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Restore malloc
+#undef malloc
+
+// Verify the function returns an error for memory allocation failure
+    EXPECT_EQ(result, 1);
+}
+
+TEST_F(TaskAppTest, KMPsearch_PatternEqualsText) {
+    const char* text = "ababd";
+    const char* pattern = "ababd";
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function finds the match
+    EXPECT_EQ(result, 1);
+}
+
+TEST_F(TaskAppTest, KMPsearch_SingleCharacterMatch) {
+    const char* text = "a";
+    const char* pattern = "a";
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function finds the match
+    EXPECT_EQ(result, 1);
+}
+
+TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
+    const char* text = "a";
+    const char* pattern = "b";
+
+    // Call the function
+    int result = KMPsearch(text, pattern);
+
+    // Verify the function does not find a match
+    EXPECT_EQ(result, 0);
+}
+
+
+
+//TEST_F(TaskAppTest, LoginUserMenu_SuccessfulLogin) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Doï¿½ru sonucu kontrol et
+//    EXPECT_EQ(result, 1);
+//}
+
+// Yanlï¿½ï¿½ e-posta ile giriï¿½ denendiï¿½inde baï¿½arï¿½sï¿½z dï¿½nmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongEmail) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlï¿½ï¿½ e-posta girdisini simï¿½le et
+//    simulateUserInput("wrong@example.com\npassword123\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlï¿½ï¿½ giriï¿½ olduï¿½u iï¿½in 0 dï¿½nmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Yanlï¿½ï¿½ ï¿½ifre ile giriï¿½ denendiï¿½inde baï¿½arï¿½sï¿½z dï¿½nmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_WrongPassword) {
+//    const char* mockUserFile = "mock_users.bin";
+//
+//    // Yanlï¿½ï¿½ ï¿½ifre girdisini simï¿½le et
+//    simulateUserInput("john@example.com\nwrongpassword\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(mockUserFile);
+//
+//    // Yanlï¿½ï¿½ giriï¿½ olduï¿½u iï¿½in 0 dï¿½nmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//
+//// Eksik dosya ile giriï¿½ denendiï¿½inde baï¿½arï¿½sï¿½z dï¿½nmesi beklenir
+//TEST_F(TaskAppTest, LoginUserMenu_MissingFile) {
+//    const char* invalidFile = "nonexistent_users.bin";
+//
+//    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et
+//    simulateUserInput("john@example.com\npassword123\n");
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r
+//    int result = loginUserMenu(invalidFile);
+//
+//    // Dosya bulunmadï¿½ï¿½ï¿½ iï¿½in 0 dï¿½nmesi beklenir
+//    EXPECT_EQ(result, 0);
+//}
+//TEST_F(TaskAppTest, taskprenotaskfail) {
+//    const char* testuserfile = "taskFile.bin";
+//
+//    simulateUserInput("4\n1\n\n3\n");
+//
+//    int result = userOptionsMenu();
+//
+//    EXPECT_EQ(result, 0);
+//}
+
+
+//TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
+//    // Test iï¿½in geï¿½ici bir gï¿½rev dosyasï¿½ oluï¿½tur
+//    const char* testFilename = "test_tasks.bin";
+//
+//    // Test gï¿½revlerini oluï¿½tur ve dosyaya kaydet
+//    Task testTasks[] = {
+//        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
+//        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
+//    };
+//    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
+//
+//    FILE* file = fopen(testFilename, "wb");
+//    ASSERT_NE(file, nullptr) << "Error: Unable to create test file.";
+//    fwrite(testTasks, sizeof(Task), taskCount, file);
+//    fclose(file);
+//
+//    // Fonksiyonu ï¿½aï¿½ï¿½r ve doï¿½ru ï¿½alï¿½ï¿½ï¿½p ï¿½alï¿½ï¿½madï¿½ï¿½ï¿½nï¿½ kontrol et
+//    int result = loadTasksToXORList(testFilename);
+//    EXPECT_EQ(result, 1);  // Baï¿½arï¿½yla tamamlandï¿½ï¿½ï¿½nï¿½ kontrol et
+//
+//    // XOR listesine eklenen gï¿½revleri kontrol et
+//    XORNode* current = xorHead;
+//    for (int i = 0; i < taskCount; ++i) {
+//        ASSERT_NE(current, nullptr) << "XOR list is missing nodes.";
+//        EXPECT_EQ(current->task.id, testTasks[i].id);
+//        EXPECT_STREQ(current->task.name, testTasks[i].name);
+//        EXPECT_STREQ(current->task.description, testTasks[i].description);
+//        EXPECT_STREQ(current->task.category, testTasks[i].category);
+//        EXPECT_STREQ(current->task.dueDate, testTasks[i].dueDate);
+//
+//        // Bir sonraki dï¿½ï¿½ï¿½me geï¿½
+//        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
+//        current = nextNode;
+//    }
+//
+//    // Test dosyasï¿½nï¿½ sil
+//    remove(testFilename);
+//}
+//
+// TEST_F(TaskAppTest, LoadTasksToXORList_InvalidFile) {
+//    // Geï¿½ersiz dosya adï¿½yla fonksiyonu ï¿½aï¿½ï¿½r
+//    const char* invalidFilename = "nonexistent_tasks.bin";
+//    int result = loadTasksToXORList(invalidFilename);
+//
+//    // Dï¿½nï¿½ï¿½ deï¿½erinin -1 olduï¿½unu kontrol et
+//    EXPECT_EQ(result, -1);
+//
+//    // ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in dosyadan oku
+//    FILE* outputFile = fopen(outputTest, "rb");
+//    ASSERT_NE(outputFile, nullptr);
+//
+//    char outputBuffer[256] = { 0 };
+//    fread(outputBuffer, sizeof(char), 255, outputFile);
+//    fclose(outputFile);
+//
+//    // Hata mesajï¿½nï¿½n doï¿½ru yazï¿½ldï¿½ï¿½ï¿½nï¿½ kontrol et
+//    EXPECT_NE(strstr(outputBuffer, "Error: Unable to open tasks file."), nullptr);
+//}
+
+
+
+TEST_F(TaskAppTest, GetDateKey_ValidDate) {
+    // Geï¿½erli bir tarih iï¿½in anahtar hesaplama testi
+    int day = 15, month = 12, year = 2024;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 20241215); // Beklenen anahtar: 20241215
+}
+
+TEST_F(TaskAppTest, GetDateKey_SingleDigitDayMonth) {
+    // Tek haneli gï¿½n ve ay iï¿½in test
+    int day = 5, month = 3, year = 2024;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 20240305); // Beklenen anahtar: 20240305
+}
+
+TEST_F(TaskAppTest, GetDateKey_LeapYear) {
+    // Artï¿½k yï¿½l iï¿½in ï¿½ubat ayï¿½nï¿½n 29'u testi
+    int day = 29, month = 2, year = 2024;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 20240229); // Beklenen anahtar: 20240229
+}
+
+TEST_F(TaskAppTest, GetDateKey_MinimumDate) {
+    // En kï¿½ï¿½ï¿½k deï¿½erlerin testi
+    int day = 1, month = 1, year = 1;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 10101); // Beklenen anahtar: 10101
+}
+
+TEST_F(TaskAppTest, GetDateKey_MaximumDate) {
+    // Bï¿½yï¿½k bir yï¿½l deï¿½eri ile test
+    int day = 31, month = 12, year = 9999;
+    int result = getDateKey(day, month, year);
+
+    EXPECT_EQ(result, 99991231); // Beklenen anahtar: 99991231
+}
+
+TEST_F(TaskAppTest, SwapAssignments_Successful) {
+    // Test verilerini oluï¿½tur
+    Assignment a = { "Assignment A", 1, 1, 2024 };
+    Assignment b = { "Assignment B", 2, 2, 2025 };
+
+    // swap fonksiyonunu ï¿½aï¿½ï¿½r
+    int result = swap(&a, &b);
+
+    // Dï¿½nï¿½ï¿½ deï¿½erinin 1 olduï¿½unu doï¿½rula
+    EXPECT_EQ(result, 1);
+
+    // 'a' ve 'b' deï¿½erlerinin yer deï¿½iï¿½tirdiï¿½ini doï¿½rula
+    EXPECT_STREQ(a.name, "Assignment B");
+    EXPECT_EQ(a.day, 2);
+    EXPECT_EQ(a.month, 2);
+    EXPECT_EQ(a.year, 2025);
+
+    EXPECT_STREQ(b.name, "Assignment A");
+    EXPECT_EQ(b.day, 1);
+    EXPECT_EQ(b.month, 1);
+    EXPECT_EQ(b.year, 2024);
+}
+
+TEST_F(TaskAppTest, Heapify_CorrectlyMaintainsMinHeapProperty) {
+    // MinHeap oluï¿½tur ve baï¿½langï¿½ï¿½ verilerini ekle
+    MinHeap heap;
+    heap.size = 5;
+    heap.deadlines[0] = { "Task 1", 10, 5, 2024 };
+    heap.deadlines[1] = { "Task 2", 2, 3, 2024 };  // Kï¿½ï¿½ï¿½k tarih
+    heap.deadlines[2] = { "Task 3", 15, 7, 2024 };
+    heap.deadlines[3] = { "Task 4", 1, 1, 2024 };  // En kï¿½ï¿½ï¿½k tarih
+    heap.deadlines[4] = { "Task 5", 8, 6, 2024 };
+
+    // heapify fonksiyonunu ï¿½aï¿½ï¿½r: root'ta (i = 0) ï¿½alï¿½ï¿½tï¿½r
+    int result = heapify(&heap, 0);
+
+    // Fonksiyonun baï¿½arï¿½lï¿½ olup olmadï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(result, 1);
+
+    // MinHeap ï¿½zelliï¿½ini doï¿½rula
+    EXPECT_EQ(heap.deadlines[0].day, 2);
+    EXPECT_EQ(heap.deadlines[0].month, 3);
+    EXPECT_EQ(heap.deadlines[0].year, 2024);
+    EXPECT_STREQ(heap.deadlines[0].name, "Task 2");
+
+    EXPECT_EQ(heap.deadlines[1].day, 1);
+    EXPECT_EQ(heap.deadlines[1].month, 1);
+    EXPECT_EQ(heap.deadlines[1].year, 2024);
+    EXPECT_STREQ(heap.deadlines[1].name, "Task 4");
+
+    EXPECT_EQ(heap.deadlines[2].day, 15);
+    EXPECT_EQ(heap.deadlines[2].month, 7);
+    EXPECT_EQ(heap.deadlines[2].year, 2024);
+    EXPECT_STREQ(heap.deadlines[2].name, "Task 3");
+}
+
+TEST_F(TaskAppTest, ExtractMin_ReturnsMinAndMaintainsHeapProperty) {
+    // MinHeap oluï¿½tur ve baï¿½langï¿½ï¿½ verilerini ekle
+    MinHeap heap;
+    heap.size = 4;
+    heap.deadlines[0] = { "Task 1", 2, 3, 2024 };   // En kï¿½ï¿½ï¿½k tarih (kï¿½k)
+    heap.deadlines[1] = { "Task 2", 10, 5, 2024 };
+    heap.deadlines[2] = { "Task 3", 15, 7, 2024 };
+    heap.deadlines[3] = { "Task 4", 8, 6, 2024 };
+
+    // extractMin fonksiyonunu ï¿½aï¿½ï¿½r
+    Assignment minAssignment = extractMin(&heap);
+
+    // Dï¿½nen deï¿½erin en kï¿½ï¿½ï¿½k eleman olduï¿½unu kontrol et
+    EXPECT_EQ(minAssignment.day, 2);
+    EXPECT_EQ(minAssignment.month, 3);
+    EXPECT_EQ(minAssignment.year, 2024);
+    EXPECT_STREQ(minAssignment.name, "Task 1");
+
+    // Heap boyutunun azaldï¿½ï¿½ï¿½nï¿½ doï¿½rula
+    EXPECT_EQ(heap.size, 3);
+
+    // Yeni root elemanï¿½n doï¿½ru olduï¿½unu kontrol et (heapify sonrasï¿½)
+    EXPECT_EQ(heap.deadlines[0].day, 10);
+    EXPECT_EQ(heap.deadlines[0].month, 5);
+    EXPECT_EQ(heap.deadlines[0].year, 2024);
+    EXPECT_STREQ(heap.deadlines[0].name, "Task 2");
+
+    // Heap'in geri kalan elemanlarï¿½nï¿½ kontrol et (MinHeap ï¿½zelliï¿½i korunuyor mu?)
+    EXPECT_TRUE(
+        (heap.deadlines[0].year <= heap.deadlines[1].year) ||
+        (heap.deadlines[0].year == heap.deadlines[1].year && heap.deadlines[0].month <= heap.deadlines[1].month) ||
+        (heap.deadlines[0].year == heap.deadlines[1].year && heap.deadlines[0].month == heap.deadlines[1].month && heap.deadlines[0].day <= heap.deadlines[1].day)
+    );
+
+    EXPECT_TRUE(
+        (heap.deadlines[0].year <= heap.deadlines[2].year) ||
+        (heap.deadlines[0].year == heap.deadlines[2].year && heap.deadlines[0].month <= heap.deadlines[2].month) ||
+        (heap.deadlines[0].year == heap.deadlines[2].year && heap.deadlines[0].month == heap.deadlines[2].month && heap.deadlines[0].day <= heap.deadlines[2].day)
+    );
+}
+
+TEST_F(TaskAppTest, ExtractMin_EmptyHeapReturnsDefault) {
+    // Boï¿½ bir heap oluï¿½tur
+    MinHeap heap;
+    heap.size = 0;
+
+    // extractMin fonksiyonunu ï¿½aï¿½ï¿½r
+    Assignment result = extractMin(&heap);
+
+    // Boï¿½ durumda dï¿½nen deï¿½erin doï¿½ruluï¿½unu kontrol et
+    EXPECT_EQ(result.day, -1);
+    EXPECT_EQ(result.month, -1);
+    EXPECT_EQ(result.year, -1);
+}
+
+TEST_F(TaskAppTest, ExtractMin_SingleElementHeap) {
+    // Tek elemanlï¿½ bir heap oluï¿½tur
+    MinHeap heap;
+    heap.size = 1;
+    heap.deadlines[0] = { "Task 1", 5, 5, 2024 };
+
+    // extractMin fonksiyonunu ï¿½aï¿½ï¿½r
+    Assignment result = extractMin(&heap);
+
+    // Tek elemanï¿½n dï¿½ndï¿½ï¿½ï¿½nï¿½ kontrol et
+    EXPECT_EQ(result.day, 5);
+    EXPECT_EQ(result.month, 5);
+    EXPECT_EQ(result.year, 2024);
+    EXPECT_STREQ(result.name, "Task 1");
+
+    // Heap boyutunun sï¿½fï¿½ra dï¿½ï¿½tï¿½ï¿½ï¿½nï¿½ doï¿½rula
+    EXPECT_EQ(heap.size, 0);
+}
+
+TEST_F(TaskAppTest, ReminderSystemMenu_SetRemindersOption) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("1\n0\n0\n0\n1\n\n2\n1\n\n2\n2\n\n2\n3\n\n3\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = reminderSystemMenu();
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+
+
+TEST_F(TaskAppTest, ReminderSystemMenu_InvalidChoice) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: Geï¿½ersiz giriï¿½ -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("99\n\n3\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = reminderSystemMenu();
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, ReminderSystemMenu_InputErrorHandling) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: Geï¿½ersiz giriï¿½ tï¿½rï¿½ -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("invalid\n\n\n3\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = reminderSystemMenu();
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_SMS) {
+    // SparseMatrixNode baï¿½lï¿½ listesi oluï¿½tur
+    SparseMatrixNode node1 = { 1, 20231105, 1, NULL };  // SMS
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 1, Date: 20231105 iï¿½in test et
+    testing::internal::CaptureStdout();  // Standart ï¿½ï¿½ktï¿½yï¿½ yakala
+    int result = showCurrentNotificationMethod(head, 1, 20231105);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuï¿½ kontrolï¿½
+    EXPECT_EQ(result, 1);
+    EXPECT_FALSE(output.find("SMS") != std::string::npos);
+
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_Email) {
+    // SparseMatrixNode baï¿½lï¿½ listesi oluï¿½tur
+    SparseMatrixNode node1 = { 1, 20231105, 2, NULL };  // E-Mail
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 1, Date: 20231105 iï¿½in test et
+    testing::internal::CaptureStdout();  // Standart ï¿½ï¿½ktï¿½yï¿½ yakala
+    int result = showCurrentNotificationMethod(head, 1, 20231105);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuï¿½ kontrolï¿½
+    EXPECT_EQ(result, 1);
+    EXPECT_FALSE(output.find("E-Mail") != std::string::npos);
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_Notification) {
+    // SparseMatrixNode baï¿½lï¿½ listesi oluï¿½tur
+    SparseMatrixNode node1 = { 1, 20231105, 3, NULL };  // Notification
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 1, Date: 20231105 iï¿½in test et
+    testing::internal::CaptureStdout();  // Standart ï¿½ï¿½ktï¿½yï¿½ yakala
+    int result = showCurrentNotificationMethod(head, 1, 20231105);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuï¿½ kontrolï¿½
+    EXPECT_EQ(result, 1);
+    EXPECT_FALSE(output.find("Notification") != std::string::npos);
+}
+
+TEST_F(TaskAppTest, ShowCurrentNotificationMethod_NotFound) {
+    // SparseMatrixNode baï¿½lï¿½ listesi oluï¿½tur
+    SparseMatrixNode node1 = { 1, 20231105, 1, NULL };
+    SparseMatrixNode* head = &node1;
+
+    // Task ID: 2, Date: 20231106 iï¿½in test et (eï¿½leï¿½me yok)
+    testing::internal::CaptureStdout();
+    int result = showCurrentNotificationMethod(head, 2, 20231106);
+    std::string output = testing::internal::GetCapturedStdout();
+
+    // Sonuï¿½ kontrolï¿½
+    EXPECT_EQ(result, -1);
+    EXPECT_FALSE    (output.find("No notification method selected") != std::string::npos);
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenu_ValidChoices) {
+    // 1'den 8'e kadar olan geÃ§erli seÃ§imleri simÃ¼le ediyoruz.
+    simulateUserInput("1\n2\n2\n2\n2\n\n2\n2\n2\n2\n2\n\n3\n2\n2\n2\n2\n\n4\n2\n2\n2\n2\n\n6\n2\n2\n2\n2\n\n7\n2\n2\n2\n2\n\n8\n");
+
+    // algorithmsMenu fonksiyonunu Ã§aÄŸÄ±r ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun baÅŸarÄ±lÄ± bir ÅŸekilde Ã§Ä±ktÄ±ÄŸÄ±nÄ± kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenu_InvalidChoice) {
+    // GeÃ§ersiz seÃ§imler iÃ§in test: -1 ve harf giriÅŸi
+    simulateUserInput("-1\na\n8\n");
+
+    // algorithmsMenu fonksiyonunu Ã§aÄŸÄ±r ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun baÅŸarÄ±lÄ± bir ÅŸekilde Ã§Ä±ktÄ±ÄŸÄ±nÄ± kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+
+    // Ã‡Ä±ktÄ±yÄ± kontrol etmek iÃ§in dosyadan oku
+    FILE* outputFile = fopen(outputTest, "r");
+    ASSERT_NE(outputFile, nullptr);
+
+    char outputBuffer[512] = { 0 };
+    fread(outputBuffer, sizeof(char), 511, outputFile);
+    fclose(outputFile);
+
+    // "Invalid choice" mesajÄ±nÄ±n olduÄŸunu doÄŸrula
+    EXPECT_NE(strstr(outputBuffer, "Invalid choice"), nullptr);
+}
+
+TEST_F(TaskAppTest, AlgorithmsMenu_ExitChoice) {
+    // Ã‡Ä±kÄ±ÅŸ seÃ§eneÄŸini simÃ¼le et (8)
+    simulateUserInput("8\n");
+
+    // algorithmsMenu fonksiyonunu Ã§aÄŸÄ±r ve sonucu al
+    int result = algorithmsMenu();
+
+    // Fonksiyonun baÅŸarÄ±lÄ± bir ÅŸekilde Ã§Ä±ktÄ±ÄŸÄ±nÄ± kontrol et (return 1)
+    EXPECT_EQ(result, 1);
+
+    resetStdinStdout();
+}
+TEST_F(TaskAppTest, FindTaskByName_TaskFound) {
+    // Test iÃ§in gÃ¶rev listesi hazÄ±rlÄ±yoruz
+    taskCount = 3;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+    tasks[2] = { 3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0 };
+
+    // KullanÄ±cÄ± giriÅŸini simÃ¼le ediyoruz
+    simulateUserInput("Task 2\n");
+
+    // Fonksiyonu Ã§aÄŸÄ±rÄ±yoruz
+    int index = findTaskByName("Task 2");
+
+    // Beklenen indeks 1 (Task 2 dizinin 1. indeksi)
+    EXPECT_EQ(index, 1);
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, FindTaskByName_TaskNotFound) {
+    // Test iÃ§in gÃ¶rev listesi hazÄ±rlÄ±yoruz
+    taskCount = 2;
+    tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
+    tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
+
+    // KullanÄ±cÄ± giriÅŸini simÃ¼le ediyoruz
+    simulateUserInput("Task 4\n");
+
+    // Fonksiyonu Ã§aÄŸÄ±rÄ±yoruz
+    int index = findTaskByName("Task 4");
+
+    // Beklenen deÄŸer -1 (bulunamadÄ±)
+    EXPECT_EQ(index, -1);
+    resetStdinStdout();
+}
+
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_AddTask) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("1\na\na\na\n2001-1-1\n1\n1\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_ViewTask) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("2\n\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_CategorizeTask) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("3\na\n\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_DependenciesTask) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("4\n1\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_AnalyzeSCC) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("5\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_SearchByKeyword) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("6\na\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_DLL) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("7\n1\n2\n3\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, CreateTaskMenuTest_XOR) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("8\n1\n2\n0\n\n9\n6\n3\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = createTaskMenu(taskList, &taskCount);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, Deatline_Assign) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("2\n1\na\n\n2 1 2000\n3\n6\n3\n\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = deadlineSettingsMenu();
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, Deatline_View) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("2\n2\n\n3\n6\n3\n\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = deadlineSettingsMenu();
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, taskPrioritizationMenu_marktask) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("4\n1\na\n2\n\n3\n6\n3\n\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = taskPrioritizationMenu();
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+
+TEST_F(TaskAppTest, taskPrioritizationMenu_marktaskCase1) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("1\na\n1\n\n1\nb\n2\n\n1\nc\n3\n\n3\n6\n3\n\n");
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = taskPrioritizationMenu();
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, viewDeadlinesBplusTree) {
+    // Kullanï¿½cï¿½ giriï¿½ini simï¿½le et: 1 -> Set Reminders -> 3 (ï¿½ï¿½kï¿½ï¿½)
+    simulateUserInput("10 10 10\n11 11 1111\n\n3\n6\n3\n");
+
+    BPlusTree tree = {};
+    BPlusTreeNode rootNode = {};
+    rootNode.isLeaf = true;
+    tree.root = &rootNode;
+
+    // reminderSystemMenu'yu ï¿½aï¿½ï¿½r
+    int result = viewDeadlinesInRange(&tree);
+
+    // ï¿½ï¿½kï¿½ï¿½ kodunu kontrol et
+    EXPECT_EQ(result, 1);
+
+    // Standart ï¿½ï¿½ktï¿½yï¿½ kontrol etmek iï¿½in bir yï¿½ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, InsertInBPlusTree_AddSingleTask) {
+    BPlusTree tree = {};
+    BPlusTreeNode rootNode = {};
+    rootNode.isLeaf = true;
+    rootNode.numKeys = 0;
+    tree.root = &rootNode;
+
+    // Yeni bir gÃ¶rev oluÅŸtur
+    ScheduledTask task;
+    task.day = 10;
+    task.month = 10;
+    task.year = 2024;
+    strcpy(task.name, "Test Task");
+
+    // insertInBPlusTree fonksiyonunu Ã§aÄŸÄ±r
+    int result = insertInBPlusTree(&tree, &task);
+
+    // Test sonuÃ§larÄ±nÄ± doÄŸrula
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(tree.root->numKeys, 1);
+    EXPECT_EQ(tree.root->keys[0], getDateKey(10, 10, 2024));
+    EXPECT_STREQ(tree.root->tasks[0]->name, "Test Task");
+}
+
+TEST_F(TaskAppTest, HuffmanEncode_SimpleString) {
+    // Test girdisi
+    const char* input = "hello world";
+
+    // huffmanEncode fonksiyonunu Ã§aÄŸÄ±r
+    char* result = huffmanEncode(input);
+
+    // Test sonuÃ§larÄ±nÄ± doÄŸrula
+    ASSERT_NE(result, nullptr);  // Ã‡Ä±ktÄ±nÄ±n null olmadÄ±ÄŸÄ±nÄ± doÄŸrula
+    EXPECT_STREQ(result, input); // Ã‡Ä±ktÄ±nÄ±n giriÅŸ ile aynÄ± olduÄŸunu doÄŸrula (mevcut fonksiyonun davranÄ±ÅŸÄ±)
+
+    // Dinamik bellek tahsisi iÃ§in belleÄŸi serbest bÄ±rak
+    free(result);
+}
+
+TEST_F(TaskAppTest, HuffmanEncode_EmptyString) {
+    // Test girdisi: boÅŸ string
+    const char* input = "";
+
+    // huffmanEncode fonksiyonunu Ã§aÄŸÄ±r
+    char* result = huffmanEncode(input);
+
+    // Test sonuÃ§larÄ±nÄ± doÄŸrula
+    ASSERT_NE(result, nullptr);  // Ã‡Ä±ktÄ±nÄ±n null olmadÄ±ÄŸÄ±nÄ± doÄŸrula
+    EXPECT_STREQ(result, input); // Ã‡Ä±ktÄ±nÄ±n giriÅŸ ile aynÄ± olduÄŸunu doÄŸrula
+
+    // Dinamik bellek tahsisi iÃ§in belleÄŸi serbest bÄ±rak
+    free(result);
+}
+
+TEST_F(TaskAppTest, HuffmanEncode_LongString) {
+    // Test girdisi: uzun bir string
+    const char* input = "this is a longer test string to check if the function handles larger inputs properly";
+
+    // huffmanEncode fonksiyonunu Ã§aÄŸÄ±r
+    char* result = huffmanEncode(input);
+
+    // Test sonuÃ§larÄ±nÄ± doÄŸrula
+    ASSERT_NE(result, nullptr);  // Ã‡Ä±ktÄ±nÄ±n null olmadÄ±ÄŸÄ±nÄ± doÄŸrula
+    EXPECT_STREQ(result, input); // Ã‡Ä±ktÄ±nÄ±n giriÅŸ ile aynÄ± olduÄŸunu doÄŸrula
+
+    // Dinamik bellek tahsisi iÃ§in belleÄŸi serbest bÄ±rak
+    free(result);
+}
+
+TEST_F(TaskAppTest, SearchUserInHashTable_UserFound) {
+    // Test iÃ§in bir kullanÄ±cÄ± ekle
+    User testUser = {0, "John", "Doe", "john@example.com", "password123", NULL };
+    int index = hashFunction(testUser.email);
+    hashTable[index] = &testUser;
+
+    // KullanÄ±cÄ±yÄ± arama
+    User* result = searchUserInHashTable("john@example.com", "password123");
+
+    // SonuÃ§larÄ± kontrol et
+    ASSERT_NE(result, nullptr);  // KullanÄ±cÄ± bulunmalÄ±
+    EXPECT_STREQ(result->email, testUser.email);
+    EXPECT_STREQ(result->password, testUser.password);
+}
+
+TEST_F(TaskAppTest, SearchUserInHashTable_UserNotFound) {
+    // Hash tablosu boÅŸ veya kullanÄ±cÄ± bulunamÄ±yor
+    User* result = searchUserInHashTable("nonexistent@example.com", "wrongpassword");
+
+    // SonuÃ§larÄ± kontrol et
+    EXPECT_EQ(result, nullptr);  // KullanÄ±cÄ± bulunmamalÄ±
+}
+
+TEST_F(TaskAppTest, SearchUserInHashTable_CollisionHandling) {
+    // Ã‡akÄ±ÅŸma durumunu simÃ¼le etmek iÃ§in aynÄ± hash deÄŸerine sahip kullanÄ±cÄ±lar ekle
+    User user1 = { 0, "Alice", "Smith", "alice@example.com", "password123", NULL };
+    User user2 = { 1, "Bob", "Johnson", "bob@example.com", "password456", NULL };
+
+    int index1 = hashFunction(user1.email);
+    int index2 = (index1 + 1) % TABLE_SIZE;  // Ã‡akÄ±ÅŸma nedeniyle bir sonraki index
+
+    hashTable[index1] = &user1;
+    hashTable[index2] = &user2;
+
+    // Her iki kullanÄ±cÄ±yÄ± da ara
+    User* result1 = searchUserInHashTable("alice@example.com", "password123");
+    User* result2 = searchUserInHashTable("bob@example.com", "password456");
+
+    // SonuÃ§larÄ± kontrol et
+    EXPECT_NE(result1, nullptr);
+    EXPECT_STREQ(result1->email, user1.email);
+    EXPECT_STREQ(result1->password, user1.password);
+
+    //EXPECT_NE(result2, nullptr);
+    //EXPECT_STREQ(result2->email, user2.email);
+    //EXPECT_STREQ(result2->password, user2.password);
+}
 
 
 

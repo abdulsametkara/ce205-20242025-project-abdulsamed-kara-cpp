@@ -1,4 +1,4 @@
-
+﻿
 /**
  * @file task.cpp
  * @brief Contains task definitions and operations for the Task Scheduler project.
@@ -6,6 +6,17 @@
  * This file contains functions and classes related to task management in the Task Scheduler project.
  * The functions include task addition, editing, and various user operations.
  */
+
+ /**
+  * @def _CRT_SECURE_NO_WARNINGS
+  * @brief Disables warnings related to the use of unsafe C runtime functions.
+  *
+  * This macro is used to suppress warnings that are generated when using certain functions
+  * such as `strcpy`, `sprintf`, etc., which are considered unsafe by modern compilers.
+  * Defining this macro allows the use of these functions without triggering security warnings.
+  */
+#define _CRT_SECURE_NO_WARNINGS
+
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "../header/task.h"
@@ -21,78 +32,152 @@
 #include <iostream>
 #include <cstring>
 
- /**
-  * @file task_manager.cpp
-  * @brief Defines constants, data structures, and platform-specific headers for the Task Scheduler project.
-  *
-  * This file includes platform-specific headers, task structures, and global variables used in the Task Scheduler project.
-  *
-  * - Platform-Specific Operations: Includes appropriate headers (`Sleep()` for Windows and `sleep()` for Unix-like systems).
-  * - Global Task Pointers: Task linked list using `head` and `tail`, and XOR linked list using `xorHead` and `xorTail`.
-  * - Constant Definitions:
-  *   - `TABLE_SIZE`: The size of the hash table.
-  *   - `MAX_TASKS`: Maximum number of tasks that can be handled.
-  *   - `MAX_ASSIGNMENT_NAME`: Maximum length for the assignment name.
-  * - Global Variables: The `assignments` array to store tasks and `filename` for persistent task data storage.
-  */
-
 #ifdef _WIN32
 #include <windows.h>  // Windows için Sleep()
 #else
 #include <unistd.h>   // Linux/macOS için sleep()
 #endif
 
-TaskNode* head = NULL;      // Liste başı (ilk görev)
-TaskNode* tail = NULL;      // Liste sonu (son görev)
+  /**
+   * @brief Pointer to the head of the task list.
+   *
+   * This pointer represents the beginning of the linked list that stores all the tasks.
+   * It is used to traverse and manage the list of tasks effectively.
+   */
+TaskNode* head = NULL;  // Liste başı (ilk görev)
+
+/**
+ * @brief Pointer to the tail of the task list.
+ *
+ * This pointer represents the end of the linked list that stores all the tasks.
+ * It is used to quickly add new tasks to the end of the list.
+ */
+TaskNode* tail = NULL;  // Liste sonu (son görev)
+
+/**
+ * @brief Pointer to the head of the XOR linked list.
+ *
+ * This pointer represents the beginning of an XOR linked list, which is used for storing tasks.
+ * The XOR linked list provides efficient traversal using XOR-based memory representation.
+ */
 XORNode* xorHead = NULL;
+
+/**
+ * @brief Pointer to the tail of the XOR linked list.
+ *
+ * This pointer represents the end of the XOR linked list.
+ * It is used to add new tasks to the end and manage the list efficiently.
+ */
 XORNode* xorTail = NULL;
 
-
-
+/**
+ * @brief Size of the hash table.
+ *
+ * This constant defines the number of buckets in the hash table used for storing user information.
+ * The value of TABLE_SIZE is set to 10, which determines the capacity of the hash table.
+ */
 #define TABLE_SIZE 10  // Hash tablosunun boyutu
+
+ /**
+  * @brief Maximum number of tasks that can be stored.
+  *
+  * This constant defines the maximum number of tasks that can be managed by the application.
+  * The value of MAX_TASKS is set to 100, limiting the number of tasks that can be created and stored.
+  */
 #define MAX_TASKS 100  // Maksimum görev sayısı
+
+  /**
+   * @brief Maximum length of assignment names.
+   *
+   * This constant defines the maximum length of an assignment name that can be stored in the application.
+   * The value of MAX_ASSIGNMENT_NAME is set to 50, ensuring assignment names do not exceed this length.
+   */
 #define MAX_ASSIGNMENT_NAME 50
+
+   /**
+    * @brief Array to store assignments.
+    *
+    * This array holds the assignments related to tasks. It can store up to 100 assignments, and each assignment
+    * is identified by a unique name with a maximum length of 50 characters.
+    */
 Assignment assignments[100];
+
+/**
+ * @brief File name for storing tasks.
+ *
+ * This constant represents the name of the binary file used to store task information persistently.
+ * The tasks are saved to and loaded from this file to maintain data across application sessions.
+ */
 const char* filename = "tasks.bin";
 
 
 /**
- * @file task_manager.cpp
- * @brief Defines global variables, data structures, and namespace usage for the Task Scheduler project.
+ * @brief Array to store tasks.
  *
- * This file contains various global variables and data structures for managing tasks, users, and notifications
- * in the Task Scheduler project. It also uses the standard namespace for convenience.
- *
- * - Task Management:
- *   - `tasks`: An array to store up to 100 tasks.
- *   - `taskList`: An array to maintain the current list of tasks in the system.
- *   - `taskCount`: Tracks the current number of tasks in the system.
- * - User Management:
- *   - `hashTable`: A hash table to store user information for quick access.
- *   - `overflowArea`: An area to manage user data that overflows the hash table.
- *   - `overflowCount`: Tracks the number of users in the overflow area.
- *   - `loggedUser`: Stores information about the currently logged-in user.
- * - Notification Settings:
- *   - `notificationMethod`: Stores the notification preference set by the user.
- * - Namespace:
- *   - `using namespace std`: Used to simplify the use of standard library features.
+ * This array holds the tasks that users create. It has a fixed size of 100, meaning it can store up to 100 tasks.
  */
-
-
 Task tasks[100];
+
+/**
+ * @brief Hash table for storing user information.
+ *
+ * This hash table is used to store pointers to User objects. The size of the hash table is defined by TABLE_SIZE.
+ * It is used for efficient lookup, insertion, and management of user data.
+ */
 User* hashTable[TABLE_SIZE];
+
+/**
+ * @brief List of tasks for task management.
+ *
+ * This array is used to manage the tasks created by users. It can store up to MAX_TASKS tasks and is used
+ * throughout the application for task-related operations such as creation, modification, and deletion.
+ */
 Task taskList[MAX_TASKS];  // Görev listesi
+
+/**
+ * @brief Counter for the current number of tasks.
+ *
+ * This variable keeps track of the number of tasks that have been created and are currently stored in the taskList.
+ * It is used to manage task operations and to determine the next available position in the taskList array.
+ */
 int taskCount = 0;  // Mevcut görev sayısı
+
+/**
+ * @brief Current notification method setting.
+ *
+ * This variable stores the current notification method selected by the user. It can take values corresponding to
+ * different notification methods such as SMS, Email, or Phone Call. The default value is 0, indicating no method selected.
+ */
 int notificationMethod = 0;
+
+/**
+ * @brief Overflow area for handling user data collisions.
+ *
+ * This array is used as an overflow area to handle collisions in the hash table. When a collision occurs and cannot
+ * be resolved within the main hash table, user data is stored in this overflow area. The size of the overflow area
+ * is defined by OVERFLOW_SIZE.
+ */
 User overflowArea[OVERFLOW_SIZE];
+
+/**
+ * @brief Counter for the number of entries in the overflow area.
+ *
+ * This variable keeps track of how many users are currently stored in the overflow area. It is used to manage
+ * the overflow mechanism and ensure that the overflow area does not exceed its capacity.
+ */
 int overflowCount = 0;
 
 
 
 using namespace std;
 
+/**
+ * @brief Represents the currently logged-in user.
+ *
+ * The `loggedUser` variable holds the information of the user who is currently logged in.
+ * It is used throughout the application to access user-specific data and preferences.
+ */
 User loggedUser;
-
 
 /**
  * @brief Clears the console screen.
@@ -259,9 +344,7 @@ int printDeadlineSettingsMenu() {
     printf("========================================\n");
     printf("1. Assign Deadline\n");
     printf("2. View Deadlines\n");
-    printf("3. View Deadlines In Range\n");
-    printf("4. Search In Date Range\n");
-    printf("5. Exit\n");
+    printf("3. Exit\n");
     printf("========================================\n");
     printf("Please enter your choice : ");
     return 1;
@@ -454,16 +537,16 @@ int createTaskMenu(Task taskList[], int* taskCount) {
             enterToContinue();
             break;
         case 6:
-            searchTasksByKeyword();  // KMP araması ile görevleri ara
+            searchTasksByKeyword(); 
             enterToContinue();
             break;
         case 7:
-            navigateTasks();  // Çift bağlantılı liste ile görevler arasında gezinme
+            navigateTasks();  
             enterToContinue();
             break;
         case 8:
-            loadTasksToXORList("tasks.bin");  // XOR Linked List'e görevleri yükle
-            navigateXORList();  // XOR Linked List üzerinde gezin
+            loadTasksToXORList("tasks.bin");  
+            navigateXORList();  
             enterToContinue();
             break;
         case 9:
@@ -491,14 +574,14 @@ int createTaskMenu(Task taskList[], int* taskCount) {
 int addTaskToXORList(Task task) {
     XORNode* newNode = (XORNode*)malloc(sizeof(XORNode));
     newNode->task = task;
-    newNode->xorPtr = xorTail; // Yeni düğümün XOR işaretçisini mevcut kuyruğa işaret edecek şekilde ayarla
+    newNode->xorPtr = xorTail; 
 
     if (xorHead == NULL) {
-        xorHead = xorTail = newNode; // Liste boşsa, baş ve son düğüm aynı olur
+        xorHead = xorTail = newNode; 
     }
     else {
-        xorTail->xorPtr = (XORNode*)((uintptr_t)(xorTail->xorPtr) ^ (uintptr_t)newNode); // Önceki düğümün XOR işaretçisini güncelle
-        xorTail = newNode; // Kuyruğu güncelle
+        xorTail->xorPtr = (XORNode*)((uintptr_t)(xorTail->xorPtr) ^ (uintptr_t)newNode); 
+        xorTail = newNode; 
     }
     return 1;
 }
@@ -512,20 +595,21 @@ int addTaskToXORList(Task task) {
  * @param filename The name of the binary file containing tasks to be loaded.
  */
 
-void loadTasksToXORList(const char* filename) {
+int loadTasksToXORList(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
         printf("Error: Unable to open tasks file.\n");
-        return;
+        return -1;
     }
 
     Task task;
     while (fread(&task, sizeof(Task), 1, file)) {
-        addTaskToXORList(task); // Her bir görevi XOR Linked List'e ekle
+        addTaskToXORList(task); 
     }
 
     fclose(file);
     printf("Tasks loaded into XOR Linked List successfully!\n");
+    return 1;
 }
 
 /**
@@ -536,19 +620,18 @@ void loadTasksToXORList(const char* filename) {
  * Navigation is based on XOR pointers to efficiently traverse in both directions.
  */
 
-void navigateXORList() {
+int navigateXORList() {
     XORNode* current = xorHead;
     XORNode* prev = NULL;
     XORNode* next;
 
     if (current == NULL) {
         printf("No tasks found in the list.\n");
-        return;
+        return -1; // Hata: XOR listesi boş
     }
 
     int choice;
     do {
-        // Mevcut görevi göster
         printf("ID: %d\n", current->task.id);
         printf("Name: %s\n", current->task.name);
         printf("Description: %s\n", current->task.description);
@@ -556,11 +639,14 @@ void navigateXORList() {
         printf("Due Date: %s\n", current->task.dueDate);
         printf("---------------------------\n");
 
-        // Kullanıcıdan seçim al
         printf("Press 1 to go forward, 2 to go backward, or 0 to exit: ");
         choice = getInput();
 
-        // Seçime göre sonraki veya önceki düğüme geç
+        if (choice == -2) { // Hatalı giriş
+            handleInputError();
+            continue;
+        }
+
         if (choice == 1) {
             next = (XORNode*)((uintptr_t)prev ^ (uintptr_t)current->xorPtr);
             prev = current;
@@ -579,7 +665,9 @@ void navigateXORList() {
     } while (choice != 0);
 
     printf("Exiting navigation.\n");
+    return 1; // Başarı durumu
 }
+
 
 /**
  * @brief Adds a new task to the doubly linked list of tasks.
@@ -590,7 +678,7 @@ void navigateXORList() {
  * @param newTask The task to be added to the doubly linked list.
  */
 
-void addTaskToList(Task newTask) {
+int addTaskToList(Task newTask) {
     TaskNode* newNode = (TaskNode*)malloc(sizeof(TaskNode));
     newNode->task = newTask;
     newNode->next = NULL;
@@ -603,6 +691,7 @@ void addTaskToList(Task newTask) {
         head = newNode;
     }
     tail = newNode;
+    return 1;
 }
 
 
@@ -657,7 +746,6 @@ int addTask(Task taskList[], int* taskCount, int maxTasks) {
     push(newTask);
     saveTasks(taskList, *taskCount);
 
-    // Çift bağlantılı listeye ekle
     addTaskToList(newTask);
 
     printf("Task added and saved successfully!\n");
@@ -722,11 +810,11 @@ void navigateTasks() {
  * The `viewTask` function displays all tasks currently stored in the queue by dequeuing them one by one.
  * If no tasks are found, it notifies the user that the task list is empty.
  */
-void viewTask() {
+int viewTask() {
     if (front == NULL) {
         printf("No tasks found. The task list is empty.\n");
         enterToContinue();
-        return;
+        return 0; // Hata durumu: Kuyruk boş
     }
 
     printf("\n--- List of Tasks ---\n");
@@ -740,7 +828,9 @@ void viewTask() {
         printf("---------------------------\n");
     }
     enterToContinue();
+    return 1; // Başarı durumu
 }
+
 
 /**
  * @brief Displays tasks filtered by a specific category.
@@ -751,7 +841,7 @@ void viewTask() {
  * @note The function prompts the user to enter the category name to filter tasks.
  */
 void categorizeTask() {
-    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda aç
+    FILE* file = fopen("tasks.bin", "rb");  
     if (!file) {
         printf("Error: Could not open tasks file or no tasks found.\n");
         enterToContinue();
@@ -761,13 +851,12 @@ void categorizeTask() {
     char category[50];
     printf("Enter category to filter: ");
     fgets(category, sizeof(category), stdin);
-    category[strcspn(category, "\n")] = 0;  // Yeni satır karakterini sil
+    category[strcspn(category, "\n")] = 0;  
 
     Task task;
-    int found = 0;  // Kategoride görev bulunup bulunmadığını kontrol etmek için
+    int found = 0;  
 
     printf("\n--- Tasks in Category '%s' ---\n", category);
-    // Dosyadaki görevleri sırayla okuyup kategoriye göre filtrele
     while (fread(&task, sizeof(Task), 1, file)) {
         if (strcmp(task.category, category) == 0) {
             printf("ID: %d\n", task.id);
@@ -783,8 +872,8 @@ void categorizeTask() {
         printf("No tasks found in this category.\n");
     }
 
-    fclose(file);  // Dosyayı kapat
-    enterToContinue();  // Kullanıcının devam etmesi için bekle
+    fclose(file);  
+    enterToContinue();  
 }
 
 
@@ -823,17 +912,17 @@ void saveTasks(const Task taskList[], int taskCount) {
  * @return The number of tasks successfully loaded.
  */
 int loadTasks(Task taskList[], int maxTasks) {
-    FILE* file = fopen("tasks.bin", "rb");  // Dosyayı okuma modunda açıyoruz
+    FILE* file = fopen("tasks.bin", "rb");  
     if (file == NULL) {
         printf("No previous tasks found.\n");
-        return 0;  // Eğer dosya yoksa 0 görev yüklendi
+        return 0;  
     }
 
     int taskCount = fread(taskList, sizeof(Task), maxTasks, file);
     fclose(file);
 
     printf("%d tasks loaded successfully!\n", taskCount);
-    return taskCount;  // Yüklenen görev sayısını geri döndürüyoruz
+    return taskCount;  
 }
 
 /**
@@ -869,7 +958,7 @@ Task dequeue() {
     if (front == NULL) {
         printf("Queue is empty\n");
         Task emptyTask;
-        emptyTask.id = -1; // Hata durumu için
+        emptyTask.id = -1; 
         return emptyTask;
     }
     QueueNode* temp = front;
@@ -890,11 +979,16 @@ Task dequeue() {
  *
  * @param task The task to be added to the stack.
  */
-void push(Task task) {
+int push(Task task) {
     StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed for StackNode.\n");
+        return -1; // Bellek tahsisi başarısız
+    }
     newNode->task = task;
     newNode->next = stackTop;
     stackTop = newNode;
+    return 1; // Başarılı
 }
 
 
@@ -910,7 +1004,7 @@ Task pop() {
     if (stackTop == NULL) {
         printf("Stack is empty\n");
         Task emptyTask;
-        emptyTask.id = -1; // Hata durumu için
+        emptyTask.id = -1; 
         return emptyTask;
     }
     StackNode* temp = stackTop;
@@ -931,20 +1025,20 @@ Task pop() {
  * @param taskList The list of tasks.
  * @param taskCount Pointer to the current count of tasks.
  */
-void undoLastTask(Task taskList[], int* taskCount) {
-    Task lastTask = pop();
-    if (lastTask.id == -1) {
+int undoLastTask(Task taskList[], int* taskCount) {
+    Task lastTask = pop(); // Son görevi yığından çıkar
+    if (lastTask.id == -1) { // Eğer yığın boşsa
         printf("No tasks to undo.\n");
-        return;
+        return -1; // Hata: Undo işlemi yapılamadı
     }
 
-    // Son görevi listeden çıkar
-    (*taskCount)--;
+    (*taskCount)--; // Görev sayısını azalt
     printf("Last task '%s' undone successfully.\n", lastTask.name);
 
-    // Dosyayı güncelle
-    saveTasks(taskList, *taskCount);
+    saveTasks(taskList, *taskCount); // Güncellenmiş görevleri kaydet
+    return 1; // Başarı durumu
 }
+
 
 /**
  * @brief Utility function to print the dependencies of a given task using DFS.
@@ -957,23 +1051,32 @@ void undoLastTask(Task taskList[], int* taskCount) {
  * @param taskId The ID of the task for which dependencies are being printed.
  * @param visited Array to keep track of visited tasks to avoid cycles.
  */
-void printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
+int printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
     if (visited[taskId]) {
-        return;
+        return 1; // Daha önce ziyaret edildi, işleme devam etmeyin
     }
     visited[taskId] = true;
 
-    Task task = taskList[taskId - 1]; // taskId'den görevi al
+    Task task = taskList[taskId - 1]; // Görevi al
 
-    // Görevin bağımlılıklarını yazdır
+    if (task.dependencyCount == 0) {
+        return 1; // Hiç bağımlılığı yok, işleme devam etmeyin
+    }
+
     for (int i = 0; i < task.dependencyCount; i++) {
         int dependencyId = task.dependencies[i];
         printf("Task %d depends on Task %d\n", task.id, dependencyId);
 
-        // Bağımlı görevi tekrar çağırarak tüm alt bağımlılıkları bul
-        printDependenciesUtil(taskList, dependencyId, visited);
+        // Rekürsif olarak bağımlılıkları kontrol et
+        int result = printDependenciesUtil(taskList, dependencyId, visited);
+        if (result == -1) {
+            return -1; // Alt bağımlılıklarda bir hata oluştu
+        }
     }
+
+    return 1; // Başarıyla tamamlandı
 }
+
 
 /**
  * @brief Prints all dependencies of a given task.
@@ -985,11 +1088,20 @@ void printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
  * @param taskCount The number of tasks in the list.
  * @param startTaskId The ID of the task for which dependencies are to be printed.
  */
-void printDependencies(Task taskList[], int taskCount, int startTaskId) {
-    bool visited[MAX_TASKS] = { false };
 
+int printDependencies(Task taskList[], int taskCount, int startTaskId) {
+    if (startTaskId <= 0 || startTaskId > taskCount) {
+        printf("Invalid task ID: %d. Task ID must be between 1 and %d.\n", startTaskId, taskCount);
+        return -1; // Hata: Geçersiz task ID
+    }
+
+    bool visited[MAX_TASKS] = { false };
     printf("Dependencies for Task %d:\n", startTaskId);
+
+    // Bağımlılıkları yazdır
     printDependenciesUtil(taskList, startTaskId, visited);
+
+    return 1; // Başarı durumu
 }
 
 /**
@@ -1000,11 +1112,16 @@ void printDependencies(Task taskList[], int taskCount, int startTaskId) {
  *
  * @param v The vertex to be added to the SCC stack.
  */
-void pushSccStack(int v) {
+int pushSccStack(int v) {
     AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+    if (newNode == NULL) {
+        printf("Memory allocation failed for AdjacencyNode.\n");
+        return -1;
+    }
     newNode->data = v;
     newNode->next = sccStack;
     sccStack = newNode;
+    return 1;
 }
 
 /**
@@ -1035,9 +1152,14 @@ int popSccStack() {
  * @param adj The adjacency list representing the graph.
  * @param component Pointer to the SCC stack for storing vertices in the current component.
  */
-void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** component) {
+int dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** component) {
+    if (visited[v]) {
+        return 0; // Düğüm zaten ziyaret edilmiş
+    }
+
     visited[v] = 1;
-    pushSccStack(v);
+    pushSccStack(v); // SCC yığınına ekle
+
     AdjacencyNode* temp = adj[v];
     while (temp != NULL) {
         if (!visited[temp->data]) {
@@ -1045,6 +1167,8 @@ void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** compone
         }
         temp = temp->next;
     }
+
+    return 1; // DFS başarıyla tamamlandı
 }
 
 /**
@@ -1058,21 +1182,32 @@ void dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** compone
  * @param adj The adjacency list representing the graph.
  * @param out The output file where SCCs are printed.
  */
-void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
+int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
+    if (V <= 0 || adj == NULL || out == NULL) {
+        fprintf(stderr, "Invalid input parameters.\n");
+        return -1; // Hata durumu
+    }
+
     int visited[MAX_TASKS] = { 0 };
 
+    // Orijinal graf üzerinde DFS
     for (int i = 0; i < V; i++) {
         if (!visited[i]) {
             dfsUtil(i, visited, adj, NULL);
         }
     }
 
+    // Transpoz graf oluşturma
     AdjacencyNode* transpose[MAX_TASKS] = { NULL };
     for (int v = 0; v < V; v++) {
         AdjacencyNode* temp = adj[v];
         while (temp != NULL) {
             int u = temp->data;
             AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+            if (!newNode) {
+                fprintf(stderr, "Memory allocation failed.\n");
+                return -1; // Hata durumu
+            }
             newNode->data = v;
             newNode->next = transpose[u];
             transpose[u] = newNode;
@@ -1083,6 +1218,7 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
     memset(visited, 0, sizeof(visited));
     int numSCC = 0;
 
+    // Transpoz graf üzerinde DFS
     while (sccStack != NULL) {
         int v = popSccStack();
 
@@ -1096,6 +1232,7 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
         }
     }
 
+    // Transpoz grafı temizle
     for (int i = 0; i < V; i++) {
         while (transpose[i] != NULL) {
             AdjacencyNode* temp = transpose[i];
@@ -1103,7 +1240,10 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
             free(temp);
         }
     }
+
+    return 1; // Başarılı durum
 }
+
 
 /**
  * @brief Analyzes Strongly Connected Components (SCCs) in the task dependency graph.
@@ -1118,21 +1258,37 @@ void findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
  * @return Always returns 1 to indicate successful analysis.
  */
 int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
+    if (taskList == NULL || taskCount <= 0 || out == NULL) {
+        fprintf(stderr, "Invalid input parameters.\n");
+        return -1; // Hata durumu
+    }
+
     AdjacencyNode* adj[MAX_TASKS] = { NULL };
 
+    // Görevlerin bağımlılıklarını oluştur
     for (int i = 0; i < taskCount; i++) {
         Task task = taskList[i];
         for (int j = 0; j < task.dependencyCount; j++) {
             int dep = task.dependencies[j];
             AdjacencyNode* newNode = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
+            if (!newNode) {
+                fprintf(stderr, "Memory allocation failed.\n");
+                return -1; // Bellek tahsisi hatası
+            }
             newNode->data = dep - 1;
             newNode->next = adj[task.id - 1];
             adj[task.id - 1] = newNode;
         }
     }
 
-    findSCCs(taskCount, adj, out);
+    // SCC'leri analiz et
+    int result = findSCCs(taskCount, adj, out);
+    if (result != 1) {
+        fprintf(stderr, "Failed to find SCCs.\n");
+        return -1; // SCC analiz hatası
+    }
 
+    // Bağımlılık listesini temizle
     for (int i = 0; i < taskCount; i++) {
         while (adj[i] != NULL) {
             AdjacencyNode* temp = adj[i];
@@ -1140,8 +1296,10 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
             free(temp);
         }
     }
-    return 1;
+
+    return 1; // Başarı durumu
 }
+
 
 
 /**
@@ -1154,20 +1312,27 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
  * @param prefixTable The prefix table to be filled.
  * @param patternLength The length of the pattern.
  */
-void computePrefixTable(const char* pattern, int* prefixTable, int patternLength) {
+int computePrefixTable(const char* pattern, int* prefixTable, int patternLength) {
+    if (pattern == NULL || prefixTable == NULL || patternLength <= 0) {
+        return -1; // Error: Invalid input parameters
+    }
+
     int length = 0;
-    prefixTable[0] = 0;  // İlk eleman 0
+    prefixTable[0] = 0;
 
     for (int i = 1; i < patternLength; i++) {
         while (length > 0 && pattern[i] != pattern[length]) {
             length = prefixTable[length - 1];
         }
+
         if (pattern[i] == pattern[length]) {
             length++;
         }
         prefixTable[i] = length;
     }
+    return 1; // Success
 }
+
 
 /**
  * @brief Searches for a pattern in the given text using the Knuth-Morris-Pratt (KMP) algorithm.
@@ -1180,23 +1345,34 @@ void computePrefixTable(const char* pattern, int* prefixTable, int patternLength
  * @return Returns 1 if the pattern is found, otherwise returns 0.
  */
 int KMPsearch(const char* text, const char* pattern) {
+    if (text == NULL || pattern == NULL) {
+        return -1; // Error: Invalid input
+    }
+
     int textLength = strlen(text);
     int patternLength = strlen(pattern);
 
-    // Önek tablosunu oluştur
+    if (patternLength == 0 || textLength == 0) {
+        return -1; // Error: Invalid input (empty text or pattern)
+    }
+
     int* prefixTable = (int*)malloc(sizeof(int) * patternLength);
+    if (!prefixTable) {
+        return -2; // Error: Memory allocation failed
+    }
+
     computePrefixTable(pattern, prefixTable, patternLength);
 
-    int i = 0;  // text indeks
-    int j = 0;  // pattern indeks
+    int i = 0;
+    int j = 0;
     while (i < textLength) {
         if (pattern[j] == text[i]) {
             j++;
             i++;
         }
         if (j == patternLength) {
-            free(prefixTable);  // Belleği serbest bırak
-            return 1;  // Eşleşme bulundu
+            free(prefixTable);
+            return 1; // Match found
         }
         else if (i < textLength && pattern[j] != text[i]) {
             if (j != 0) {
@@ -1207,9 +1383,10 @@ int KMPsearch(const char* text, const char* pattern) {
             }
         }
     }
-    free(prefixTable);  // Belleği serbest bırak
-    return 0;  // Eşleşme bulunamadı
+    free(prefixTable);
+    return 0; // Match not found
 }
+
 
 
 /**
@@ -1231,7 +1408,7 @@ void searchTasksByKeyword() {
     char keyword[256];
     printf("Enter the keyword to search in task descriptions: ");
     fgets(keyword, sizeof(keyword), stdin);
-    keyword[strcspn(keyword, "\n")] = 0;  // Yeni satır karakterini sil
+    keyword[strcspn(keyword, "\n")] = 0;  
 
     Task task;
     int found = 0;
@@ -1272,7 +1449,7 @@ void searchTasksByKeyword() {
  */
 int deadlineSettingsMenu() {
     int choice;
-    Assignment assignment;  // Görev yapısı
+    Assignment assignment;  
 
     while (1) {
         printDeadlineSettingsMenu();
@@ -1286,7 +1463,6 @@ int deadlineSettingsMenu() {
 
         switch (choice) {
         case 1:
-            // Deadline atama fonksiyonunu çağır
             assign_deadline(&assignment);
             enterToContinue();
             break;
@@ -1295,33 +1471,7 @@ int deadlineSettingsMenu() {
             enterToContinue();
             break;
         case 3:
-            // Belirli bir tarih aralığındaki görevleri görüntüle
-            viewDeadlinesInRange(tree);
-            enterToContinue();
-            break;
-        case 4:
-            // Tarih aralığında görev arama fonksiyonunu çağır
-        {
-            int startDay, startMonth, startYear;
-            int endDay, endMonth, endYear;
-
-            printf("Enter start date (day month year): ");
-            scanf("%d %d %d", &startDay, &startMonth, &startYear);
-            printf("Enter end date (day month year): ");
-            scanf("%d %d %d", &endDay, &endMonth, &endYear);
-
-            int startKey = getDateKey(startDay, startMonth, startYear);
-            int endKey = getDateKey(endDay, endMonth, endYear);
-
-            printf("\n--- Tasks between %02d/%02d/%04d and %02d/%02d/%04d ---\n",
-                startDay, startMonth, startYear, endDay, endMonth, endYear);
-
-            searchInDateRange(tree->root, startKey, endKey);
-            enterToContinue();
-        }
-        break;
-        case 5:
-            return 0;  // Menüden çıkış
+            return 0;  
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -1332,15 +1482,12 @@ int deadlineSettingsMenu() {
 }
 
 /**
- * @brief Represents a MinHeap data structure for managing deadlines.
+ * @brief Initializes a MinHeap for managing deadlines.
  *
- * The `MinHeap` structure is used to manage deadlines in the task scheduling system.
- * It helps to keep track of tasks with the closest deadlines at the top.
- *
- * @var deadlineHeap The MinHeap instance used to manage deadlines.
+ * The `deadlineHeap` structure is initialized with an array of tasks, all set to zero initially.
+ * The second field represents the size of the heap, which is initially set to 0.
  */
-MinHeap deadlineHeap = { {0}, 0 };  // İlk alan tüm görevler için sıfırlanır, ikinci alan size olarak 0 atanır
-
+MinHeap deadlineHeap = { {0}, 0 };
 
 /**
  * @brief Assigns a deadline to a given assignment.
@@ -1356,42 +1503,35 @@ int assign_deadline(Assignment* assignment) {
     char taskName[MAX_ASSIGNMENT_NAME];
     int day, month, year;
 
-    // Görev adını kullanıcıdan al
     printf("Enter Task Name: ");
-    while (getchar() != '\n');  // stdin'deki önceki newline'ı temizle
+    while (getchar() != '\n');  
     if (fgets(taskName, MAX_ASSIGNMENT_NAME, stdin) == NULL) {
         printf("Error reading task name.\n");
         return -1;
     }
-    taskName[strcspn(taskName, "\n")] = '\0';  // Yeni satırı sil
+    taskName[strcspn(taskName, "\n")] = '\0';  
 
-    // Deadline bilgisi al
     printf("Enter Deadline (day month year): ");
     if (scanf("%d %d %d", &day, &month, &year) != 3) {
         printf("Invalid input! Please try again.\n");
-        while (getchar() != '\n');  // stdin temizle
+        while (getchar() != '\n');  
         return -1;
     }
 
-    // Tarih geçerliliğini kontrol et
     if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900) {
         printf("Invalid date! Please enter a valid date.\n");
         return -1;
     }
 
-    // Görev adını kopyala
     strncpy(assignment->name, taskName, MAX_ASSIGNMENT_NAME - 1);
-    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  // Null terminator
+    assignment->name[MAX_ASSIGNMENT_NAME - 1] = '\0';  
 
-    // Deadline tarihini ata
     assignment->day = day;
     assignment->month = month;
     assignment->year = year;
 
-    // Deadline'ı yığına ekle
     insertMinHeap(&deadlineHeap, *assignment);
 
-    // Deadline'ı dosyaya kaydet
     FILE* file = fopen("deadlines.bin", "ab");
     if (!file) {
         printf("Error: Could not open deadlines file for writing.\n");
@@ -1423,7 +1563,7 @@ int viewDeadlines() {
     printf("\n--- Upcoming Deadlines (Sorted by Date) ---\n");
     printf("-------------------------------------------\n");
 
-    MinHeap tempHeap = deadlineHeap;  // Yığının bir kopyasını alarak orijinali koruyoruz
+    MinHeap tempHeap = deadlineHeap;  
 
     int taskCount = 0;
     while (tempHeap.size > 0) {
@@ -1441,7 +1581,7 @@ int viewDeadlines() {
     }
 
     printf("-------------------------------------------\n");
-    enterToContinue();  // Kullanıcıdan devam etmesini bekle
+    enterToContinue();  
     return 1;
 }
 
@@ -1458,7 +1598,7 @@ int viewDeadlines() {
  * @return Returns an integer representing the date in YYYYMMDD format.
  */
 int getDateKey(int day, int month, int year) {
-    return year * 10000 + month * 100 + day;  // YYYYMMDD formatında bir anahtar oluşturur
+    return year * 10000 + month * 100 + day;  
 }
 
 
@@ -1607,7 +1747,6 @@ int heapify(MinHeap* heap, int i) {
     int left = 2 * i + 1;
     int right = 2 * i + 2;
 
-    // Deadline'a göre karşılaştırma
     if (left < heap->size &&
         (heap->deadlines[left].year < heap->deadlines[smallest].year ||
             (heap->deadlines[left].year == heap->deadlines[smallest].year && heap->deadlines[left].month < heap->deadlines[smallest].month) ||
@@ -1649,7 +1788,6 @@ int insertMinHeap(MinHeap* heap, Assignment deadline) {
     int i = heap->size - 1;
     heap->deadlines[i] = deadline;
 
-    // Yukarı doğru yer değiştirerek minimum yığın özelliğini koruma
     while (i != 0 &&
         (heap->deadlines[(i - 1) / 2].year > heap->deadlines[i].year ||
             (heap->deadlines[(i - 1) / 2].year == heap->deadlines[i].year && heap->deadlines[(i - 1) / 2].month > heap->deadlines[i].month) ||
@@ -1731,7 +1869,37 @@ int reminderSystemMenu() {
 
 
 
-// Hatırlatıcı Ayarlama Fonksiyonu
+/**
+ * @brief Sets a reminder by prompting the user for a specific duration and displaying a countdown.
+ *
+ * The function prompts the user to input a reminder duration in days, hours, minutes, and seconds.
+ * It then calculates the total duration in seconds and starts a countdown timer to display the time
+ * remaining in the format "Days:Hours:Minutes:Seconds".
+ *
+ * If the entered duration is invalid (i.e., less than or equal to zero), the user is prompted to enter
+ * a valid duration and the function returns without setting the reminder.
+ *
+ * @return int Returns 0 if the duration is invalid, otherwise continues with the countdown.
+ *
+ * @details
+ * - Uses `getInput()` to get input values for days, hours, minutes, and seconds.
+ * - Uses `clearScreen()` to clear the console between countdown displays.
+ * - The countdown is handled by a for loop that decreases the total number of seconds by 1.
+ * - Each second, `platformSleep(1)` is called to make the program wait for 1 second.
+ * - After the countdown reaches zero, a message is displayed informing the user that the reminder is triggered.
+ *
+ * @note The time remaining is displayed in the format Days:Hours:Minutes:Seconds.
+ *
+ * Example Usage:
+ * @code
+ *     int result = setReminders();
+ *     if (result == 0) {
+ *         // Handle invalid duration
+ *     }
+ * @endcode
+ *
+ * @todo Implement `getInput()`, `clearScreen()`, `enterToContinue()`, and `platformSleep(int seconds)` functions to work across different platforms.
+ */
 int setReminders() {
     clearScreen();
 
@@ -1747,7 +1915,7 @@ int setReminders() {
     printf("Seconds: ");
     seconds = getInput();
 
-    // Toplam süreyi saniyeye çevir
+    // Convert total duration to seconds
     int totalSeconds = seconds + minutes * 60 + hours * 3600 + days * 86400;
 
     if (totalSeconds <= 0) {
@@ -1758,29 +1926,38 @@ int setReminders() {
 
     printf("Setting reminder for %d seconds...\n", totalSeconds);
 
-    // Geri sayım yaparak bekleme
+    // Countdown loop
     for (int remaining = totalSeconds; remaining > 0; --remaining) {
         clearScreen();
         printf("Time remaining: %02d:%02d:%02d:%02d\n",
-            remaining / 86400,            // Gün
-            (remaining % 86400) / 3600,   // Saat
-            (remaining % 3600) / 60,      // Dakika
-            remaining % 60);              // Saniye
+            remaining / 86400,            // Days
+            (remaining % 86400) / 3600,   // Hours
+            (remaining % 3600) / 60,      // Minutes
+            remaining % 60);              // Seconds
 
-        platformSleep(1);  // 1 saniye bekle
+        platformSleep(1);  // Wait for 1 second
     }
 
     printf("Time's up! Reminder triggered.\n");
     enterToContinue();
-
 }
 
-// Platforma göre uyumlu bekleme fonksiyonu
+
+/**
+ * @brief Platform-independent sleep function.
+ *
+ * This function pauses the execution of the program for the specified number of seconds.
+ * It uses `Sleep()` on Windows and `sleep()` on Linux/macOS.
+ *
+ * @param seconds The number of seconds to sleep.
+ *
+ * @return int Returns 1 after sleeping for the given duration.
+ */
 int platformSleep(int seconds) {
 #ifdef _WIN32
-    Sleep(seconds * 1000);  // Windows: milisaniye cinsinden bekler
+    Sleep(seconds * 1000);  // Windows: wait in milliseconds
 #else
-    sleep(seconds);         // Linux/macOS: saniye cinsinden bekler
+    sleep(seconds);         // Linux/macOS: wait in seconds
 #endif
     return 1;
 }
@@ -1789,10 +1966,20 @@ int platformSleep(int seconds) {
 
 
 
+
+/**
+ * @brief Configures notification settings by allowing the user to select a notification method.
+ *
+ * The function displays the current notification method and prompts the user to select a new notification method
+ * from the available options: SMS, E-Mail, or Phone Call.
+ * If an invalid choice is made, the function is called recursively until a valid choice is entered.
+ *
+ * @return int Returns 0 if the notification method is successfully set, otherwise returns 1 for invalid input.
+ */
 int notificationSettings() {
     clearScreen();
 
-    // Mevcut bildirim yöntemini göster
+    // Display current notification method
     showCurrentNotificationMethod();
 
     int choice;
@@ -1819,7 +2006,7 @@ int notificationSettings() {
     default:
         printf("Invalid choice. Please try again.\n");
         enterToContinue();
-        notificationSettings();  // Geçersiz girişte tekrar çağır
+        notificationSettings();  // Recursively call for invalid input
         return 1;
     }
 
@@ -1827,7 +2014,14 @@ int notificationSettings() {
     return 0;
 }
 
-// Mevcut bildirim yöntemini ekranda gösterir
+/**
+ * @brief Displays the current notification method.
+ *
+ * This function displays the currently selected notification method.
+ * If no method is selected, it informs the user accordingly.
+ *
+ * @return int Returns 1 after displaying the current notification method.
+ */
 int showCurrentNotificationMethod() {
     if (notificationMethod == 0) {
         printf("No notification method selected yet.\n");
@@ -1842,6 +2036,18 @@ int showCurrentNotificationMethod() {
     return 1;
 }
 
+/**
+ * @brief Creates a new Sparse Matrix node.
+ *
+ * This function allocates memory for a new node in a sparse matrix with the given row, column, and value.
+ * The `next` pointer is set to NULL.
+ *
+ * @param row The row index of the new node.
+ * @param col The column index of the new node.
+ * @param value The value to be stored in the new node.
+ *
+ * @return SparseMatrixNode* A pointer to the newly created Sparse Matrix node.
+ */
 SparseMatrixNode* createNode(int row, int col, int value) {
     SparseMatrixNode* newNode = (SparseMatrixNode*)malloc(sizeof(SparseMatrixNode));
     newNode->row = row;
@@ -1851,7 +2057,19 @@ SparseMatrixNode* createNode(int row, int col, int value) {
     return newNode;
 }
 
-// Sparse Matrix'e değer ekleme
+/**
+ * @brief Adds a value to the Sparse Matrix.
+ *
+ * This function adds a new node with the specified row, column, and value to the sparse matrix.
+ * The new node is added to the head of the linked list representing the sparse matrix.
+ *
+ * @param head A pointer to the head of the sparse matrix linked list.
+ * @param row The row index of the new value.
+ * @param col The column index of the new value.
+ * @param value The value to be added to the sparse matrix.
+ *
+ * @return int Returns 1 after successfully adding the new value.
+ */
 int addNotification(SparseMatrixNode** head, int row, int col, int value) {
     SparseMatrixNode* newNode = createNode(row, col, value);
     newNode->next = *head;
@@ -1859,7 +2077,16 @@ int addNotification(SparseMatrixNode** head, int row, int col, int value) {
     return 1;
 }
 
-// Bildirimleri gösterme
+/**
+ * @brief Displays all notifications in the sparse matrix.
+ *
+ * This function traverses the linked list representing the sparse matrix and displays the task ID, date,
+ * and notification type for each node.
+ *
+ * @param head A pointer to the head of the sparse matrix linked list.
+ *
+ * @return int Returns 1 after successfully displaying all notifications.
+ */
 int displayNotifications(SparseMatrixNode* head) {
     SparseMatrixNode* temp = head;
     while (temp != NULL) {
@@ -1869,12 +2096,38 @@ int displayNotifications(SparseMatrixNode* head) {
     return 1;
 }
 
+/**
+ * @brief Updates the notification method for a specific task on a specific date.
+ *
+ * This function adds or updates a node in the sparse matrix representing a notification for a specific task ID
+ * and date with a new notification method.
+ *
+ * @param taskId The task ID for which the notification method is to be updated.
+ * @param date The date for which the notification method is to be updated.
+ * @param method The new notification method (e.g., SMS, E-Mail).
+ * @param head A pointer to the head of the sparse matrix linked list.
+ *
+ * @return int Returns 1 after successfully updating the notification method.
+ */
 int updateNotificationMethod(int taskId, int date, int method, SparseMatrixNode** head) {
     addNotification(head, taskId, date, method);
     printf("Notification method updated for Task ID %d on Date %d\n", taskId, date);
     return 1;
 }
 
+/**
+ * @brief Displays the current notification method for a specific task on a specific date.
+ *
+ * This function traverses the linked list representing the sparse matrix and finds the notification method
+ * for a given task ID and date. If found, it displays the notification method; otherwise, it informs the user
+ * that no notification method is selected.
+ *
+ * @param head A pointer to the head of the sparse matrix linked list.
+ * @param taskId The task ID for which the notification method is to be displayed.
+ * @param date The date for which the notification method is to be displayed.
+ *
+ * @return int Returns 1 if the notification method is found, otherwise returns -1.
+ */
 int showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date) {
     SparseMatrixNode* temp = head;
     while (temp != NULL) {
@@ -1893,27 +2146,81 @@ int showCurrentNotificationMethod(SparseMatrixNode* head, int taskId, int date) 
 
 
 
-
-
-
+/**
+ * @brief Task prioritization menu allowing the user to mark task importance.
+ *
+ * This function displays a menu for the user to prioritize tasks by marking their importance level.
+ * It provides options for marking task importance, viewing current tasks, or exiting the menu. The user
+ * can select a task and assign an importance level of Low, Medium, or High.
+ *
+ * The menu is displayed in a loop until the user chooses to exit. If invalid input is provided, the user
+ * is prompted to enter a valid option. The function handles errors and invalid choices gracefully by
+ * re-prompting the user.
+ *
+ * @return int Returns 0 upon exiting the menu successfully.
+ *
+ * @details
+ * - Uses `printTaskPrioritizationMenu()` to display the available options.
+ * - Uses `getInput()` to read the user's choice.
+ * - Allows the user to mark the importance of tasks by calling `markTaskImportance()`.
+ * - Handles invalid inputs by displaying an error message and re-prompting the user.
+ *
+ * Example Usage:
+ * @code
+ *     int result = taskPrioritizationMenu();
+ *     if (result == 0) {
+ *         // Menu exited successfully
+ *     }
+ * @endcode
+ */
 int taskPrioritizationMenu() {
     int choice;
 
     while (1) {
-        printTaskPrioritizationMenu();  // Menüyü ekrana yazdır
-        choice = getInput();  // Kullanıcıdan giriş al
+        printTaskPrioritizationMenu();  // Display the task prioritization menu
+        choice = getInput();  // Get user input
 
-        if (choice == -2) {  // Hatalı giriş durumu
+        if (choice == -2) {  // Handle invalid input case
             handleInputError();
             enterToContinue();
             continue;
         }
 
         switch (choice) {
-        case 1:
-            markTaskImportance();  // Görevin önemini belirleme
+        case 1: {
+            char taskName[100];
+            int importanceId;
+
+            // Kullanıcıdan Task Name al
+            printf("Enter the name of the task to mark importance: ");
+            scanf(" %[^\n]%*c", taskName);
+
+            // Kullanıcıdan Importance ID al
+            while (1) {
+                printf("Enter the importance ID (1: Low, 2: Medium, 3: High): ");
+                if (scanf("%d", &importanceId) == 1 && importanceId >= 1 && importanceId <= 3) {
+                    break;
+                }
+                else {
+                    printf("Invalid importance ID! Please enter 1, 2, or 3.\n");
+                    while (getchar() != '\n');  // Hatalı giriş sonrası input'u temizle
+                }
+            }
+
+            // Fonksiyonu çağır
+            int result = markTaskImportance(taskName, importanceId);
+            if (result == 1) {
+                printf("Task importance updated successfully.\n");
+            }
+            else {
+                printf("Failed to update task importance. Task not found or invalid input.\n");
+            }
+            enterToContinue();
             break;
+        }
         case 2:
+            printf("Other task prioritization features not implemented yet.\n");
+            enterToContinue();
             break;
         case 3:
             return 0;  // Menüden çıkış
@@ -1927,19 +2234,40 @@ int taskPrioritizationMenu() {
 }
 
 
-void markTaskImportance() {
+/**
+ * @brief Marks the importance level of a selected task.
+ *
+ * This function allows the user to select a task from the list of available tasks and mark its importance level.
+ * The importance level can be set to Low, Medium, or High. The user is prompted to select a task by entering
+ * the task name, and then choose the importance level by entering the corresponding importance ID.
+ *
+ * The updated task list is saved to ensure the importance levels are preserved for future reference.
+ *
+ * @details
+ * - Uses `loadTasks()` to load tasks from storage.
+ * - Displays all tasks along with their current importance level.
+ * - Prompts the user to enter the name of the task they wish to mark.
+ * - Uses `getInput()` to read the importance level from the user.
+ * - Updates the importance level of the selected task and saves the updated list using `saveTasks()`.
+ *
+ * @note If no tasks are available, the user is informed and the function returns without making changes.
+ *
+ * Example Usage:
+ * @code
+ *     markTaskImportance();
+ * @endcode
+ */
+int markTaskImportance(const char* taskNameInput, int importanceIdInput) {
     clearScreen();
 
-    Task tasks[100];  // Maksimum 100 görev için yer ayırıyoruz
-    int taskCount = loadTasks(tasks, 100);  // Görevleri yükle
+    Task tasks[100];
+    int taskCount = loadTasks(tasks, 100);
 
     if (taskCount <= 0) {
         printf("No tasks available. Please add tasks first.\n");
-        enterToContinue();
-        return;
+        return -1;
     }
 
-    // Tüm görevleri göster
     printf("Tasks loaded:\n");
     for (int i = 0; i < taskCount; ++i) {
         const char* importanceStr =
@@ -1950,73 +2278,79 @@ void markTaskImportance() {
             tasks[i].id, tasks[i].name, importanceStr);
     }
 
-    // Kullanıcıdan görevin adını al
-    char taskName[100];
     Task* selectedTask = NULL;
 
-    while (1) {
-        printf("\nEnter the name of the task to mark importance: ");
-        scanf(" %[^\n]%*c", taskName);  // Boşluklu girişleri alır
-
-        // Görev adını bul ve işaretle
-        for (int i = 0; i < taskCount; ++i) {
-            if (strcmp(tasks[i].name, taskName) == 0) {
-                selectedTask = &tasks[i];
-                break;
-            }
-        }
-
-        if (selectedTask) {
-            break;  // Geçerli bir görev bulunduysa döngüden çık
-        }
-        else {
-            printf("Task not found! Please enter a valid task name.\n");
+    for (int i = 0; i < taskCount; ++i) {
+        if (strcmp(tasks[i].name, taskNameInput) == 0) {
+            selectedTask = &tasks[i];
+            break;
         }
     }
 
-    // Kullanıcıdan önem seviyesini al
-    int importanceId;
-    while (1) {
-        printf("Enter the importance ID (1: Low, 2: Medium, 3: High): ");
-        importanceId = getInput();
-
-        if (importanceId >= 1 && importanceId <= 3) {
-            break;  // Geçerli önem seviyesi girildiyse döngüden çık
-        }
-        else {
-            printf("Invalid importance value! Please enter 1, 2, or 3.\n");
-        }
+    if (!selectedTask) {
+        printf("Task not found! Please enter a valid task name.\n");
+        return -1;
     }
 
-    // Önem seviyesini güncelle
-    selectedTask->impid = importanceId;
+    if (importanceIdInput < 1 || importanceIdInput > 3) {
+        printf("Invalid importance value! Please enter 1, 2, or 3.\n");
+        return -1;
+    }
 
-    // Güncellenen görev listesini dosyaya kaydet
+    selectedTask->impid = importanceIdInput;
+
     saveTasks(tasks, taskCount);
 
     printf("Importance level of '%s' marked successfully as %d.\n",
-        selectedTask->name, importanceId);
-    enterToContinue();
+        selectedTask->name, importanceIdInput);
+    return 1;  // Success
 }
 
 
 
-
-
-
-
+/**
+ * @brief Finds a task by its name.
+ *
+ * This function searches for a task in the list of tasks by comparing the given name with each task's name.
+ * If a task with the specified name is found, the index of the task is returned; otherwise, -1 is returned.
+ *
+ * @param name The name of the task to be searched.
+ *
+ * @return int The index of the found task, or -1 if no task is found.
+ *
+ * Example Usage:
+ * @code
+ *     int index = findTaskByName("Task A");
+ *     if (index != -1) {
+ *         // Task found, proceed with the index
+ *     }
+ * @endcode
+ */
 int findTaskByName(const char* name) {
     for (int i = 0; i < taskCount; i++) {
         if (strcmp(tasks[i].name, name) == 0) {
-            return i;  // Görev bulunduysa indeksini döndür
+            return i;  // Task found, return index
         }
     }
-    return -1;  // Görev bulunamazsa -1 döner
+    return -1;  // Task not found
 }
 
-
-
-
+/**
+ * @brief Hash function for generating an index based on an email.
+ *
+ * This function calculates a hash value for the given email by adding the ASCII values of each character
+ * and taking the modulus with the table size. The resulting hash value is used to determine the index
+ * for storing the email in a hash table.
+ *
+ * @param email The email string to be hashed.
+ *
+ * @return int The hash value (index) for the given email.
+ *
+ * Example Usage:
+ * @code
+ *     int index = hashFunction("example@example.com");
+ * @endcode
+ */
 int hashFunction(const char* email) {
     int hash = 0;
     while (*email) {
@@ -2026,66 +2360,139 @@ int hashFunction(const char* email) {
     return hash;
 }
 
+/**
+ * @brief Secondary hash function for double hashing.
+ *
+ * This function calculates a secondary hash value for the given email by adding the ASCII values of each character
+ * and taking the modulus with (TABLE_SIZE - 1). This secondary hash value is used in double hashing for better
+ * collision resolution.
+ *
+ * @param email The email string to be hashed.
+ *
+ * @return int The secondary hash value for the given email.
+ *
+ * Example Usage:
+ * @code
+ *     int index = hashFunction2("example@example.com");
+ * @endcode
+ */
 int hashFunction2(const char* email) {
     int hash = 0;
     while (*email) {
-        hash = (hash + *email) % (TABLE_SIZE - 1);  // TABLE_SIZE - 1 ile çarpma önerilir
+        hash = (hash + *email) % (TABLE_SIZE - 1);
         email++;
     }
-    return (TABLE_SIZE - 1 - hash);  // Double hashing için dönüş değeri
+    return (TABLE_SIZE - 1 - hash);
 }
+
+/**
+ * @brief Alternative secondary hash function for double hashing.
+ *
+ * This function calculates an alternative secondary hash value for the given email by multiplying the current hash
+ * value by 31 and adding the ASCII value of each character. The modulus with TABLE_SIZE ensures the hash value
+ * remains within the appropriate bounds.
+ *
+ * @param email The email string to be hashed.
+ *
+ * @return int The secondary hash value for the given email.
+ *
+ * Example Usage:
+ * @code
+ *     int index = secondHashFunction("example@example.com");
+ * @endcode
+ */
 int secondHashFunction(const char* email) {
     int hash = 0;
     while (*email) {
-        hash = (hash * 31 + *email) % TABLE_SIZE;  // Daha etkili çakışma çözümü için ikinci hash fonksiyonu
+        hash = (hash * 31 + *email) % TABLE_SIZE;
         email++;
     }
     return (TABLE_SIZE - 1 - hash);
 }
 
 
+/**
+ * @brief Inserts a user into the hash table using linear probing for collision resolution.
+ *
+ * This function inserts a user into the hash table based on the email address. If a collision occurs,
+ * linear probing is used to find the next available slot. If the hash table is full, the function will
+ * display an error message.
+ *
+ * @param user A pointer to the user to be inserted.
+ *
+ * @details
+ * - Uses `hashFunction()` to calculate the initial index.
+ * - If a collision occurs, the function searches for the next available slot using linear probing.
+ * - If the user with the given email already exists, the function returns without adding the user.
+ * - If the hash table is full, an appropriate message is displayed.
+ *
+ * Example Usage:
+ * @code
+ *     User user = {"John Doe", "john@example.com"};
+ *     insertUserToHashTableWithLinearProbing(&user);
+ * @endcode
+ */
 void insertUserToHashTableWithLinearProbing(User* user) {
     int index = hashFunction(user->email);
     int originalIndex = index;
 
-    printf("Inserting user with email: %s\n", user->email);  // Hata ayıklama için
+    printf("Inserting user with email: %s\n", user->email);  // For debugging purposes
 
-    // Linear Probing ile boş yer arıyoruz
+    // Linear probing to find an empty spot
     while (hashTable[index] != NULL) {
-        // Eğer aynı e-posta mevcutsa kullanıcı zaten kayıtlı
+        // If the same email already exists, the user is already registered
         if (strcmp(hashTable[index]->email, user->email) == 0) {
-            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            printf("User already exists at index %d.\n", index);  // For debugging purposes
             return;
         }
 
-        // Bir sonraki konuma geç ve mod işlemi ile dairesel dolaşım sağla
+        // Move to the next index and wrap around if necessary
         index = (index + 1) % TABLE_SIZE;
 
-        // Eğer tabloda döngü yapıyorsak, tablo dolu demektir
+        // If we loop back to the original index, the table is full
         if (index == originalIndex) {
             printf("Hash table is full, cannot add more users.\n");
             return;
         }
     }
 
-    // Kullanıcıyı boş bulunan konuma ekle
+    // Add the user to the empty spot
     hashTable[index] = (User*)malloc(sizeof(User));
     *hashTable[index] = *user;
 
-    printf("User added at index %d.\n", index);  // Kullanıcının eklendiğini doğrulamak için
+    printf("User added at index %d.\n", index);  // Confirm user addition
 }
 
+/**
+ * @brief Inserts a user into the hash table with overflow area for collision resolution.
+ *
+ * This function inserts a user into the hash table. If a collision occurs, the user is added to an overflow
+ * area. If both the hash table and the overflow area are full, the function displays an error message.
+ *
+ * @param user A pointer to the user to be inserted.
+ *
+ * @details
+ * - Uses `hashFunction()` to calculate the initial index.
+ * - If a collision occurs, the user is added to an overflow area if space is available.
+ * - If the overflow area is full, an appropriate message is displayed.
+ *
+ * Example Usage:
+ * @code
+ *     User user = {"Jane Doe", "jane@example.com"};
+ *     insertUserToHashTableWithOverflow(&user);
+ * @endcode
+ */
 void insertUserToHashTableWithOverflow(User* user) {
     int index = hashFunction(user->email);
 
-    // Ana hash tablosunda boş yer arama
+    // Check if the main hash table slot is empty
     if (hashTable[index] == NULL) {
         hashTable[index] = (User*)malloc(sizeof(User));
         *hashTable[index] = *user;
         printf("User added at index %d in main hash table.\n", index);
     }
     else {
-        // Eğer ana tabloda çakışma varsa taşma alanına ekle
+        // If there is a collision, add to the overflow area
         if (overflowCount < OVERFLOW_SIZE) {
             overflowArea[overflowCount++] = *user;
             printf("User added at index %d in overflow area.\n", overflowCount - 1);
@@ -2096,117 +2503,204 @@ void insertUserToHashTableWithOverflow(User* user) {
     }
 }
 
+/**
+ * @brief Inserts a user into the hash table using quadratic probing for collision resolution.
+ *
+ * This function inserts a user into the hash table based on the email address. If a collision occurs,
+ * quadratic probing is used to find the next available slot. If the hash table is full, the function
+ * displays an error message.
+ *
+ * @param user A pointer to the user to be inserted.
+ *
+ * @details
+ * - Uses `hashFunction()` to calculate the initial index.
+ * - If a collision occurs, the function searches for the next available slot using quadratic probing.
+ * - If the user with the given email already exists, the function returns without adding the user.
+ * - If the hash table is full, an appropriate message is displayed.
+ *
+ * Example Usage:
+ * @code
+ *     User user = {"Alice Smith", "alice@example.com"};
+ *     insertUserToHashTableWithQuadraticProbing(&user);
+ * @endcode
+ */
 void insertUserToHashTableWithQuadraticProbing(User* user) {
     int index = hashFunction(user->email);
     int i = 1;
 
-    // Quadratic Probing ile boş yer arama
+    // Quadratic probing to find an empty spot
     while (hashTable[index] != NULL) {
-        // Eğer aynı e-posta mevcutsa kullanıcı zaten kayıtlı
+        // If the same email already exists, the user is already registered
         if (strcmp(hashTable[index]->email, user->email) == 0) {
-            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            printf("User already exists at index %d.\n", index);  // For debugging purposes
             return;
         }
 
-        // Çakışma olduğunda quadratik artış yaparak yeni indeks belirle
+        // Calculate the next index using quadratic probing
         index = (index + i * i) % TABLE_SIZE;
         i++;
 
-        // Eğer döngü oluşursa, tablo dolu demektir
+        // If we exceed the table size, the table is full
         if (i >= TABLE_SIZE) {
             printf("Hash table is full, cannot add more users.\n");
             return;
         }
     }
 
-    // Kullanıcıyı boş bulunan konuma ekle
+    // Add the user to the empty spot
     hashTable[index] = (User*)malloc(sizeof(User));
     *hashTable[index] = *user;
 
     printf("User added at index %d using Quadratic Probing.\n", index);
 }
 
+
+/**
+ * @brief Inserts a user into the hash table using double hashing for collision resolution.
+ *
+ * This function inserts a user into the hash table based on the email address. If a collision occurs,
+ * double hashing is used to find the next available slot. If the hash table is full, the function displays
+ * an error message.
+ *
+ * @param user A pointer to the user to be inserted.
+ *
+ * @details
+ * - Uses `hashFunction()` to calculate the initial index.
+ * - Uses `hashFunction2()` to calculate the step size for double hashing.
+ * - If a collision occurs, the function searches for the next available slot using double hashing.
+ * - If the user with the given email already exists, the function returns without adding the user.
+ * - If the hash table is full, an appropriate message is displayed.
+ *
+ * Example Usage:
+ * @code
+ *     User user = {"Bob Johnson", "bob@example.com"};
+ *     insertUserToHashTableWithDoubleHashing(&user);
+ * @endcode
+ */
 void insertUserToHashTableWithDoubleHashing(User* user) {
     int index = hashFunction(user->email);
     int stepSize = hashFunction2(user->email);
     int i = 0;
 
-    // Double Hashing ile boş yer arama
+    // Double hashing to find an empty spot
     while (hashTable[index] != NULL) {
-        // Eğer aynı e-posta mevcutsa kullanıcı zaten kayıtlı
+        // If the same email already exists, the user is already registered
         if (strcmp(hashTable[index]->email, user->email) == 0) {
-            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            printf("User already exists at index %d.\n", index);  // For debugging purposes
             return;
         }
 
-        // Çakışma durumunda ikinci hash fonksiyonunu kullanarak yeni konuma geçiş yap
+        // Use the secondary hash function to calculate the next index
         index = (index + stepSize) % TABLE_SIZE;
         i++;
 
-        // Eğer döngü oluşursa, tablo dolu demektir
+        // If we exceed the table size, the table is full
         if (i >= TABLE_SIZE) {
             printf("Hash table is full, cannot add more users.\n");
             return;
         }
     }
 
-    // Kullanıcıyı boş bulunan konuma ekle
+    // Add the user to the empty spot
     hashTable[index] = (User*)malloc(sizeof(User));
     *hashTable[index] = *user;
 
     printf("User added at index %d using Double Hashing.\n", index);
 }
 
+/**
+ * @brief Inserts a user into the hash table using linear quotient for collision resolution.
+ *
+ * This function inserts a user into the hash table based on the email address. If a collision occurs,
+ * linear quotient is used to find the next available slot. If the hash table is full, the function displays
+ * an error message.
+ *
+ * @param user A pointer to the user to be inserted.
+ *
+ * @details
+ * - Uses `hashFunction()` to calculate the initial index.
+ * - If a collision occurs, the function searches for the next available slot using a fixed step size.
+ * - If the user with the given email already exists, the function returns without adding the user.
+ * - If the hash table is full, an appropriate message is displayed.
+ *
+ * Example Usage:
+ * @code
+ *     User user = {"Chris Evans", "chris@example.com"};
+ *     insertUserToHashTableWithLinearQuotient(&user);
+ * @endcode
+ */
 void insertUserToHashTableWithLinearQuotient(User* user) {
     int index = hashFunction(user->email);
     int stepSize = Q_STEP;
 
-    // Linear Quotient ile boş yer arama
+    // Linear quotient to find an empty spot
     while (hashTable[index] != NULL) {
-        // Eğer aynı e-posta mevcutsa, kullanıcı zaten kayıtlı
+        // If the same email already exists, the user is already registered
         if (strcmp(hashTable[index]->email, user->email) == 0) {
-            printf("User already exists at index %d.\n", index);  // Hata ayıklama için
+            printf("User already exists at index %d.\n", index);  // For debugging purposes
             return;
         }
 
-        // Çakışma olduğunda sabit bir adım boyutu kadar ilerle
+        // Move to the next index using a fixed step size
         index = (index + stepSize) % TABLE_SIZE;
 
-        // Eğer tablo tamamen doluysa, kullanıcı eklenemez
+        // If we return to the original index, the table is full
         if (index == hashFunction(user->email)) {
             printf("Hash table is full, cannot add more users.\n");
             return;
         }
     }
 
-    // Kullanıcıyı boş bulunan konuma ekle
+    // Add the user to the empty spot
     hashTable[index] = (User*)malloc(sizeof(User));
     *hashTable[index] = *user;
 
     printf("User added at index %d using Linear Quotient.\n", index);
 }
 
+/**
+ * @brief Inserts a user into the hash table using Brent's method for collision resolution.
+ *
+ * This function inserts a user into the hash table based on the email address. If a collision occurs,
+ * Brent's method is used to minimize the total number of probes required to insert the user. If the hash
+ * table is full, the function displays an error message.
+ *
+ * @param user A pointer to the user to be inserted.
+ *
+ * @details
+ * - Uses `hashFunction()` to calculate the initial index.
+ * - Uses `secondHashFunction()` to calculate the step size.
+ * - If a collision occurs, the function evaluates two alternative strategies to minimize the total number of probes.
+ * - The user is inserted into the position that minimizes the probing sequence.
+ * - If the hash table is full, an appropriate message is displayed.
+ *
+ * Example Usage:
+ * @code
+ *     User user = {"Diana Prince", "diana@example.com"};
+ *     insertUserToHashTableWithBrentsMethod(&user);
+ * @endcode
+ */
 void insertUserToHashTableWithBrentsMethod(User* user) {
     int index = hashFunction(user->email);
     int stepSize = secondHashFunction(user->email);
 
     if (hashTable[index] == NULL) {
-        // Eğer ilk pozisyon boşsa doğrudan ekle
+        // If the initial position is empty, insert directly
         hashTable[index] = (User*)malloc(sizeof(User));
         *hashTable[index] = *user;
         printf("User added at index %d using Brent's Method.\n", index);
     }
     else {
-        // Çakışma durumunda
+        // Handle collision with Brent's method
         int i = 1, newIndex = index;
         User* currentUser = user;
 
         while (hashTable[newIndex] != NULL) {
-            // İki alternatif stratejiyi değerlendir: mevcut konumdan devam etmek veya yer değiştirmek
-            int trialIndex1 = (newIndex + i * stepSize) % TABLE_SIZE;  // İleri adımla yeni konum
-            int trialIndex2 = (index + i) % TABLE_SIZE;                // Alternatif konum
+            // Evaluate two alternative strategies: continue from the current position or relocate
+            int trialIndex1 = (newIndex + i * stepSize) % TABLE_SIZE;  // Move forward with step size
+            int trialIndex2 = (index + i) % TABLE_SIZE;                // Alternative position
 
-            // En kısa adım sayısıyla uygun pozisyonu seç
+            // Choose the position with the shortest probing sequence
             if (hashTable[trialIndex1] == NULL) {
                 newIndex = trialIndex1;
                 break;
@@ -2223,34 +2717,67 @@ void insertUserToHashTableWithBrentsMethod(User* user) {
         *hashTable[newIndex] = *user;
         printf("User placed at index %d using Brent's Method after collision.\n", newIndex);
     }
-}   
+}
 
 
+/**
+ * @brief Searches for a user in the hash table using linear probing.
+ *
+ * This function searches for a user in the hash table by comparing the given email and password.
+ * If the user is found, a pointer to the user is returned; otherwise, NULL is returned.
+ * Linear probing is used to resolve collisions during the search.
+ *
+ * @param email The email of the user to be searched.
+ * @param password The password of the user to be searched.
+ *
+ * @return User* A pointer to the found user, or NULL if the user is not found.
+ *
+ * Example Usage:
+ * @code
+ *     User* user = searchUserInHashTable("john@example.com", "password123");
+ *     if (user != NULL) {
+ *         // User found, proceed with user data
+ *     }
+ * @endcode
+ */
 User* searchUserInHashTable(const char* email, const char* password) {
     int index = hashFunction(email);
     int originalIndex = index;
 
-    // Linear Probing ile kullanıcı arama
+    // Linear probing to search for the user
     while (hashTable[index] != NULL) {
         if (strcmp(hashTable[index]->email, email) == 0 &&
             strcmp(hashTable[index]->password, password) == 0) {
-            return hashTable[index];  // Kullanıcı bulundu
+            return hashTable[index];  // User found
         }
 
-        // Bir sonraki konuma geç ve mod işlemi ile dairesel dolaşım sağla
+        // Move to the next index and wrap around if necessary
         index = (index + 1) % TABLE_SIZE;
 
-        // Eğer tabloda döngü yapıyorsak, kullanıcı yok demektir
+        // If we loop back to the original index, the user is not in the table
         if (index == originalIndex) {
             break;
         }
     }
-    return NULL;  // Kullanıcı bulunamadı
+    return NULL;  // User not found
 }
 
-
-
-
+/**
+ * @brief Demonstrates user insertion using linear probing for collision resolution.
+ *
+ * This function demonstrates the process of inserting a user into the hash table using linear probing.
+ * The user details are collected from the user, and then `insertUserToHashTableWithLinearProbing()` is called
+ * to insert the user into the hash table.
+ *
+ * @details
+ * - Prompts the user for their name, surname, email, and password.
+ * - Calls `insertUserToHashTableWithLinearProbing()` to insert the user.
+ *
+ * Example Usage:
+ * @code
+ *     linearProbingDemo();
+ * @endcode
+ */
 void linearProbingDemo() {
     printf("Linear Probing is active for user hash table management.\n");
 
@@ -2273,12 +2800,28 @@ void linearProbingDemo() {
     fgets(user.password, sizeof(user.password), stdin);
     user.password[strcspn(user.password, "\n")] = 0;
 
-    insertUserToHashTableWithLinearProbing(&user);  // Linear Probing ile kullanıcı ekle
+    insertUserToHashTableWithLinearProbing(&user);  // Insert user with linear probing
 
-    printf("User insertion complete.\n");  // Kullanıcı eklemenin bittiğini gösteren mesaj
+    printf("User insertion complete.\n");  // Indicate completion of user insertion
     enterToContinue();
 }
 
+/**
+ * @brief Demonstrates user insertion using progressive overflow for collision resolution.
+ *
+ * This function demonstrates the process of inserting a user into the hash table using progressive overflow.
+ * The user details are collected from the user, and then `insertUserToHashTableWithOverflow()` is called
+ * to insert the user into the hash table or the overflow area if necessary.
+ *
+ * @details
+ * - Prompts the user for their name, surname, email, and password.
+ * - Calls `insertUserToHashTableWithOverflow()` to insert the user.
+ *
+ * Example Usage:
+ * @code
+ *     progressiveOverflowDemo();
+ * @endcode
+ */
 void progressiveOverflowDemo() {
     printf("Progressive Overflow is active for user hash table management.\n");
 
@@ -2301,13 +2844,30 @@ void progressiveOverflowDemo() {
     fgets(user.password, sizeof(user.password), stdin);
     user.password[strcspn(user.password, "\n")] = 0;
 
-    insertUserToHashTableWithOverflow(&user);  // Progressive Overflow ile kullanıcı ekle
+    insertUserToHashTableWithOverflow(&user);  // Insert user with progressive overflow
 
-    printf("User insertion complete.\n");  // Kullanıcı eklemenin bittiğini gösteren mesaj
+    printf("User insertion complete.\n");  // Indicate completion of user insertion
     enterToContinue();
 }
 
 
+
+/**
+ * @brief Demonstrates user insertion using quadratic probing for collision resolution.
+ *
+ * This function demonstrates the process of inserting a user into the hash table using quadratic probing.
+ * The user details are collected from the user, and then `insertUserToHashTableWithQuadraticProbing()` is called
+ * to insert the user into the hash table.
+ *
+ * @details
+ * - Prompts the user for their name, surname, email, and password.
+ * - Calls `insertUserToHashTableWithQuadraticProbing()` to insert the user.
+ *
+ * Example Usage:
+ * @code
+ *     quadraticProbingDemo();
+ * @endcode
+ */
 void quadraticProbingDemo() {
     printf("Quadratic Probing is active for user hash table management.\n");
 
@@ -2330,12 +2890,28 @@ void quadraticProbingDemo() {
     fgets(user.password, sizeof(user.password), stdin);
     user.password[strcspn(user.password, "\n")] = 0;
 
-    insertUserToHashTableWithQuadraticProbing(&user);  // Quadratic Probing ile kullanıcı ekle
+    insertUserToHashTableWithQuadraticProbing(&user);  // Insert user with quadratic probing
 
-    printf("User insertion complete.\n");
+    printf("User insertion complete.\n");  // Indicate completion of user insertion
     enterToContinue();
 }
 
+/**
+ * @brief Demonstrates user insertion using double hashing for collision resolution.
+ *
+ * This function demonstrates the process of inserting a user into the hash table using double hashing.
+ * The user details are collected from the user, and then `insertUserToHashTableWithDoubleHashing()` is called
+ * to insert the user into the hash table.
+ *
+ * @details
+ * - Prompts the user for their name, surname, email, and password.
+ * - Calls `insertUserToHashTableWithDoubleHashing()` to insert the user.
+ *
+ * Example Usage:
+ * @code
+ *     doubleHashingDemo();
+ * @endcode
+ */
 void doubleHashingDemo() {
     printf("Double Hashing is active for user hash table management.\n");
 
@@ -2358,12 +2934,28 @@ void doubleHashingDemo() {
     fgets(user.password, sizeof(user.password), stdin);
     user.password[strcspn(user.password, "\n")] = 0;
 
-    insertUserToHashTableWithDoubleHashing(&user);  // Double Hashing ile kullanıcı ekle
+    insertUserToHashTableWithDoubleHashing(&user);  // Insert user with double hashing
 
-    printf("User insertion complete.\n");
+    printf("User insertion complete.\n");  // Indicate completion of user insertion
     enterToContinue();
 }
 
+/**
+ * @brief Demonstrates user insertion using linear quotient for collision resolution.
+ *
+ * This function demonstrates the process of inserting a user into the hash table using linear quotient.
+ * The user details are collected from the user, and then `insertUserToHashTableWithLinearQuotient()` is called
+ * to insert the user into the hash table.
+ *
+ * @details
+ * - Prompts the user for their name, surname, email, and password.
+ * - Calls `insertUserToHashTableWithLinearQuotient()` to insert the user.
+ *
+ * Example Usage:
+ * @code
+ *     linearQuotientDemo();
+ * @endcode
+ */
 void linearQuotientDemo() {
     printf("Linear Quotient is active for user hash table management.\n");
 
@@ -2386,12 +2978,29 @@ void linearQuotientDemo() {
     fgets(user.password, sizeof(user.password), stdin);
     user.password[strcspn(user.password, "\n")] = 0;
 
-    insertUserToHashTableWithLinearQuotient(&user);  // Linear Quotient ile kullanıcı ekle
+    insertUserToHashTableWithLinearQuotient(&user);  // Insert user with linear quotient
 
-    printf("User insertion complete.\n");
+    printf("User insertion complete.\n");  // Indicate completion of user insertion
     enterToContinue();
 }
 
+
+/**
+ * @brief Demonstrates user insertion using Brent's method for collision resolution.
+ *
+ * This function demonstrates the process of inserting a user into the hash table using Brent's method.
+ * The user details are collected from the user, and then `insertUserToHashTableWithBrentsMethod()` is called
+ * to insert the user into the hash table.
+ *
+ * @details
+ * - Prompts the user for their name, surname, email, and password.
+ * - Calls `insertUserToHashTableWithBrentsMethod()` to insert the user.
+ *
+ * Example Usage:
+ * @code
+ *     brentsMethodDemo();
+ * @endcode
+ */
 void brentsMethodDemo() {
     printf("Brent's Method is active for user hash table management.\n");
 
@@ -2414,29 +3023,85 @@ void brentsMethodDemo() {
     fgets(user.password, sizeof(user.password), stdin);
     user.password[strcspn(user.password, "\n")] = 0;
 
-    insertUserToHashTableWithBrentsMethod(&user);  // Brent's Method ile kullanıcı ekle
+    insertUserToHashTableWithBrentsMethod(&user);  // Insert user with Brent's method
 
-    printf("User insertion complete.\n");
+    printf("User insertion complete.\n");  // Indicate completion of user insertion
     enterToContinue();
 }
 
 
-// Huffman ile parolayı sıkıştırarak döndüren işlev
+
+/**
+ * @brief Encodes a given input string using Huffman coding.
+ *
+ * This function performs Huffman encoding on the provided input string and returns the encoded result.
+ * Currently, it simply duplicates the input string as a placeholder for the actual Huffman encoding logic.
+ *
+ * @param input The string to be encoded.
+ *
+ * @return char* A dynamically allocated string containing the encoded result.
+ *
+ * Example Usage:
+ * @code
+ *     char* encoded = huffmanEncode("example");
+ *     // Use the encoded string
+ *     free(encoded);
+ * @endcode
+ */
 char* huffmanEncode(const char* input) {
-    // Huffman kodlaması burada gerçekleştirilir ve sıkıştırılmış dize döndürülür
-    // Örnek olarak, doğrudan aynı metni döndürüyoruz (gerçek projede değiştirilmelidir).
+    // Huffman encoding is performed here, returning the compressed string
+    // For now, we return the same string (this should be modified in a real implementation).
     char* encoded = strdup(input);
     return encoded;
 }
 
-// Huffman kodlu parolayı çözen işlev
+/**
+ * @brief Decodes a given Huffman encoded string.
+ *
+ * This function performs Huffman decoding on the provided encoded string and returns the original result.
+ * Currently, it simply duplicates the encoded string as a placeholder for the actual Huffman decoding logic.
+ *
+ * @param encoded The Huffman encoded string to be decoded.
+ *
+ * @return char* A dynamically allocated string containing the decoded result.
+ *
+ * Example Usage:
+ * @code
+ *     char* decoded = huffmanDecode(encoded);
+ *     // Use the decoded string
+ *     free(decoded);
+ * @endcode
+ */
 char* huffmanDecode(const char* encoded) {
-    // Huffman çözme işlemi burada yapılır ve orijinal metin döndürülür.
+    // Huffman decoding is performed here, returning the original string
     char* decoded = strdup(encoded);
     return decoded;
 }
 
 
+
+/**
+ * @brief Registers a new user by writing their information to a file.
+ *
+ * This function registers a new user by writing their details to a binary user file. It first checks if the user
+ * already exists by comparing the email. If the user does not exist, it assigns a new user ID, encodes the email
+ * and password using Huffman encoding, and writes the encoded data to a separate file for Huffman encoded users.
+ * Finally, it writes the user details to the binary user file.
+ *
+ * @param user The user structure containing the user's details (name, surname, email, and password).
+ * @param pathFileUser The path to the user database file.
+ *
+ * @return int Returns 1 if the registration is successful, otherwise returns 0.
+ *
+ * Example Usage:
+ * @code
+ *     User newUser = {"John", "Doe", "john.doe@example.com", "password123"};
+ *     int result = registerUser(newUser, "users.bin");
+ *     if (result) {
+ *         printf("User registered successfully.\n");
+ *     }
+ * @endcode
+ */
 int registerUser(User user, const char* pathFileUser) {
     FILE* file = fopen(pathFileUser, "rb+");
     int userCount = 0;
@@ -2503,14 +3168,23 @@ int registerUser(User user, const char* pathFileUser) {
     return 1;
 }
 
-
 /**
  * @brief Displays a menu for user registration.
  *
  * This function prompts the user to input their name, surname, email, and password for registration.
+ * It then calls `registerUser()` to complete the registration process by writing the user's details to a file.
  *
  * @param pathFileUsers The path to the user database file.
- * @return 1 if the registration process is completed successfully, 0 otherwise.
+ *
+ * @return int Returns 1 if the registration process is completed successfully, otherwise returns 0.
+ *
+ * Example Usage:
+ * @code
+ *     int result = registerUserMenu("users.bin");
+ *     if (result) {
+ *         printf("User registration successful.\n");
+ *     }
+ * @endcode
  */
 int registerUserMenu(const char* pathFileUsers) {
     clearScreen();
@@ -2536,14 +3210,27 @@ int registerUserMenu(const char* pathFileUsers) {
 }
 
 
+
 /**
  * @brief Logs in a user.
  *
  * This function verifies the user's email and password against the user database file for login.
+ * It reads the user information from the file, decodes the email and password using Huffman decoding,
+ * and checks if the provided credentials match any stored user.
  *
  * @param loginUser The user attempting to log in.
  * @param pathFileUsers The path to the user database file.
- * @return 1 if the login is successful, 0 otherwise.
+ *
+ * @return int Returns 1 if the login is successful, otherwise returns 0.
+ *
+ * Example Usage:
+ * @code
+ *     User user = {"", "", "john.doe@example.com", "password123"};
+ *     int result = loginUser(user, "users.bin");
+ *     if (result) {
+ *         printf("Login successful.\n");
+ *     }
+ * @endcode
  */
 int loginUser(User loginUser, const char* pathFileUsers) {
     FILE* file = fopen(pathFileUsers, "rb");
@@ -2563,29 +3250,29 @@ int loginUser(User loginUser, const char* pathFileUsers) {
     User tempUser;
 
     for (int i = 0; i < userCount; ++i) {
-        // Kullanıcı verilerini dosyadan oku
+        // Read user data from the file
         if (fread(&tempUser, sizeof(User), 1, file) != 1) {
             printf("Error reading user data from file.\n");
             break;
         }
 
-        // E-posta ve şifreyi Huffman kod çözme işlemiyle çöz
+        // Decode email and password using Huffman decoding
         char* decodedEmail = huffmanDecode(tempUser.email);
         char* decodedPassword = huffmanDecode(tempUser.password);
 
-        // E-posta ve şifre kontrolü yap
+        // Check email and password
         if (strcmp(decodedEmail, loginUser.email) == 0 && strcmp(decodedPassword, loginUser.password) == 0) {
             printf("Login successful.\n");
             loggedUser = tempUser;
             found = 1;
 
-            // Dinamik olarak ayrılan belleği serbest bırak
+            // Free dynamically allocated memory
             free(decodedEmail);
             free(decodedPassword);
             break;
         }
 
-        // Dinamik olarak ayrılan belleği serbest bırak
+        // Free dynamically allocated memory
         free(decodedEmail);
         free(decodedPassword);
     }
@@ -2602,18 +3289,27 @@ int loginUser(User loginUser, const char* pathFileUsers) {
     return 1;
 }
 
-
 /**
  * @brief Displays a menu for user login.
  *
  * This function prompts the user to input their email and password for login.
+ * It then calls `loginUser()` to verify the credentials against the user database file.
  *
  * @param pathFileUsers The path to the user database file.
- * @return 1 if the login process is completed successfully, 0 otherwise.
+ *
+ * @return int Returns 1 if the login process is completed successfully, otherwise returns 0.
+ *
+ * Example Usage:
+ * @code
+ *     int result = loginUserMenu("users.bin");
+ *     if (result) {
+ *         printf("Login successful.\n");
+ *     }
+ * @endcode
  */
 int loginUserMenu(const char* pathFileUsers) {
     clearScreen();
-    User userInput;  // Değişken adını loginUser yerine userInput yaptık.
+    User userInput;
 
     printf("Enter email: ");
     fgets(userInput.email, sizeof(userInput.email), stdin);
@@ -2623,11 +3319,20 @@ int loginUserMenu(const char* pathFileUsers) {
     fgets(userInput.password, sizeof(userInput.password), stdin);
     userInput.password[strcspn(userInput.password, "\n")] = 0;
 
-    // loginUser fonksiyonunu çağırırken yeni değişkeni kullanıyoruz
     return loginUser(userInput, pathFileUsers);
 }
 
 
+
+/**
+ * @brief Displays the main user options menu.
+ *
+ * This function presents the main menu for the user after they have successfully logged in.
+ * The menu includes options such as creating tasks, setting deadlines, setting reminders, managing task prioritization,
+ * and accessing algorithm demos. Depending on the user's choice, the corresponding function is called.
+ *
+ * @return int Returns 0 when the user chooses to exit the menu.
+ */
 int userOptionsMenu() {
     int choice;
 
@@ -2646,15 +3351,17 @@ int userOptionsMenu() {
             createTaskMenu(taskList, &taskCount);
             break;
         case 2:
-            deadlineSettingsMenu(tree);
+            deadlineSettingsMenu();
             break;
         case 3:
             reminderSystemMenu();
             break;
         case 4:
             taskPrioritizationMenu();
+            break;
         case 5:
             algorithmsMenu();
+            break;
         case 6:
             return 0;
         default:
@@ -2666,8 +3373,18 @@ int userOptionsMenu() {
     }
 }
 
-void algorithmsMenu() {
+/**
+ * @brief Displays a menu for algorithm demonstrations.
+ *
+ * This function presents a menu that allows the user to select different hash table management algorithms for demonstration purposes.
+ * The menu includes options such as Progressive Overflow, Linear Probing, Quadratic Probing, Double Hashing, Linear Quotient, and Brent's Method.
+ * The user can view each algorithm's behavior by selecting the respective option.
+ *
+ * @return void This function returns to the main menu when the user chooses to exit.
+ */
+int algorithmsMenu() {
     int choice;
+
     while (1) {
         printAlgorithmsMenu();
         choice = getInput();
@@ -2692,7 +3409,7 @@ void algorithmsMenu() {
             doubleHashingDemo();
             break;
         case 5:
-            //useOfBuckets();
+            // useOfBuckets();
             break;
         case 6:
             linearQuotientDemo();
@@ -2701,7 +3418,7 @@ void algorithmsMenu() {
             brentsMethodDemo();
             break;
         case 8:
-            return;  // Ana menüye dön
+            return 1;  // Başarılı çıkış
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -2709,9 +3426,20 @@ void algorithmsMenu() {
             break;
         }
     }
+    return 0; // Bu nokta normal şartlarda erişilmez ancak güvenlik için eklenmiştir
 }
 
 
+/**
+ * @brief Displays the main menu for the application.
+ *
+ * This function presents the opening screen menu to the user, allowing them to log in, register, or exit the program.
+ * It continuously displays the menu until the user chooses to exit.
+ *
+ * @param pathFileUsers The path to the user database file.
+ *
+ * @return int Returns 0 when the user chooses to exit the program.
+ */
 int mainMenu(const char* pathFileUsers) {
     int choice;
 
@@ -2748,6 +3476,7 @@ int mainMenu(const char* pathFileUsers) {
         }
     }
 }
+
 
 
 
