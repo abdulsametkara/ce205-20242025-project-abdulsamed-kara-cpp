@@ -16,6 +16,7 @@ protected:
     const char* deadlineFile = "deadlines.bin";
     const char* inputTest = "inputTest.txt";
     const char* outputTest = "outputTest.txt";
+    //C:\\U0sers\\fatma\\Desktop\\ce205 - final - abdulsamed - kara - omersahan - sofu - vahithamza - baran - fatmaciran - akbas - cpp\\outputTest.txt
 
 
     void SetUp() override {
@@ -2182,7 +2183,53 @@ TEST_F(TaskAppTest, Deatline_View) {
     resetStdinStdout();
 }
 
+TEST_F(TaskAppTest, taskPrioritizationMenu_marktask) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("4\n1\na\n2\n\n3\n6\n3\n\n");
 
+    // reminderSystemMenu'yu �a��r
+    int result = taskPrioritizationMenu();
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+
+TEST_F(TaskAppTest, taskPrioritizationMenu_marktaskCase1) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("1\na\n1\n\n1\nb\n2\n\n1\nc\n3\n\n3\n6\n3\n\n");
+
+    // reminderSystemMenu'yu �a��r
+    int result = taskPrioritizationMenu();
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 0);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
+
+TEST_F(TaskAppTest, viewDeadlinesBplusTree) {
+    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    simulateUserInput("10 10 10\n11 11 1111\n\n3\n6\n3\n");
+
+    BPlusTree tree = {};
+    BPlusTreeNode rootNode = {};
+    rootNode.isLeaf = true;
+    tree.root = &rootNode;
+
+    // reminderSystemMenu'yu �a��r
+    int result = viewDeadlinesInRange(&tree);
+
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 1);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
 
 
 
