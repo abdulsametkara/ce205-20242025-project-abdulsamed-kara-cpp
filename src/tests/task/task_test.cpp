@@ -2273,17 +2273,17 @@ TEST_F(TaskAppTest, CreateTaskMenuTest_InputError) {
     resetStdinStdout();
 }
 
-//TEST_F(TaskAppTest, navigateXORListTest_InputError) {
-//
-//    simulateUserInput("-2\n\n0\n\n9\n6\n3\n");
-//
-//    int result = navigateXORList();
-//    // ��k�� kodunu kontrol et
-//    EXPECT_EQ(result, 1);
-//
-//    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
-//    resetStdinStdout();
-//}
+TEST_F(TaskAppTest, navigateXORListTest_InputError) {
+
+    simulateUserInput("-2\n\n0\n\n9\n6\n3\n");
+
+    int result = navigateXORList();
+    // ��k�� kodunu kontrol et
+    EXPECT_EQ(result, 1);
+
+    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    resetStdinStdout();
+}
 
 
 TEST_F(TaskAppTest, RegisterUser_UserAddedSuccessfully) {
