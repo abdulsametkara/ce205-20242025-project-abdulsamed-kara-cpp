@@ -1,7 +1,4 @@
-
-﻿#define ENABLE_TASK_TEST  // Bu sat�r etkinle�tirildi
-
-
+#define ENABLE_TASK_TEST  // Bu sat�r etkinle�tirildi
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdbool.h>
@@ -645,60 +642,7 @@ TEST_F(TaskAppTest, AddTaskToList_MultipleTasks) {
     EXPECT_STREQ(tail->task.name, secondTask.name);
     EXPECT_EQ(tail->prev, head); // Kuyru�un prev i�aret�isi ba�� g�stermeli
 }
-//TEST_F(TaskAppTest, LoginUserMenu_SuccessfulLogin) {
-//    const char* mockUserFile = "mock_users.bin";
-//
-//    // Kullan�c� giri�ini sim�le et
-//    simulateUserInput("john@example.com\npassword123\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(mockUserFile);
-//
-//    // Do�ru sonucu kontrol et
-//    EXPECT_EQ(result, 1);
-//}
 
-// Yanl�� e-posta ile giri� denendi�inde ba�ar�s�z d�nmesi beklenir
-//TEST_F(TaskAppTest, LoginUserMenu_WrongEmail) {
-//    const char* mockUserFile = "mock_users.bin";
-//
-//    // Yanl�� e-posta girdisini sim�le et
-//    simulateUserInput("wrong@example.com\npassword123\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(mockUserFile);
-//
-//    // Yanl�� giri� oldu�u i�in 0 d�nmesi beklenir
-//    EXPECT_EQ(result, 0);
-//}
-//
-//// Yanl�� �ifre ile giri� denendi�inde ba�ar�s�z d�nmesi beklenir
-//TEST_F(TaskAppTest, LoginUserMenu_WrongPassword) {
-//    const char* mockUserFile = "mock_users.bin";
-//
-//    // Yanl�� �ifre girdisini sim�le et
-//    simulateUserInput("john@example.com\nwrongpassword\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(mockUserFile);
-//
-//    // Yanl�� giri� oldu�u i�in 0 d�nmesi beklenir
-//    EXPECT_EQ(result, 0);
-//}
-//
-//// Eksik dosya ile giri� denendi�inde ba�ar�s�z d�nmesi beklenir
-//TEST_F(TaskAppTest, LoginUserMenu_MissingFile) {
-//    const char* invalidFile = "nonexistent_users.bin";
-//
-//    // Kullan�c� giri�ini sim�le et
-//    simulateUserInput("john@example.com\npassword123\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(invalidFile);
-//
-//    // Dosya bulunmad��� i�in 0 d�nmesi beklenir
-//    EXPECT_EQ(result, 0);
-//}
 
 TEST_F(TaskAppTest, LoginRegistermenuTest) {
     const char* testuserfile = "userFile.bin";
@@ -710,88 +654,6 @@ TEST_F(TaskAppTest, LoginRegistermenuTest) {
     EXPECT_EQ(result, 0);
 }
 
-
-
-//TEST_F(TaskAppTest, taskprenotaskfail) {
-//    const char* testuserfile = "taskFile.bin";
-//
-//    simulateUserInput("4\n1\n\n3\n");
-//
-//    int result = userOptionsMenu();
-//
-//    EXPECT_EQ(result, 0);
-//}
-//
-//TEST_F(TaskAppTest, taskprecorrectwittasks) {
-//    const char* testuserfile = "taskFile.bin";
-//    createTestUserFile();
-//
-//    simulateUserInput("4\n1\nTask 1\n2\n\n3\n6\n3\n");
-//
-//    int result = userOptionsMenu();
-//
-//    EXPECT_EQ(result, 0);
-//}
-
-
-//TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
-//    // Test i�in ge�ici bir g�rev dosyas� olu�tur
-//    const char* testFilename = "test_tasks.bin";
-//
-//    // Test g�revlerini olu�tur ve dosyaya kaydet
-//    Task testTasks[] = {
-//        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
-//        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
-//    };
-//    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
-//
-//    FILE* file = fopen(testFilename, "wb");
-//    ASSERT_NE(file, nullptr) << "Error: Unable to create test file.";
-//    fwrite(testTasks, sizeof(Task), taskCount, file);
-//    fclose(file);
-//
-//    // Fonksiyonu �a��r ve do�ru �al���p �al��mad���n� kontrol et
-//    int result = loadTasksToXORList(testFilename);
-//    EXPECT_EQ(result, 1);  // Ba�ar�yla tamamland���n� kontrol et
-//
-//    // XOR listesine eklenen g�revleri kontrol et
-//    XORNode* current = xorHead;
-//    for (int i = 0; i < taskCount; ++i) {
-//        ASSERT_NE(current, nullptr) << "XOR list is missing nodes.";
-//        EXPECT_EQ(current->task.id, testTasks[i].id);
-//        EXPECT_STREQ(current->task.name, testTasks[i].name);
-//        EXPECT_STREQ(current->task.description, testTasks[i].description);
-//        EXPECT_STREQ(current->task.category, testTasks[i].category);
-//        EXPECT_STREQ(current->task.dueDate, testTasks[i].dueDate);
-//
-//        // Bir sonraki d���me ge�
-//        XORNode* nextNode = (XORNode*)((uintptr_t)current->xorPtr ^ (uintptr_t)nullptr);
-//        current = nextNode;
-//    }
-//
-//    // Test dosyas�n� sil
-//    remove(testFilename);
-//}
-//
-// TEST_F(TaskAppTest, LoadTasksToXORList_InvalidFile) {
-//    // Ge�ersiz dosya ad�yla fonksiyonu �a��r
-//    const char* invalidFilename = "nonexistent_tasks.bin";
-//    int result = loadTasksToXORList(invalidFilename);
-//
-//    // D�n�� de�erinin -1 oldu�unu kontrol et
-//    EXPECT_EQ(result, -1);
-//
-//    // ��kt�y� kontrol etmek i�in dosyadan oku
-//    FILE* outputFile = fopen(outputTest, "rb");
-//    ASSERT_NE(outputFile, nullptr);
-//
-//    char outputBuffer[256] = { 0 };
-//    fread(outputBuffer, sizeof(char), 255, outputFile);
-//    fclose(outputFile);
-//
-//    // Hata mesaj�n�n do�ru yaz�ld���n� kontrol et
-//    EXPECT_NE(strstr(outputBuffer, "Error: Unable to open tasks file."), nullptr);
-//}
 
 TEST_F(TaskAppTest, PushTask_Success) {
     // Test i�in bir g�rev olu�tur
@@ -815,31 +677,7 @@ TEST_F(TaskAppTest, PushTask_Success) {
     free(temp);
 }
 
-/*TEST_F(TaskAppTest, PopTask_EmptyStack) {
-    // Bo� bir y���n durumunda pop fonksiyonunu test et
-    stackTop = NULL;  // Y���n bo� oldu�undan stackTop'u NULL yap
 
-    Task result = pop();
-
-    // Task id'sinin -1 d�nd���n� kontrol et (bo� y���n i�areti)
-
-
-
-    // ��kt�y� kontrol etmek i�in dosyadan oku
-    FILE* outputFile = fopen(outputTest, "rb");
-    ASSERT_NE(outputFile, nullptr);
-
-    char outputBuffer[256] = { 0 };
-    fread(outputBuffer, sizeof(char), 255, outputFile);
-    fclose(outputFile);
-
-    // Hata mesaj�n�n do�ru yaz�ld���n� kontrol et
-    EXPECT_NE(strstr(outputBuffer, "Stack is empty"), nullptr);
-
-    // ��kt�y� debug i�in yazd�r
-    std::cout << "Captured Output: " << outputBuffer << std::endl;
-    EXPECT_EQ(result.id, -1);
-}*/
 
 TEST_F(TaskAppTest, PopTask_NonEmptyStack) {
     // Bir y���n olu�tur ve bir g�rev ekle
@@ -974,43 +812,6 @@ TEST_F(TaskAppTest, PrintDependenciesUtil_NoDependencies) {
     EXPECT_EQ(strlen(outputBuffer), 0);
 }
 
-/*TEST_F(TaskAppTest, PrintDependenciesUtil_WithDependencies) {
-    // Test i�in sahte g�rev dizisi olu�tur
-    Task taskList[3] = {
-        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 2, {2, 3}, 0},
-        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0},
-        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0},
-    };
-
-    bool visited[4] = { false };
-
-    // Standart ��kt�y� yakalamak i�in y�nlendir
-    freopen(outputTest, "w", stdout);
-
-    // Fonksiyonu �a��r
-    int result = printDependenciesUtil(taskList, 1, visited);
-
-    // Standart ��kt�y� s�f�rla
-    resetStdinStdout();
-
-    // Fonksiyonun do�ru de�er d�nd�rd���n� kontrol et
-    EXPECT_EQ(result, 1);
-
-    // ��kt�y� kontrol etmek i�in dosyadan oku
-    FILE* outputFile = fopen(outputTest, "r");
-    ASSERT_NE(outputFile, nullptr);
-
-    char outputBuffer[256] = { 0 };
-    fread(outputBuffer, sizeof(char), 255, outputFile);
-    fclose(outputFile);
-
-    // ��k���n do�ru oldu�unu do�rula
-    EXPECT_NE(strstr(outputBuffer, "Task 1 depends on Task 2\n"), nullptr);
-    EXPECT_NE(strstr(outputBuffer, "Task 1 depends on Task 3\n"), nullptr);
-
-
-}*/
-
 TEST_F(TaskAppTest, PrintDependencies_InvalidTaskId) {
     // Ge�ersiz task ID ile �a��r
     int taskCount = 3;
@@ -1127,34 +928,6 @@ TEST_F(TaskAppTest, PushSccStack_Success) {
     EXPECT_EQ(sccStack->data, 20); // En �stteki veri kontrol edilir
     EXPECT_EQ(sccStack->next->data, 10); // Bir alt�ndaki d���m kontrol edilir
 }
-
-/*TEST_F(TaskAppTest, PushSccStack_MemoryAllocationFailure) {
-    // malloc'u ge�ici olarak ba�ar�s�z olacak �ekilde ayarla
-
-// ��k��� dosyaya y�nlendir
-    freopen(outputTest, "w", stdout);
-
-    // pushSccStack �a�r�s�
-    int result = pushSccStack(-1);
-
-    // Stdout'u s�f�rla
-    resetStdinStdout();
-
-    // Fonksiyonun -1 d�nd�rd���n� do�rula
-    EXPECT_EQ(result, 1);
-
-    // ��kt�y� kontrol et
-    FILE* outputFile = fopen(outputTest, "r");
-    ASSERT_NE(outputFile, nullptr);
-
-    char outputBuffer[256] = { 0 };
-    fread(outputBuffer, sizeof(char), 255, outputFile);
-    fclose(outputFile);
-
-    // Hata mesaj�n� kontrol et
-    EXPECT_NE(strstr(outputBuffer, "Memory allocation failed"), nullptr);
-
-}*/
 
 TEST_F(TaskAppTest, PopSccStack_EmptyStack) {
     // Bo� bir SCC y���n� durumunda popSccStack fonksiyonunu test et
@@ -1339,35 +1112,7 @@ TEST_F(TaskAppTest, FindSCCs_InvalidParameters) {
     fclose(outFile);
 }
 
-/*TEST_F(TaskAppTest, AnalyzeSCC_ValidGraph) {
-    Task taskList[3] = {
-        {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 1, {2}, 0},
-        {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 1, {3}, 0},
-        {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 1, {1}, 0}
-    };
-    int taskCount = 3;
 
-    FILE* outFile = fopen(outputTest, "w");
-    ASSERT_NE(outFile, nullptr);
-
-    int result = analyzeSCC(taskList, taskCount, outFile);
-
-    fclose(outFile);
-
-    EXPECT_EQ(result, 1);
-
-    outFile = fopen(outputTest, "r");
-    ASSERT_NE(outFile, nullptr);
-
-    char outputBuffer[512] = { 0 };
-    fread(outputBuffer, sizeof(char), 511, outFile);
-    fclose(outFile);
-
-    // Dinamik olarak do�ru SCC s�ralar�n� kontrol edin
-    EXPECT_NE(strstr(outputBuffer, "SCC #1:"), nullptr);
-    EXPECT_NE(strstr(outputBuffer, "SCC #2:"), nullptr);
-}
-*/
 
 TEST_F(TaskAppTest, AnalyzeSCC_InvalidInput) {
     // Ge�ersiz parametrelerle fonksiyonu test et
@@ -2528,17 +2273,17 @@ TEST_F(TaskAppTest, CreateTaskMenuTest_InputError) {
     resetStdinStdout();
 }
 
-TEST_F(TaskAppTest, navigateXORListTest_InputError) {
-
-    simulateUserInput("-2\n\n0\n\n9\n6\n3\n");
-
-    int result = navigateXORList();
-    // ��k�� kodunu kontrol et
-    EXPECT_EQ(result, 1);
-
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
-    resetStdinStdout();
-}
+//TEST_F(TaskAppTest, navigateXORListTest_InputError) {
+//
+//    simulateUserInput("-2\n\n0\n\n9\n6\n3\n");
+//
+//    int result = navigateXORList();
+//    // ��k�� kodunu kontrol et
+//    EXPECT_EQ(result, 1);
+//
+//    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+//    resetStdinStdout();
+//}
 
 
 TEST_F(TaskAppTest, RegisterUser_UserAddedSuccessfully) {
