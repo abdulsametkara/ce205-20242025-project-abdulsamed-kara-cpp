@@ -33,9 +33,9 @@
 #include <cstring>
 
 #ifdef _WIN32
-#include <windows.h>  // Windows için Sleep()
+#include <windows.h>  
 #else
-#include <unistd.h>   // Linux/macOS için sleep()
+#include <unistd.h>   
 #endif
 
   /**
@@ -44,7 +44,7 @@
    * This pointer represents the beginning of the linked list that stores all the tasks.
    * It is used to traverse and manage the list of tasks effectively.
    */
-TaskNode* head = NULL;  // Liste başı (ilk görev)
+TaskNode* head = NULL;  
 
 /**
  * @brief Pointer to the tail of the task list.
@@ -52,7 +52,7 @@ TaskNode* head = NULL;  // Liste başı (ilk görev)
  * This pointer represents the end of the linked list that stores all the tasks.
  * It is used to quickly add new tasks to the end of the list.
  */
-TaskNode* tail = NULL;  // Liste sonu (son görev)
+TaskNode* tail = NULL; 
 
 /**
  * @brief Pointer to the head of the XOR linked list.
@@ -76,7 +76,7 @@ XORNode* xorTail = NULL;
  * This constant defines the number of buckets in the hash table used for storing user information.
  * The value of TABLE_SIZE is set to 10, which determines the capacity of the hash table.
  */
-#define TABLE_SIZE 10  // Hash tablosunun boyutu
+#define TABLE_SIZE 10  
 
  /**
   * @brief Maximum number of tasks that can be stored.
@@ -84,7 +84,7 @@ XORNode* xorTail = NULL;
   * This constant defines the maximum number of tasks that can be managed by the application.
   * The value of MAX_TASKS is set to 100, limiting the number of tasks that can be created and stored.
   */
-#define MAX_TASKS 100  // Maksimum görev sayısı
+#define MAX_TASKS 100  
 
   /**
    * @brief Maximum length of assignment names.
@@ -636,7 +636,7 @@ int navigateXORList() {
         printf("Press 1 to go forward, 2 to go backward, or 0 to exit: ");
         choice = getInput();
 
-        if (choice == -2) { // Hatalı giriş
+        if (choice == -2) { 
             handleInputError();
             continue;
         }
@@ -653,7 +653,7 @@ int navigateXORList() {
     } while (choice != 0);
 
     printf("Exiting navigation.\n");
-    return 1; // Başarı durumu
+    return 1; 
 }
 
 
@@ -794,7 +794,7 @@ int viewTask() {
     if (front == NULL) {
         printf("No tasks found. The task list is empty.\n");
         enterToContinue();
-        return 0; // Hata durumu: Kuyruk boş
+        return 0;
     }
 
     printf("\n--- List of Tasks ---\n");
@@ -808,7 +808,7 @@ int viewTask() {
         printf("---------------------------\n");
     }
     enterToContinue();
-    return 1; // Başarı durumu
+    return 1; 
 }
 
 
@@ -948,7 +948,7 @@ int push(Task task) {
     newNode->task = task;
     newNode->next = stackTop;
     stackTop = newNode;
-    return 1; // Başarılı
+    return 1; 
 }
 
 
@@ -986,17 +986,17 @@ Task pop() {
  * @param taskCount Pointer to the current count of tasks.
  */
 int undoLastTask(Task taskList[], int* taskCount) {
-    Task lastTask = pop(); // Son görevi yığından çıkar
-    if (lastTask.id == -1) { // Eğer yığın boşsa
+    Task lastTask = pop(); 
+    if (lastTask.id == -1) { 
         printf("No tasks to undo.\n");
-        return -1; // Hata: Undo işlemi yapılamadı
+        return -1; 
     }
 
-    (*taskCount)--; // Görev sayısını azalt
+    (*taskCount)--; 
     printf("Last task '%s' undone successfully.\n", lastTask.name);
 
-    saveTasks(taskList, *taskCount); // Güncellenmiş görevleri kaydet
-    return 1; // Başarı durumu
+    saveTasks(taskList, *taskCount); 
+    return 1; 
 }
 
 
@@ -1016,22 +1016,22 @@ int printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
 
     visited[taskId] = true;
 
-    Task task = taskList[taskId - 1]; // Görevi al
+    Task task = taskList[taskId - 1]; 
 
     if (task.dependencyCount == 0) {
-        return 1; // Hiç bağımlılığı yok, işleme devam etmeyin
+        return 1;
     }
 
     for (int i = 0; i < task.dependencyCount; i++) {
         int dependencyId = task.dependencies[i];
         printf("Task %d depends on Task %d\n", task.id, dependencyId);
 
-        // Rekürsif olarak bağımlılıkları kontrol et
+        
         int result = printDependenciesUtil(taskList, dependencyId, visited);
         if (result == -1) { return -1; }
     }
 
-    return 1; // Başarıyla tamamlandı
+    return 1; 
 }
 
 
@@ -1049,16 +1049,16 @@ int printDependenciesUtil(Task taskList[], int taskId, bool visited[]) {
 int printDependencies(Task taskList[], int taskCount, int startTaskId) {
     if (startTaskId <= 0 || startTaskId > taskCount) {
         printf("Invalid task ID: %d. Task ID must be between 1 and %d.\n", startTaskId, taskCount);
-        return -1; // Hata: Geçersiz task ID
+        return -1;
     }
 
     bool visited[MAX_TASKS] = { false };
     printf("Dependencies for Task %d:\n", startTaskId);
 
-    // Bağımlılıkları yazdır
+    
     printDependenciesUtil(taskList, startTaskId, visited);
 
-    return 1; // Başarı durumu
+    return 1; 
 }
 
 /**
@@ -1112,7 +1112,7 @@ int dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** componen
 
 
     visited[v] = 1;
-    pushSccStack(v); // SCC yığınına ekle
+    pushSccStack(v); 
 
     AdjacencyNode* temp = adj[v];
     while (temp != NULL) {
@@ -1122,7 +1122,7 @@ int dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** componen
         temp = temp->next;
     }
 
-    return 1; // DFS başarıyla tamamlandı
+    return 1; 
 }
 
 /**
@@ -1139,19 +1139,17 @@ int dfsUtil(int v, int visited[], AdjacencyNode* adj[], AdjacencyNode** componen
 int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
     if (V <= 0 || adj == NULL || out == NULL) {
         fprintf(stderr, "Invalid input parameters.\n");
-        return -1; // Hata durumu
+        return -1; 
     }
 
     int visited[MAX_TASKS] = { 0 };
 
-    // Orijinal graf üzerinde DFS
     for (int i = 0; i < V; i++) {
         if (!visited[i]) {
             dfsUtil(i, visited, adj, NULL);
         }
     }
 
-    // Transpoz graf oluşturma
     AdjacencyNode* transpose[MAX_TASKS] = { NULL };
     for (int v = 0; v < V; v++) {
         AdjacencyNode* temp = adj[v];
@@ -1170,7 +1168,6 @@ int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
     memset(visited, 0, sizeof(visited));
     int numSCC = 0;
 
-    // Transpoz graf üzerinde DFS
     while (sccStack != NULL) {
         int v = popSccStack();
 
@@ -1184,7 +1181,6 @@ int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
         }
     }
 
-    // Transpoz grafı temizle
     for (int i = 0; i < V; i++) {
         while (transpose[i] != NULL) {
             AdjacencyNode* temp = transpose[i];
@@ -1193,7 +1189,7 @@ int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
         }
     }
 
-    return 1; // Başarılı durum
+    return 1; 
 }
 
 
@@ -1212,12 +1208,11 @@ int findSCCs(int V, AdjacencyNode* adj[], FILE* out) {
 int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
     if (taskList == NULL || taskCount <= 0 || out == NULL) {
         fprintf(stderr, "Invalid input parameters.\n");
-        return -1; // Hata durumu
+        return -1; 
     }
 
     AdjacencyNode* adj[MAX_TASKS] = { NULL };
 
-    // Görevlerin bağımlılıklarını oluştur
     for (int i = 0; i < taskCount; i++) {
         Task task = taskList[i];
         for (int j = 0; j < task.dependencyCount; j++) {
@@ -1231,12 +1226,10 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
         }
     }
 
-    // SCC'leri analiz et
     int result = findSCCs(taskCount, adj, out);
     if (result != 1) { fprintf(stderr, "Failed to find SCCs.\n"); return -1; }
 
 
-    // Bağımlılık listesini temizle
     for (int i = 0; i < taskCount; i++) {
         while (adj[i] != NULL) {
             AdjacencyNode* temp = adj[i];
@@ -1245,7 +1238,7 @@ int analyzeSCC(Task taskList[], int taskCount, FILE* out) {
         }
     }
 
-    return 1; // Başarı durumu
+    return 1; 
 }
 
 
@@ -2107,11 +2100,11 @@ int taskPrioritizationMenu() {
             char taskName[100];
             int importanceId;
 
-            // Kullanıcıdan Task Name al
+            
             printf("Enter the name of the task to mark importance: ");
             scanf(" %[^\n]%*c", taskName);
 
-            // Kullanıcıdan Importance ID al
+            
             while (1) {
                 printf("Enter the importance ID (1: Low, 2: Medium, 3: High): ");
                 if (scanf("%d", &importanceId) == 1 && importanceId >= 1 && importanceId <= 3) {
@@ -2119,11 +2112,11 @@ int taskPrioritizationMenu() {
                 }
                 else {
                     printf("Invalid importance ID! Please enter 1, 2, or 3.\n");
-                    while (getchar() != '\n');  // Hatalı giriş sonrası input'u temizle
+                    while (getchar() != '\n');  
                 }
             }
 
-            // Fonksiyonu çağır
+            
             int result = markTaskImportance(taskName, importanceId);
             if (result == 1) {
                 printf("Task importance updated successfully.\n");
@@ -2139,7 +2132,7 @@ int taskPrioritizationMenu() {
             enterToContinue();
             break;
         case 3:
-            return 0;  // Menüden çıkış
+            return 0; 
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -3065,7 +3058,7 @@ int registerUser(User user, const char* pathFileUser, bool isTestMode) {
     printf("User registered successfully: Welcome %s %s\n", user.name, user.surname);
 
     fclose(file);
-    if (!isTestMode) enterToContinue();  // Test modunda bekleme yapılmaz
+    if (!isTestMode) enterToContinue();  
     return 1;
 }
 
@@ -3308,7 +3301,7 @@ int algorithmsMenu() {
             brentsMethodDemo();
             break;
         case 8:
-            return 1;  // Başarılı çıkış
+            return 1; 
         default:
             clearScreen();
             printf("Invalid choice. Please try again.\n");
@@ -3316,7 +3309,7 @@ int algorithmsMenu() {
             break;
         }
     }
-    return 0; // Bu nokta normal şartlarda erişilmez ancak güvenlik için eklenmiştir
+    return 0;
 }
 
 

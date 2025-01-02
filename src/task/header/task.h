@@ -333,7 +333,7 @@ BPlusTreeNode* createNode(bool isLeaf) {
  */
 BPlusTree* createBPlusTree() {
     BPlusTree* tree = (BPlusTree*)malloc(sizeof(BPlusTree));
-    tree->root = createNode(true);  // Başlangıçta tek bir yaprak düğümü var
+    tree->root = createNode(true);  
     return tree;
 }
 
