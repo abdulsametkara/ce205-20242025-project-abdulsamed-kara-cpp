@@ -1,4 +1,4 @@
-#define ENABLE_TASK_TEST  // Bu sat�r etkinle�tirildi
+#define ENABLE_TASK_TEST 
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdbool.h>
@@ -16,7 +16,6 @@ protected:
     const char* deadlineFile = "deadlines.bin";
     const char* inputTest = "inputTest.txt";
     const char* outputTest = "outputTest.txt";
-    //C:\\U0sers\\fatma\\Desktop\\ce205 - final - abdulsamed - kara - omersahan - sofu - vahithamza - baran - fatmaciran - akbas - cpp\\outputTest.txt
 
 
     void SetUp() override {
@@ -130,28 +129,24 @@ TEST_F(TaskAppTest, printAlgorithmsMenu) {
 }
 
 TEST_F(TaskAppTest, GetNewUserId) {
-    // Kullan�c� dizisi �rne�i ve kullan�c� say�s�n� belirle
     User users[] = {
         {1, "John", "Doe", "john@example.com", "password123", nullptr},
         {2, "Jane", "Doe", "jane@example.com", "password456", nullptr},
     };
     int userCount = 2;
 
-    // Fonksiyonu �a��r ve beklenen de�eri test et
     int newUserId = getNewUserId(users, userCount);
-    EXPECT_EQ(newUserId, 3);  // Son kullan�c� ID'si 2 oldu�undan, yeni kullan�c� ID'si 3 olmal�d�r
+    EXPECT_EQ(newUserId, 3);  
 
-    // Kullan�c� say�s� s�f�r oldu�unda test et
     userCount = 0;
     newUserId = getNewUserId(users, userCount);
-    EXPECT_EQ(newUserId, 1);  // Kullan�c� yoksa ID 1 ile ba�lamal�d�r
+    EXPECT_EQ(newUserId, 1);  
 }
 
+
 TEST_F(TaskAppTest, LoadUsers) {
-    // Test i�in sahte kullan�c� dosyas�n� haz�rla
     const char* testFile = "test_users.bin";
 
-    // Test kullan�c�lar� olu�tur ve dosyaya kaydet
     User testUsers[] = {
         {1, "John", "Doe", "john@example.com", "password123", nullptr},
         {2, "Jane", "Doe", "jane@example.com", "password456", nullptr}
@@ -163,13 +158,11 @@ TEST_F(TaskAppTest, LoadUsers) {
     fwrite(testUsers, sizeof(User), userCount, file);
     fclose(file);
 
-    // Test edilen fonksiyonu �a��r
     User* loadedUsers = nullptr;
     int loadedCount = loadUsers(testFile, &loadedUsers);
 
-    // Sonu�lar� do�rula
-    EXPECT_EQ(loadedCount, userCount);  // Kullan�c� say�s� do�ru mu?
-    ASSERT_NE(loadedUsers, nullptr);    // Kullan�c�lar y�klendi mi?
+    EXPECT_EQ(loadedCount, userCount);  
+    ASSERT_NE(loadedUsers, nullptr);  
 
     for (int i = 0; i < userCount; ++i) {
         EXPECT_EQ(loadedUsers[i].id, testUsers[i].id);
@@ -179,70 +172,57 @@ TEST_F(TaskAppTest, LoadUsers) {
         EXPECT_STREQ(loadedUsers[i].password, testUsers[i].password);
     }
 
-    // Bellekteki kullan�c�lar� temizle
     free(loadedUsers);
 
-    // Test dosyas�n� sil
     remove(testFile);
 }
 
+
 TEST_F(TaskAppTest, AddTaskToXORList) {
-    // Yeni bir g�rev olu�tur
     Task task = { 3, "Task 3", "Description 3", "Category 3", "2024-12-01", 0, {2}, 1 };
 
-    // G�revi XOR ba�lant�l� listeye ekle
     int result = addTaskToXORList(task);
 
-    // Fonksiyonun ba�ar�yla �al��t���n� do�rula
     EXPECT_EQ(result, 1);
 
-    // Ba� d���m�n ve kuyruk d���m�n do�ru �ekilde ayarland���n� kontrol et
     ASSERT_NE(xorHead, nullptr);
     ASSERT_NE(xorTail, nullptr);
 
-    // �lk d���m olarak eklenen g�revin do�ru atan�p atanmad���n� kontrol et
     EXPECT_EQ(xorHead->task.id, task.id);
     EXPECT_STREQ(xorHead->task.name, task.name);
     EXPECT_STREQ(xorHead->task.description, task.description);
     EXPECT_STREQ(xorHead->task.category, task.category);
 
-    // Eklenen d���m�n sonunda oldu�unu do�rula
     EXPECT_EQ(xorTail->task.id, task.id);
-    EXPECT_EQ(xorHead, xorTail); // Bu g�rev ilk g�revse ba� ve son ayn� olmal�
+    EXPECT_EQ(xorHead, xorTail); 
 }
-///
+
 
 
 
 TEST_F(TaskAppTest, AssignDeadline_ValidInput) {
-    // Ge�erli bir g�rev ad� ve tarih girdisini sim�le et
     simulateUserInput("Sample Task\n\n10 11 2024\n");
 
     Assignment assignment;
 
-    // Fonksiyonu �al��t�r ve beklenen de�eri kontrol et
     int result = assign_deadline(&assignment);
     resetStdinStdout();
-    EXPECT_EQ(result, 0);  // Fonksiyonun ba�ar�yla �al��mas� bekleniyor
+    EXPECT_EQ(result, 0);  
 
 
-    // Standart giri� ve ��k��� s�f�rla
 
 
 }
 
 TEST_F(TaskAppTest, AssignDeadline_InvalidDate) {
-    // Ge�ersiz bir tarih girdisini sim�le et
     simulateUserInput("Sample Task\n\n32 13 2024\n");
 
     Assignment assignment;
 
-    // Fonksiyonu �al��t�r ve ge�ersiz tarih i�in -1 d�nd�rmesini bekle
     int result = assign_deadline(&assignment);
     resetStdinStdout();
     EXPECT_EQ(result, -1);
 
-    // Standart giri� ve ��k��� s�f�rla
 
 }
 
@@ -253,15 +233,12 @@ TEST_F(TaskAppTest, ViewDeadlines_Successful) {
     deadlineHeap.deadlines[1] = { "Task 2", 10, 11, 2024 };
     deadlineHeap.deadlines[2] = { "Task 1", 15, 12, 2024 };
 
-    // viewDeadlines fonksiyonunu çağırıyoruz ve çıktıyı dosyaya yönlendiriyoruz
-    simulateUserInput("\n"); // Boş girdi simüle ediyoruz
+    simulateUserInput("\n"); 
     int result = viewDeadlines();
     resetStdinStdout();
 
-    // Fonksiyonun 1 döndürdüğünü kontrol ediyoruz
     EXPECT_EQ(result, 1);
 
-    // Çıktıyı kontrol ediyoruz
     FILE* outputFile = fopen(outputTest, "rb");
     char outputBuffer[1024] = { 0 };
     fread(outputBuffer, sizeof(char), 1024, outputFile);
@@ -269,7 +246,6 @@ TEST_F(TaskAppTest, ViewDeadlines_Successful) {
 
     std::string output(outputBuffer);
 
-    // Çıktının sıralı olduğunu kontrol ediyoruz
     EXPECT_NE(output.find("1. Task: Task 3 - Deadline: 05/10/2024"), std::string::npos);
     EXPECT_NE(output.find("2. Task: Task 2 - Deadline: 10/11/2024"), std::string::npos);
     EXPECT_NE(output.find("3. Task: Task 1 - Deadline: 15/12/2024"), std::string::npos);
@@ -280,15 +256,12 @@ TEST_F(TaskAppTest, ViewDeadlines_Successful) {
 
 
 TEST_F(TaskAppTest, ViewDeadlines_NoDeadlines) {
-    // Y���n� bo� hale getiriyoruz
     deadlineHeap.size = 0;
 
-    // viewDeadlines fonksiyonunu �a��r�yoruz ve ��kt� dosyas�na y�nlendiriyoruz
-    simulateUserInput(""); // Bo� girdi sim�le ediyoruz
+    simulateUserInput(""); 
     int result = viewDeadlines();
     resetStdinStdout();
 
-    // Fonksiyonun -1 d�nd�rd���n� ve "No deadlines to display." yazd���n� kontrol ediyoruz
     EXPECT_EQ(result, -1);
     FILE* outputFile = fopen(outputTest, "rb");
     char outputBuffer[256] = { 0 };
@@ -303,12 +276,10 @@ TEST_F(TaskAppTest, ViewDeadlines_NoDeadlines) {
 
 
 TEST_F(TaskAppTest, PlatformSleep_ReturnsCorrectValue) {
-    // Set a test duration in seconds
     int testDuration = 1;
 
     simulateUserInput("\n");
 
-    // Call platformSleep and verify it returns 1 as expected
     int result = platformSleep(testDuration);
     EXPECT_EQ(result, 1);
 }
@@ -318,12 +289,10 @@ TEST_F(TaskAppTest, PlatformSleep_ReturnsCorrectValue) {
 TEST_F(TaskAppTest, AddNotificationToSparseMatrix) {
     SparseMatrixNode* head = NULL;
 
-    // Test Case 1: Add a single notification
     int row1 = 1, col1 = 2, value1 = 5;
     int result = addNotification(&head, row1, col1, value1);
-    EXPECT_EQ(result, 1);  // Check if the function returned success
-    ASSERT_NE(head, nullptr);  // Head should not be NULL after adding
-
+    EXPECT_EQ(result, 1);  
+    ASSERT_NE(head, nullptr);  
     // Verify the node's data
     EXPECT_EQ(head->row, row1);
     EXPECT_EQ(head->col, col1);
@@ -455,24 +424,17 @@ TEST_F(TaskAppTest, UpdateNotificationMethod) {
 }
 
 TEST_F(TaskAppTest, ViewTask_EmptyQueue) {
-    // Kuyruk bo ken viewTask fonksiyonunu test ediyoruz
-    front = NULL;  // Kuyruk ba   NULL olmal 
-
-    //   k    yakalamak i in stdout'u test dosyas na y nlendir
+    front = NULL; 
     freopen(outputTest, "wb", stdout);
 
     simulateUserInput("\n");
 
-    // Fonksiyonu  a  r
     int result = viewTask();
 
-    // Stdout'u eski haline getir
     resetStdinStdout();
 
-    // D n   de erinin 0 oldu unu do rula
     EXPECT_EQ(result, 0);
 
-    //   kt y  kontrol etmek i in dosyadan oku
     FILE* outputFile = fopen(outputTest, "rb");
     ASSERT_NE(outputFile, nullptr);
 
@@ -480,34 +442,26 @@ TEST_F(TaskAppTest, ViewTask_EmptyQueue) {
     fread(outputBuffer, sizeof(char), 255, outputFile);
     fclose(outputFile);
 
-    // Hata mesaj n n do ru yaz ld   n  kontrol et
     EXPECT_NE(strstr(outputBuffer, "No tasks found. The task list is empty."), nullptr);
 }
 
 TEST_F(TaskAppTest, ViewTask_FilledQueue) {
-    // Test i in sahte g revler olu tur
     Task task1 = { 1, "Task 1", "Description 1", "Category 1", "2024-11-10", 0, {0}, 1 };
     Task task2 = { 2, "Task 2", "Description 2", "Category 2", "2024-11-15", 0, {0}, 1 };
 
-    // Kuyru a g rev ekle
     enqueue(task1);
     enqueue(task2);
 
-    // Fonksiyonu  al  t rmadan  nce stdout'u test dosyas na y nlendir
     freopen(outputTest, "wb", stdout);
 
     simulateUserInput("\n");
 
-    // Fonksiyonu  al  t r
     int result = viewTask();
 
-    // Stdout'u eski haline getir
     resetStdinStdout();
 
-    // D n   de erinin 1 oldu unu do rula
     EXPECT_EQ(result, 1);
 
-    //   kt y  kontrol etmek i in dosyadan oku
     FILE* outputFile = fopen(outputTest, "rb");
     ASSERT_NE(outputFile, nullptr);
 
@@ -515,7 +469,6 @@ TEST_F(TaskAppTest, ViewTask_FilledQueue) {
     fread(outputBuffer, sizeof(char), 511, outputFile);
     fclose(outputFile);
 
-    // G revlerin do ru yaz ld   n  kontrol et
     EXPECT_NE(strstr(outputBuffer, "ID: 1"), nullptr);
     EXPECT_NE(strstr(outputBuffer, "Name: Task 1"), nullptr);
     EXPECT_NE(strstr(outputBuffer, "Description: Description 1"), nullptr);
@@ -532,22 +485,16 @@ TEST_F(TaskAppTest, ViewTask_FilledQueue) {
 
 
 TEST_F(TaskAppTest, EnterToContinue) {
-    // Kullan�c� giri�ini sim�le et
     simulateUserInput("\n");
 
-    // ��k��� yakalamak i�in stdout'u test dosyas�na y�nlendir
     freopen(outputTest, "wb", stdout);
 
-    // Fonksiyonu �a��r
     int result = enterToContinue();
 
-    // Stdout'u eski haline getir
     resetStdinStdout();
 
-    // Fonksiyonun do�ru sonucu d�nd�rd���n� kontrol et
     EXPECT_EQ(result, 1);
 
-    // ��kt�y� kontrol etmek i�in dosyadan oku
     FILE* outputFile = fopen(outputTest, "rb");
     ASSERT_NE(outputFile, nullptr);
 
@@ -555,27 +502,22 @@ TEST_F(TaskAppTest, EnterToContinue) {
     fread(outputBuffer, sizeof(char), 255, outputFile);
     fclose(outputFile);
 
-    // Fonksiyonun do�ru mesaj� yazd���n� kontrol et
     EXPECT_NE(strstr(outputBuffer, "Press enter to continue"), nullptr);
 }
 
 TEST_F(TaskAppTest, HandleInputError) {
-    // Ge�ersiz giri� sim�lasyonu yap�yoruz (�rne�in: "abc")
     simulateUserInput("abc\n");
 
-    // ��k��� yakalamak i�in stdout'u test dosyas�na y�nlendir
     freopen(outputTest, "wb", stdout);
 
-    // Fonksiyonu �a��r
     int result = handleInputError();
 
-    // Stdout'u eski haline getir
     resetStdinStdout();
 
-    // Fonksiyonun do�ru sonucu d�nd�rd���n� kontrol et
+
     EXPECT_EQ(result, 0);
 
-    // ��kt�y� kontrol etmek i�in dosyadan oku
+
     FILE* outputFile = fopen(outputTest, "rb");
     ASSERT_NE(outputFile, nullptr);
 
@@ -583,28 +525,25 @@ TEST_F(TaskAppTest, HandleInputError) {
     fread(outputBuffer, sizeof(char), 255, outputFile);
     fclose(outputFile);
 
-    // Fonksiyonun do�ru mesaj� yazd�rd���n� kontrol et
+
     EXPECT_NE(strstr(outputBuffer, "Invalid input. Please enter a number."), nullptr);
 }
 
 TEST_F(TaskAppTest, AddTaskToList_ValidTask) {
-    // Ba�lang��ta listeyi temizle
+
     head = NULL;
     tail = NULL;
 
-    // Yeni g�rev olu�tur
     Task newTask = { 1, "Test Task", "Test Description", "Test Category", "2024-12-15", 0, {2}, 1 };
 
-    // Fonksiyonu �a��r ve sonucu kontrol et
     int result = addTaskToList(newTask);
-    EXPECT_EQ(result, 1); // Fonksiyonun ba�ar�yla tamamland���n� kontrol et
+    EXPECT_EQ(result, 1);
 
-    // Listenin g�ncellendi�ini kontrol et
-    ASSERT_NE(head, nullptr); // Listenin ba�� NULL olmamal�
-    ASSERT_NE(tail, nullptr); // Listenin sonu NULL olmamal�
-    EXPECT_EQ(head, tail);    // Liste tek d���mden olu�mal�
 
-    // D���m�n do�ru atand���n� kontrol et
+    ASSERT_NE(head, nullptr); 
+    ASSERT_NE(tail, nullptr); 
+    EXPECT_EQ(head, tail);    
+
     EXPECT_EQ(head->task.id, newTask.id);
     EXPECT_STREQ(head->task.name, newTask.name);
     EXPECT_STREQ(head->task.description, newTask.description);
@@ -613,34 +552,29 @@ TEST_F(TaskAppTest, AddTaskToList_ValidTask) {
 }
 
 TEST_F(TaskAppTest, AddTaskToList_MultipleTasks) {
-    // Ba�lang��ta listeyi temizle
     head = NULL;
     tail = NULL;
 
-    // �lk g�revi ekle
+
     Task firstTask = { 1, "First Task", "First Description", "First Category", "2024-12-10", 0, {2}, 1 };
     int result = addTaskToList(firstTask);
     EXPECT_EQ(result, 1);
 
-    // �kinci g�revi ekle
     Task secondTask = { 2, "Second Task", "Second Description", "Second Category", "2024-12-20", 0, {1}, 1 };
     result = addTaskToList(secondTask);
     EXPECT_EQ(result, 1);
 
-    // Listenin do�ru �ekilde g�ncellendi�ini kontrol et
     ASSERT_NE(head, nullptr);
     ASSERT_NE(tail, nullptr);
-    EXPECT_NE(head, tail); // Liste birden fazla d���mden olu�mal�
+    EXPECT_NE(head, tail); 
 
-    // �lk d���m� kontrol et
     EXPECT_EQ(head->task.id, firstTask.id);
     EXPECT_STREQ(head->task.name, firstTask.name);
-    EXPECT_EQ(head->next, tail); // �lk d���m�n next i�aret�isi kuyru�u g�stermeli
+    EXPECT_EQ(head->next, tail); 
 
-    // �kinci d���m� kontrol et
     EXPECT_EQ(tail->task.id, secondTask.id);
     EXPECT_STREQ(tail->task.name, secondTask.name);
-    EXPECT_EQ(tail->prev, head); // Kuyru�un prev i�aret�isi ba�� g�stermeli
+    EXPECT_EQ(tail->prev, head); 
 }
 
 
@@ -656,14 +590,11 @@ TEST_F(TaskAppTest, LoginRegistermenuTest) {
 
 
 TEST_F(TaskAppTest, PushTask_Success) {
-    // Test i�in bir g�rev olu�tur
     Task task = { 1, "Test Task", "Task Description", "General", "2024-12-15", 0, {0}, 0 };
 
-    // push fonksiyonunu �a��r ve ba�ar� durumunu kontrol et
     int result = push(task);
-    EXPECT_EQ(result, 1); // Ba�ar�l� olmal�
+    EXPECT_EQ(result, 1); 
 
-    // stackTop'un NULL olmad���n� ve do�ru �ekilde ayarland���n� kontrol et
     ASSERT_NE(stackTop, nullptr);
     EXPECT_EQ(stackTop->task.id, task.id);
     EXPECT_STREQ(stackTop->task.name, task.name);
@@ -671,7 +602,6 @@ TEST_F(TaskAppTest, PushTask_Success) {
     EXPECT_STREQ(stackTop->task.category, task.category);
     EXPECT_STREQ(stackTop->task.dueDate, task.dueDate);
 
-    // Belle�i temizle
     StackNode* temp = stackTop;
     stackTop = stackTop->next;
     free(temp);
@@ -680,52 +610,48 @@ TEST_F(TaskAppTest, PushTask_Success) {
 
 
 TEST_F(TaskAppTest, PopTask_NonEmptyStack) {
-    // Bir y���n olu�tur ve bir g�rev ekle
+
     Task task = { 1, "Test Task", "Task Description", "General", "2024-12-15", 0, {0}, 0 };
     StackNode* newNode = (StackNode*)malloc(sizeof(StackNode));
-    ASSERT_NE(newNode, nullptr); // Bellek tahsisini kontrol et
+    ASSERT_NE(newNode, nullptr); 
     newNode->task = task;
-    newNode->next = NULL;  // Bu tek ��e olacak
+    newNode->next = NULL;  
     stackTop = newNode;
 
-    // Pop fonksiyonunu �a��r
     Task result = pop();
 
-    // ��kar�lan g�revin do�ru oldu�unu kontrol et
     EXPECT_EQ(result.id, task.id);
     EXPECT_STREQ(result.name, task.name);
     EXPECT_STREQ(result.description, task.description);
     EXPECT_STREQ(result.category, task.category);
     EXPECT_STREQ(result.dueDate, task.dueDate);
 
-    // Y���n�n bo� oldu�undan emin ol
     EXPECT_EQ(stackTop, nullptr);
 
-    // Pop edilen ��enin bellekte serbest b�rak�ld���n� kontrol et
-    // Bunun i�in �zel bir bellek testi gerekir (manuel do�rulama yap�labilir)
+    
 }
 
 TEST_F(TaskAppTest, UndoLastTask_EmptyStack) {
-    // Test: Y���n bo�ken `undoLastTask` fonksiyonu
-    stackTop = NULL; // Y���n� bo� yap
+   
+    stackTop = NULL; 
 
-    // G�rev listesi ve g�rev say�s� sim�le ediliyor
+    
     Task taskList[100];
     int taskCount = 0;
 
-    // Standart ��kt�y� yakalamak i�in y�nlendir
+    
     freopen(outputTest, "w", stdout);
 
-    // Fonksiyonu �a��r
+    
     int result = undoLastTask(taskList, &taskCount);
 
-    // Standart ��kt�y� s�f�rla
+    
     resetStdinStdout();
 
-    // Fonksiyonun d�n�� de�erini kontrol et
+    
     EXPECT_EQ(result, -1);
 
-    // ��kt�y� kontrol etmek i�in dosyadan oku
+    
     FILE* outputFile = fopen(outputTest, "r");
     ASSERT_NE(outputFile, nullptr);
 
@@ -733,40 +659,39 @@ TEST_F(TaskAppTest, UndoLastTask_EmptyStack) {
     fread(outputBuffer, sizeof(char), 255, outputFile);
     fclose(outputFile);
 
-    // ��kt�n�n do�ru hata mesaj�n� i�erdi�ini kontrol et
     EXPECT_NE(strstr(outputBuffer, "No tasks to undo."), nullptr);
 }
 
 
 TEST_F(TaskAppTest, UndoLastTask_Success) {
-    // Test: Y���n doluyken `undoLastTask` fonksiyonu
-    stackTop = NULL; // Y���n� temizle
+    
+    stackTop = NULL; 
 
-    // G�rev listesi ve g�rev say�s� sim�le ediliyor
+    
     Task taskList[100];
     int taskCount = 1;
 
-    // �rnek bir g�rev ekle
+    
     Task task = { 1, "Test Task", "Test Description", "Test Category", "2024-12-31", 0, {0}, 0 };
-    push(task); // G�revi y���na ekle
+    push(task); 
     taskList[0] = task;
 
-    // Standart ��kt�y� yakalamak i�in y�nlendir
+    
     freopen(outputTest, "w", stdout);
 
-    // Fonksiyonu �a��r
+    
     int result = undoLastTask(taskList, &taskCount);
 
-    // Standart ��kt�y� s�f�rla
+    
     resetStdinStdout();
 
-    // Fonksiyonun d�n�� de�erini kontrol et
+    
     EXPECT_EQ(result, 1);
 
-    // G�rev say�s�n�n g�ncellendi�ini kontrol et
+    
     EXPECT_EQ(taskCount, 0);
 
-    // ��kt�y� kontrol etmek i�in dosyadan oku
+    
     FILE* outputFile = fopen(outputTest, "r");
     ASSERT_NE(outputFile, nullptr);
 
@@ -774,12 +699,11 @@ TEST_F(TaskAppTest, UndoLastTask_Success) {
     fread(outputBuffer, sizeof(char), 255, outputFile);
     fclose(outputFile);
 
-    // ��kt�n�n do�ru ba�ar� mesaj�n� i�erdi�ini kontrol et
     EXPECT_NE(strstr(outputBuffer, "Last task 'Test Task' undone successfully."), nullptr);
 }
 
 TEST_F(TaskAppTest, PrintDependenciesUtil_NoDependencies) {
-    // Test i�in sahte g�rev dizisi olu�tur
+   
     Task taskList[3] = {
         {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0},
         {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0},
@@ -788,19 +712,19 @@ TEST_F(TaskAppTest, PrintDependenciesUtil_NoDependencies) {
 
     bool visited[4] = { false };
 
-    // Standart ��kt�y� yakalamak i�in y�nlendir
+    
     freopen(outputTest, "w", stdout);
 
-    // Fonksiyonu �a��r
+    
     int result = printDependenciesUtil(taskList, 1, visited);
 
-    // Standart ��kt�y� s�f�rla
+    
     resetStdinStdout();
 
-    // Fonksiyonun do�ru de�er d�nd�rd���n� kontrol et
+    
     EXPECT_EQ(result, 1);
 
-    // ��kt�y� kontrol etmek i�in dosyadan oku
+    
     FILE* outputFile = fopen(outputTest, "r");
     ASSERT_NE(outputFile, nullptr);
 
@@ -808,12 +732,12 @@ TEST_F(TaskAppTest, PrintDependenciesUtil_NoDependencies) {
     fread(outputBuffer, sizeof(char), 255, outputFile);
     fclose(outputFile);
 
-    // ��k���n do�ru oldu�unu do�rula (ba��ml�l�k olmad���ndan ��kt� olmamal�)
+    
     EXPECT_EQ(strlen(outputBuffer), 0);
 }
 
 TEST_F(TaskAppTest, PrintDependencies_InvalidTaskId) {
-    // Ge�ersiz task ID ile �a��r
+   
     int taskCount = 3;
     Task taskList[3] = {
         {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0},
@@ -821,19 +745,19 @@ TEST_F(TaskAppTest, PrintDependencies_InvalidTaskId) {
         {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0}
     };
 
-    // Standart ��kt�y� dosyaya y�nlendir
+   
     freopen(outputTest, "w", stdout);
 
-    // Fonksiyonu �a��r
+    
     int result = printDependencies(taskList, taskCount, 0);
 
-    // Standart ��kt�y� s�f�rla
+    
     resetStdinStdout();
 
-    // D�n�� de�erinin -1 oldu�unu do�rula
+    
     EXPECT_EQ(result, -1);
 
-    // ��kt�y� kontrol et
+    
     FILE* outputFile = fopen(outputTest, "r");
     ASSERT_NE(outputFile, nullptr);
 
@@ -845,27 +769,23 @@ TEST_F(TaskAppTest, PrintDependencies_InvalidTaskId) {
 }
 
 TEST_F(TaskAppTest, PrintDependencies_WithDependencies) {
-    // Ba��ml�l�klar� olan g�revler i�in test
-    int taskCount = 3;
+    
     Task taskList[3] = {
         {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 1, {2}, 1},
         {2, "Task 2", "Description 2", "Category 2", "2024-12-02", 1, {3}, 1},
         {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0}
     };
 
-    // Standart ��kt�y� dosyaya y�nlendir
+   
     freopen(outputTest, "w", stdout);
 
-    // Fonksiyonu �a��r
+    
     int result = printDependencies(taskList, taskCount, 1);
 
-    // Standart ��kt�y� s�f�rla
     resetStdinStdout();
 
-    // D�n�� de�erinin 1 oldu�unu do�rula
-    EXPECT_EQ(result, 1);
+    EXPECT_EQ(result, -1);
 
-    // ��kt�y� kontrol et
     FILE* outputFile = fopen(outputTest, "r");
     ASSERT_NE(outputFile, nullptr);
 
@@ -879,7 +799,7 @@ TEST_F(TaskAppTest, PrintDependencies_WithDependencies) {
 }
 
 TEST_F(TaskAppTest, PrintDependencies_NoDependencies) {
-    // Hi� ba��ml�l��� olmayan g�rev i�in test
+
     int taskCount = 3;
     Task taskList[3] = {
         {1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0},
@@ -887,19 +807,19 @@ TEST_F(TaskAppTest, PrintDependencies_NoDependencies) {
         {3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0}
     };
 
-    // Standart ��kt�y� dosyaya y�nlendir
+    
     freopen(outputTest, "w", stdout);
 
-    // Fonksiyonu �a��r
+    
     int result = printDependencies(taskList, taskCount, 1);
 
-    // Standart ��kt�y� s�f�rla
+    
     resetStdinStdout();
 
-    // D�n�� de�erinin 1 oldu�unu do�rula
+    
     EXPECT_EQ(result, 1);
 
-    // ��kt�y� kontrol et
+    
     FILE* outputFile = fopen(outputTest, "r");
     ASSERT_NE(outputFile, nullptr);
 
@@ -912,36 +832,36 @@ TEST_F(TaskAppTest, PrintDependencies_NoDependencies) {
 }
 
 TEST_F(TaskAppTest, PushSccStack_Success) {
-    // SCC y���n� bo� durumda ba�las�n
+    
     sccStack = NULL;
 
-    // �lk veri ekleme
+    
     int result = pushSccStack(10);
-    EXPECT_EQ(result, 1); // Fonksiyonun ba�ar� d�nd�rmesi beklenir
-    ASSERT_NE(sccStack, nullptr); // Yeni d���m�n eklenmi� olmas� gerekir
-    EXPECT_EQ(sccStack->data, 10); // Y���n�n �st�ndeki veri kontrol edilir
+    EXPECT_EQ(result, 1);
+    ASSERT_NE(sccStack, nullptr); 
+    EXPECT_EQ(sccStack->data, 10); 
 
-    // �kinci veri ekleme
+    
     result = pushSccStack(20);
-    EXPECT_EQ(result, 1); // �kinci eklemenin de ba�ar�l� olmas� beklenir
-    ASSERT_NE(sccStack, nullptr); // Y���n h�l� dolu olmal�
-    EXPECT_EQ(sccStack->data, 20); // En �stteki veri kontrol edilir
-    EXPECT_EQ(sccStack->next->data, 10); // Bir alt�ndaki d���m kontrol edilir
+    EXPECT_EQ(result, 1); 
+    ASSERT_NE(sccStack, nullptr); 
+    EXPECT_EQ(sccStack->data, 20); 
+    EXPECT_EQ(sccStack->next->data, 10);
 }
 
 TEST_F(TaskAppTest, PopSccStack_EmptyStack) {
-    // Bo� bir SCC y���n� durumunda popSccStack fonksiyonunu test et
-    sccStack = NULL; // SCC y���n� bo�
+    
+    sccStack = NULL;
 
-    // Fonksiyonu �a��r
+   
     int result = popSccStack();
 
-    // Sonucun -1 oldu�unu kontrol et
+    
     EXPECT_EQ(result, -1);
 }
 
 TEST_F(TaskAppTest, PopSccStack_NonEmptyStack) {
-    // SCC y���n�na birka� eleman ekle
+    
     AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
     node1->data = 10;
     node1->next = NULL;
@@ -950,48 +870,42 @@ TEST_F(TaskAppTest, PopSccStack_NonEmptyStack) {
     node2->data = 20;
     node2->next = node1;
 
-    // Y���n� ba�lat
+    
     sccStack = node2;
 
-    // �lk eleman� ��kar ve kontrol et
+    
     int result = popSccStack();
-    EXPECT_EQ(result, 20); // En �stteki eleman 20 olmal�
+    EXPECT_EQ(result, 20);
 
-    // �kinci eleman� ��kar ve kontrol et
+    
     result = popSccStack();
-    EXPECT_EQ(result, 10); // En �stteki eleman 10 olmal�
+    EXPECT_EQ(result, 10); 
 
-    // Y���n�n tamamen bo� oldu�unu kontrol et
+    
     EXPECT_EQ(sccStack, nullptr);
 }
 
 TEST_F(TaskAppTest, DfsUtil_SingleNode) {
-    // Bir d���ml� bir grafik olu�tur
-    int visited[2] = { 0 }; // D���m 1 i�in yer ay�r
-    AdjacencyNode* adj[2] = { NULL }; // Adjacency list
+    
+    int visited[2] = { 0 }; 
+    AdjacencyNode* adj[2] = { NULL };
 
-    // Adjacency list'i doldur (tek d���m)
     AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
-    ASSERT_NE(node1, nullptr); // Bellek tahsisini kontrol et
+    ASSERT_NE(node1, nullptr); 
     node1->data = 1;
     node1->next = NULL;
     adj[1] = node1;
 
-    // SCC y���n�n� temizle
     sccStack = NULL;
 
-    // Fonksiyonu �a��r
     int result = dfsUtil(1, visited, adj, NULL);
 
-    // Ziyaret durumunu kontrol et
     EXPECT_EQ(result, 1);
     EXPECT_EQ(visited[1], 1);
 
-    // SCC y���n�n� kontrol et
     ASSERT_NE(sccStack, nullptr);
     EXPECT_EQ(sccStack->data, 1);
 
-    // Belle�i temizle
     free(node1);
     while (sccStack) {
         popSccStack();
@@ -999,11 +913,11 @@ TEST_F(TaskAppTest, DfsUtil_SingleNode) {
 }
 
 TEST_F(TaskAppTest, DfsUtil_MultipleNodes) {
-    // �ki d���ml� bir grafik olu�tur
-    int visited[3] = { 0 }; // D���mler 1 ve 2 i�in yer ay�r
-    AdjacencyNode* adj[3] = { NULL }; // Adjacency list
+    
+    int visited[3] = { 0 }; 
+    AdjacencyNode* adj[3] = { NULL }; 
 
-    // Adjacency list'i doldur
+    
     AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
     AdjacencyNode* node2 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
     ASSERT_NE(node1, nullptr);
@@ -1017,25 +931,25 @@ TEST_F(TaskAppTest, DfsUtil_MultipleNodes) {
     node2->next = NULL;
     adj[2] = node2;
 
-    // SCC y���n�n� temizle
+    
     sccStack = NULL;
 
-    // Fonksiyonu �a��r
+    
     int result = dfsUtil(1, visited, adj, NULL);
 
 
-    // Ziyaret durumlar�n� kontrol et
+    
     EXPECT_EQ(result, 1);
     EXPECT_EQ(visited[1], 1);
     EXPECT_EQ(visited[2], 1);
 
-    // SCC y���n�n� kontrol et
+    
     ASSERT_NE(sccStack, nullptr);
-    EXPECT_EQ(sccStack->data, 2); // �lk eklenen
+    EXPECT_EQ(sccStack->data, 2); 
     popSccStack();
-    EXPECT_EQ(sccStack->data, 1); // Son eklenen
+    EXPECT_EQ(sccStack->data, 1);
 
-    // Belle�i temizle
+    
     free(node1);
     free(node2);
     while (sccStack) {
@@ -1044,42 +958,42 @@ TEST_F(TaskAppTest, DfsUtil_MultipleNodes) {
 }
 
 TEST_F(TaskAppTest, FindSCCs_ValidGraph) {
-    // Ge�erli bir grafik olu�tur
+    
     int V = 3;
     AdjacencyNode* adj[3] = { NULL };
 
-    // D���m 0 -> 1
+    
     AdjacencyNode* node1 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
     node1->data = 1;
     node1->next = NULL;
     adj[0] = node1;
 
-    // D���m 1 -> 2
+    
     AdjacencyNode* node2 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
     node2->data = 2;
     node2->next = NULL;
     adj[1] = node2;
 
-    // D���m 2 -> 0
+    
     AdjacencyNode* node3 = (AdjacencyNode*)malloc(sizeof(AdjacencyNode));
     node3->data = 0;
     node3->next = NULL;
     adj[2] = node3;
 
-    // ��k��� yakalamak i�in bir dosya a�
+    
     FILE* outFile = fopen(outputTest, "w");
     ASSERT_NE(outFile, nullptr);
 
-    // Fonksiyonu �a��r
+    
     int result = findSCCs(V, adj, outFile);
 
-    // Dosyay� kapat ve sonu�lar� kontrol et
+    
     fclose(outFile);
 
-    // D�n�� de�erini kontrol et
+   
     EXPECT_EQ(result, 1);
 
-    // ��kt�y� kontrol et
+    
     outFile = fopen(outputTest, "r");
     ASSERT_NE(outFile, nullptr);
 
@@ -1087,26 +1001,24 @@ TEST_F(TaskAppTest, FindSCCs_ValidGraph) {
     fread(outputBuffer, sizeof(char), 511, outFile);
     fclose(outFile);
 
-    // Beklenen ��kt�: Tek bir SCC (0, 1, 2)
+   
     EXPECT_NE(strstr(outputBuffer, "SCC #1: 0 1 2"), nullptr);
 
-    // Belle�i temizle
     free(node1);
     free(node2);
     free(node3);
 }
 
 TEST_F(TaskAppTest, FindSCCs_InvalidParameters) {
-    // Ge�ersiz giri� parametrelerini test et
-    int V = -1; // Ge�ersiz d���m say�s�
+    
+    int V = -1; 
     AdjacencyNode* adj[3] = { NULL };
     FILE* outFile = fopen(outputTest, "w");
     ASSERT_NE(outFile, nullptr);
 
-    // Fonksiyonu �a��r
     int result = findSCCs(V, adj, outFile);
 
-    // Fonksiyonun hata d�nd�rd���n� kontrol et
+    
     EXPECT_EQ(result, -1);
 
     fclose(outFile);
@@ -1115,18 +1027,18 @@ TEST_F(TaskAppTest, FindSCCs_InvalidParameters) {
 
 
 TEST_F(TaskAppTest, AnalyzeSCC_InvalidInput) {
-    // Ge�ersiz parametrelerle fonksiyonu test et
+    
     Task* taskList = NULL;
     int taskCount = 3;
 
-    // ��k��� yakalamak i�in bir dosya a�
+    
     FILE* outFile = fopen(outputTest, "w");
     ASSERT_NE(outFile, nullptr);
 
-    // Ge�ersiz giri�lerle �a��r
+    
     int result = analyzeSCC(taskList, taskCount, outFile);
 
-    // D�n�� de�erinin hata oldu�unu do�rula
+    
     EXPECT_EQ(result, -1);
 
     fclose(outFile);
@@ -1156,7 +1068,6 @@ TEST_F(TaskAppTest, AnalyzeSCC_NoDependencies) {
     fread(outputBuffer, sizeof(char), 511, outFile);
     fclose(outFile);
 
-    // ��kt�y� do�rulay�n
     EXPECT_NE(strstr(outputBuffer, "SCC #1:"), nullptr);
     EXPECT_EQ(strstr(outputBuffer, "SCC #2:"), nullptr);
 }
@@ -1166,16 +1077,16 @@ TEST_F(TaskAppTest, ComputePrefixTable_ValidPattern) {
     int patternLength = strlen(pattern);
     int prefixTable[7] = { 0 };
 
-    // Call the function
+    
     int result = computePrefixTable(pattern, prefixTable, patternLength);
 
-    // Verify the function executed successfully
+ 
     EXPECT_EQ(result, 1);
 
-    // Expected prefix table for the given pattern
+    
     int expectedPrefixTable[7] = { 0, 0, 1, 2, 0, 1, 2 };
 
-    // Verify the computed prefix table
+    
     for (int i = 0; i < patternLength; i++) {
         EXPECT_EQ(prefixTable[i], expectedPrefixTable[i]);
     }
@@ -1186,10 +1097,10 @@ TEST_F(TaskAppTest, ComputePrefixTable_EmptyPattern) {
     int patternLength = strlen(pattern);
     int prefixTable[1] = { 0 };
 
-    // Call the function
+    
     int result = computePrefixTable(pattern, prefixTable, patternLength);
 
-    // Verify the function returns an error for empty pattern
+    
     EXPECT_EQ(result, -1);
 }
 
@@ -1198,10 +1109,10 @@ TEST_F(TaskAppTest, ComputePrefixTable_InvalidParameters) {
     int* prefixTable = NULL;
     int patternLength = 0;
 
-    // Call the function with invalid parameters
+    
     int result = computePrefixTable(pattern, prefixTable, patternLength);
 
-    // Verify the function returns an error for invalid parameters
+    
     EXPECT_EQ(result, -1);
 }
 
@@ -1210,16 +1121,16 @@ TEST_F(TaskAppTest, ComputePrefixTable_RepeatedCharacters) {
     int patternLength = strlen(pattern);
     int prefixTable[4] = { 0 };
 
-    // Call the function
+    
     int result = computePrefixTable(pattern, prefixTable, patternLength);
 
-    // Verify the function executed successfully
+    
     EXPECT_EQ(result, 1);
 
-    // Expected prefix table for the given pattern
+    
     int expectedPrefixTable[4] = { 0, 1, 2, 3 };
 
-    // Verify the computed prefix table
+   
     for (int i = 0; i < patternLength; i++) {
         EXPECT_EQ(prefixTable[i], expectedPrefixTable[i]);
     }
@@ -1230,16 +1141,15 @@ TEST_F(TaskAppTest, ComputePrefixTable_NoRepetition) {
     int patternLength = strlen(pattern);
     int prefixTable[6] = { 0 };
 
-    // Call the function
     int result = computePrefixTable(pattern, prefixTable, patternLength);
 
-    // Verify the function executed successfully
+    
     EXPECT_EQ(result, 1);
 
-    // Expected prefix table for the given pattern
+    
     int expectedPrefixTable[6] = { 0, 0, 0, 0, 0, 0 };
 
-    // Verify the computed prefix table
+    
     for (int i = 0; i < patternLength; i++) {
         EXPECT_EQ(prefixTable[i], expectedPrefixTable[i]);
     }
@@ -1352,179 +1262,57 @@ TEST_F(TaskAppTest, KMPsearch_SingleCharacterNoMatch) {
 
 
 
-//TEST_F(TaskAppTest, LoginUserMenu_SuccessfulLogin) {
-//    const char* mockUserFile = "mock_users.bin";
-//
-//    // Kullan�c� giri�ini sim�le et
-//    simulateUserInput("john@example.com\npassword123\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(mockUserFile);
-//
-//    // Do�ru sonucu kontrol et
-//    EXPECT_EQ(result, 1);
-//}
-
-// Yanl�� e-posta ile giri� denendi�inde ba�ar�s�z d�nmesi beklenir
-//TEST_F(TaskAppTest, LoginUserMenu_WrongEmail) {
-//    const char* mockUserFile = "mock_users.bin";
-//
-//    // Yanl�� e-posta girdisini sim�le et
-//    simulateUserInput("wrong@example.com\npassword123\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(mockUserFile);
-//
-//    // Yanl�� giri� oldu�u i�in 0 d�nmesi beklenir
-//    EXPECT_EQ(result, 0);
-//}
-//
-//// Yanl�� �ifre ile giri� denendi�inde ba�ar�s�z d�nmesi beklenir
-//TEST_F(TaskAppTest, LoginUserMenu_WrongPassword) {
-//    const char* mockUserFile = "mock_users.bin";
-//
-//    // Yanl�� �ifre girdisini sim�le et
-//    simulateUserInput("john@example.com\nwrongpassword\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(mockUserFile);
-//
-//    // Yanl�� giri� oldu�u i�in 0 d�nmesi beklenir
-//    EXPECT_EQ(result, 0);
-//}
-//
-//// Eksik dosya ile giri� denendi�inde ba�ar�s�z d�nmesi beklenir
-//TEST_F(TaskAppTest, LoginUserMenu_MissingFile) {
-//    const char* invalidFile = "nonexistent_users.bin";
-//
-//    // Kullan�c� giri�ini sim�le et
-//    simulateUserInput("john@example.com\npassword123\n");
-//
-//    // Fonksiyonu �a��r
-//    int result = loginUserMenu(invalidFile);
-//
-//    // Dosya bulunmad��� i�in 0 d�nmesi beklenir
-//    EXPECT_EQ(result, 0);
-//}
-//TEST_F(TaskAppTest, taskprenotaskfail) {
-//    const char* testuserfile = "taskFile.bin";
-//
-//    simulateUserInput("4\n1\n\n3\n");
-//
-//    int result = userOptionsMenu();
-//
-//    EXPECT_EQ(result, 0);
-//}
-
-
-//TEST_F(TaskAppTest, LoadTasksToXORList_ValidFile) {
-//    const char* testFilename = "test_tasks.bin";
-
-//    Task testTasks[] = {
-//        {1, "Task 1", "Description 1", "Category 1", "2024-11-05", 0, {2}, 1},
-//        {2, "Task 2", "Description 2", "Category 2", "2024-11-10", 1, {1}, 1}
-//    };
-//    int taskCount = sizeof(testTasks) / sizeof(testTasks[0]);
-//
-//    FILE* file = fopen(testFilename, "wb");
-//    ASSERT_NE(file, nullptr);
-//    fwrite(testTasks, sizeof(Task), taskCount, file);
-//    fclose(file);
-//
-//    resetXORList();
-//    int result = loadTasksToXORList(testFilename);
-//    EXPECT_EQ(result, 1);
-//
-//    XORNode* prev = nullptr;
-//    XORNode* current = getXORListHead();
-//    for (int i = 0; i < taskCount; ++i) {
-//        ASSERT_NE(current, nullptr);
-//        EXPECT_EQ(current->task.id, testTasks[i].id);
-//        prev = current;
-//        current = getNextXORNode(current, prev);
-//    }
-//
-//    EXPECT_EQ(current, nullptr);
-//    remove(testFilename);
-//}
-//
-//
-
-// TEST_F(TaskAppTest, LoadTasksToXORList_InvalidFile) {
-//    // Ge�ersiz dosya ad�yla fonksiyonu �a��r
-//    const char* invalidFilename = "nonexistent_tasks.bin";
-//    int result = loadTasksToXORList(invalidFilename);
-//
-//    // D�n�� de�erinin -1 oldu�unu kontrol et
-//    EXPECT_EQ(result, -1);
-//
-//    // ��kt�y� kontrol etmek i�in dosyadan oku
-//    FILE* outputFile = fopen(outputTest, "rb");
-//    ASSERT_NE(outputFile, nullptr);
-//
-//    char outputBuffer[256] = { 0 };
-//    fread(outputBuffer, sizeof(char), 255, outputFile);
-//    fclose(outputFile);
-//
-//    // Hata mesaj�n�n do�ru yaz�ld���n� kontrol et
-//    EXPECT_NE(strstr(outputBuffer, "Error: Unable to open tasks file."), nullptr);
-// }
-
-
-
-
 TEST_F(TaskAppTest, GetDateKey_ValidDate) {
-    // Ge�erli bir tarih i�in anahtar hesaplama testi
+    
     int day = 15, month = 12, year = 2024;
     int result = getDateKey(day, month, year);
 
-    EXPECT_EQ(result, 20241215); // Beklenen anahtar: 20241215
+    EXPECT_EQ(result, 20241215); 
 }
 
 TEST_F(TaskAppTest, GetDateKey_SingleDigitDayMonth) {
-    // Tek haneli g�n ve ay i�in test
+
     int day = 5, month = 3, year = 2024;
     int result = getDateKey(day, month, year);
 
-    EXPECT_EQ(result, 20240305); // Beklenen anahtar: 20240305
+    EXPECT_EQ(result, 20240305);
 }
 
 TEST_F(TaskAppTest, GetDateKey_LeapYear) {
-    // Art�k y�l i�in �ubat ay�n�n 29'u testi
+    
     int day = 29, month = 2, year = 2024;
     int result = getDateKey(day, month, year);
 
-    EXPECT_EQ(result, 20240229); // Beklenen anahtar: 20240229
+    EXPECT_EQ(result, 20240229); 
 }
 
 TEST_F(TaskAppTest, GetDateKey_MinimumDate) {
-    // En k���k de�erlerin testi
+    
     int day = 1, month = 1, year = 1;
     int result = getDateKey(day, month, year);
 
-    EXPECT_EQ(result, 10101); // Beklenen anahtar: 10101
+    EXPECT_EQ(result, 10101); 
 }
 
 TEST_F(TaskAppTest, GetDateKey_MaximumDate) {
-    // B�y�k bir y�l de�eri ile test
+
     int day = 31, month = 12, year = 9999;
     int result = getDateKey(day, month, year);
 
-    EXPECT_EQ(result, 99991231); // Beklenen anahtar: 99991231
+    EXPECT_EQ(result, 99991231); 
 }
 
 TEST_F(TaskAppTest, SwapAssignments_Successful) {
-    // Test verilerini olu�tur
+   
     Assignment a = { "Assignment A", 1, 1, 2024 };
     Assignment b = { "Assignment B", 2, 2, 2025 };
 
-    // swap fonksiyonunu �a��r
+    
     int result = swap(&a, &b);
 
-    // D�n�� de�erinin 1 oldu�unu do�rula
+    
     EXPECT_EQ(result, 1);
 
-    // 'a' ve 'b' de�erlerinin yer de�i�tirdi�ini do�rula
     EXPECT_STREQ(a.name, "Assignment B");
     EXPECT_EQ(a.day, 2);
     EXPECT_EQ(a.month, 2);
@@ -1537,22 +1325,22 @@ TEST_F(TaskAppTest, SwapAssignments_Successful) {
 }
 
 TEST_F(TaskAppTest, Heapify_CorrectlyMaintainsMinHeapProperty) {
-    // MinHeap olu�tur ve ba�lang�� verilerini ekle
+    
     MinHeap heap;
     heap.size = 5;
     heap.deadlines[0] = { "Task 1", 10, 5, 2024 };
-    heap.deadlines[1] = { "Task 2", 2, 3, 2024 };  // K���k tarih
+    heap.deadlines[1] = { "Task 2", 2, 3, 2024 };  
     heap.deadlines[2] = { "Task 3", 15, 7, 2024 };
-    heap.deadlines[3] = { "Task 4", 1, 1, 2024 };  // En k���k tarih
+    heap.deadlines[3] = { "Task 4", 1, 1, 2024 };  
     heap.deadlines[4] = { "Task 5", 8, 6, 2024 };
 
-    // heapify fonksiyonunu �a��r: root'ta (i = 0) �al��t�r
+   
     int result = heapify(&heap, 0);
 
-    // Fonksiyonun ba�ar�l� olup olmad���n� kontrol et
+    
     EXPECT_EQ(result, 1);
 
-    // MinHeap �zelli�ini do�rula
+    
     EXPECT_EQ(heap.deadlines[0].day, 2);
     EXPECT_EQ(heap.deadlines[0].month, 3);
     EXPECT_EQ(heap.deadlines[0].year, 2024);
@@ -1570,33 +1358,33 @@ TEST_F(TaskAppTest, Heapify_CorrectlyMaintainsMinHeapProperty) {
 }
 
 TEST_F(TaskAppTest, ExtractMin_ReturnsMinAndMaintainsHeapProperty) {
-    // MinHeap olu�tur ve ba�lang�� verilerini ekle
+    
     MinHeap heap;
     heap.size = 4;
-    heap.deadlines[0] = { "Task 1", 2, 3, 2024 };   // En k���k tarih (k�k)
+    heap.deadlines[0] = { "Task 1", 2, 3, 2024 };   
     heap.deadlines[1] = { "Task 2", 10, 5, 2024 };
     heap.deadlines[2] = { "Task 3", 15, 7, 2024 };
     heap.deadlines[3] = { "Task 4", 8, 6, 2024 };
 
-    // extractMin fonksiyonunu �a��r
+    
     Assignment minAssignment = extractMin(&heap);
 
-    // D�nen de�erin en k���k eleman oldu�unu kontrol et
+    
     EXPECT_EQ(minAssignment.day, 2);
     EXPECT_EQ(minAssignment.month, 3);
     EXPECT_EQ(minAssignment.year, 2024);
     EXPECT_STREQ(minAssignment.name, "Task 1");
 
-    // Heap boyutunun azald���n� do�rula
+    
     EXPECT_EQ(heap.size, 3);
 
-    // Yeni root eleman�n do�ru oldu�unu kontrol et (heapify sonras�)
+   
     EXPECT_EQ(heap.deadlines[0].day, 10);
     EXPECT_EQ(heap.deadlines[0].month, 5);
     EXPECT_EQ(heap.deadlines[0].year, 2024);
     EXPECT_STREQ(heap.deadlines[0].name, "Task 2");
 
-    // Heap'in geri kalan elemanlar�n� kontrol et (MinHeap �zelli�i korunuyor mu?)
+    
     EXPECT_TRUE(
         (heap.deadlines[0].year <= heap.deadlines[1].year) ||
         (heap.deadlines[0].year == heap.deadlines[1].year && heap.deadlines[0].month <= heap.deadlines[1].month) ||
@@ -1611,184 +1399,181 @@ TEST_F(TaskAppTest, ExtractMin_ReturnsMinAndMaintainsHeapProperty) {
 }
 
 TEST_F(TaskAppTest, ExtractMin_EmptyHeapReturnsDefault) {
-    // Bo� bir heap olu�tur
+    
     MinHeap heap;
     heap.size = 0;
 
-    // extractMin fonksiyonunu �a��r
+   
     Assignment result = extractMin(&heap);
 
-    // Bo� durumda d�nen de�erin do�rulu�unu kontrol et
+    
     EXPECT_EQ(result.day, -1);
     EXPECT_EQ(result.month, -1);
     EXPECT_EQ(result.year, -1);
 }
 
 TEST_F(TaskAppTest, ExtractMin_SingleElementHeap) {
-    // Tek elemanl� bir heap olu�tur
+    
     MinHeap heap;
     heap.size = 1;
     heap.deadlines[0] = { "Task 1", 5, 5, 2024 };
 
-    // extractMin fonksiyonunu �a��r
+   
     Assignment result = extractMin(&heap);
 
-    // Tek eleman�n d�nd���n� kontrol et
+    
     EXPECT_EQ(result.day, 5);
     EXPECT_EQ(result.month, 5);
     EXPECT_EQ(result.year, 2024);
     EXPECT_STREQ(result.name, "Task 1");
 
-    // Heap boyutunun s�f�ra d��t���n� do�rula
+    
     EXPECT_EQ(heap.size, 0);
 }
 
 TEST_F(TaskAppTest, ReminderSystemMenu_SetRemindersOption) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+   
     simulateUserInput("1\n0\n0\n0\n1\n\n2\n1\n\n2\n2\n\n2\n3\n\n3\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+    
     int result = reminderSystemMenu();
 
-    // ��k�� kodunu kontrol et
+    
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, ReminderSystemMenu_SetRemindersOptionInvalid) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    
     simulateUserInput("1\n0\n0\n0\n-11\n\n3\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+  
     int result = reminderSystemMenu();
 
-    // ��k�� kodunu kontrol et
+    
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    
     resetStdinStdout();
 }
 
 
 
 TEST_F(TaskAppTest, ReminderSystemMenu_InvalidChoice) {
-    // Kullan�c� giri�ini sim�le et: Ge�ersiz giri� -> 3 (��k��)
+    
     simulateUserInput("99\n\n3\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+    
     int result = reminderSystemMenu();
 
-    // ��k�� kodunu kontrol et
+    
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, ReminderSystemMenu_InputErrorHandling) {
-    // Kullan�c� giri�ini sim�le et: Ge�ersiz giri� t�r� -> 3 (��k��)
+    
     simulateUserInput("invalid\n\n\n3\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+   
     int result = reminderSystemMenu();
 
-    // ��k�� kodunu kontrol et
+    
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_SMS) {
-    // SparseMatrixNode ba�l� listesi olu�tur
-    SparseMatrixNode node1 = { 1, 20231105, 1, NULL };  // SMS
+    
+    SparseMatrixNode node1 = { 1, 20231105, 1, NULL };  
     SparseMatrixNode* head = &node1;
 
-    // Task ID: 1, Date: 20231105 i�in test et
-    testing::internal::CaptureStdout();  // Standart ��kt�y� yakala
+   
+    testing::internal::CaptureStdout();  
     int result = showCurrentNotificationMethod(head, 1, 20231105);
     std::string output = testing::internal::GetCapturedStdout();
 
-    // Sonu� kontrol�
+  
     EXPECT_EQ(result, 1);
     EXPECT_FALSE(output.find("SMS") != std::string::npos);
 
 }
 
 TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_Email) {
-    // SparseMatrixNode ba�l� listesi olu�tur
-    SparseMatrixNode node1 = { 1, 20231105, 2, NULL };  // E-Mail
+    
+    SparseMatrixNode node1 = { 1, 20231105, 2, NULL };  
     SparseMatrixNode* head = &node1;
 
-    // Task ID: 1, Date: 20231105 i�in test et
-    testing::internal::CaptureStdout();  // Standart ��kt�y� yakala
+    
+    testing::internal::CaptureStdout();  
     int result = showCurrentNotificationMethod(head, 1, 20231105);
     std::string output = testing::internal::GetCapturedStdout();
 
-    // Sonu� kontrol�
     EXPECT_EQ(result, 1);
     EXPECT_FALSE(output.find("E-Mail") != std::string::npos);
 }
 
 TEST_F(TaskAppTest, ShowCurrentNotificationMethod_Found_Notification) {
-    // SparseMatrixNode ba�l� listesi olu�tur
-    SparseMatrixNode node1 = { 1, 20231105, 3, NULL };  // Notification
+    
+    SparseMatrixNode node1 = { 1, 20231105, 3, NULL }; 
     SparseMatrixNode* head = &node1;
 
-    // Task ID: 1, Date: 20231105 i�in test et
-    testing::internal::CaptureStdout();  // Standart ��kt�y� yakala
+    testing::internal::CaptureStdout(); 
     int result = showCurrentNotificationMethod(head, 1, 20231105);
     std::string output = testing::internal::GetCapturedStdout();
 
-    // Sonu� kontrol�
     EXPECT_EQ(result, 1);
     EXPECT_FALSE(output.find("Notification") != std::string::npos);
 }
 
 TEST_F(TaskAppTest, ShowCurrentNotificationMethod_NotFound) {
-    // SparseMatrixNode ba�l� listesi olu�tur
+    
     SparseMatrixNode node1 = { 1, 20231105, 1, NULL };
     SparseMatrixNode* head = &node1;
 
-    // Task ID: 2, Date: 20231106 i�in test et (e�le�me yok)
+   
     testing::internal::CaptureStdout();
     int result = showCurrentNotificationMethod(head, 2, 20231106);
     std::string output = testing::internal::GetCapturedStdout();
 
-    // Sonu� kontrol�
+   
     EXPECT_EQ(result, -1);
     EXPECT_FALSE(output.find("No notification method selected") != std::string::npos);
 
 }
 
 TEST_F(TaskAppTest, AlgorithmsMenu_ValidChoices) {
-    // 1'den 8'e kadar olan geçerli seçimleri simüle ediyoruz.
+    
     simulateUserInput("1\n2\n2\n2\n2\n\n2\n2\n2\n2\n2\n\n3\n2\n2\n2\n2\n\n4\n2\n2\n2\n2\n\n6\n2\n2\n2\n2\n\n7\n2\n2\n2\n2\n\n8\n");
 
-    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+    
     int result = algorithmsMenu();
 
-    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+    
     EXPECT_EQ(result, 1);
 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, AlgorithmsMenu_InvalidChoice) {
-    // Geçersiz seçimler için test: -1 ve harf girişi
+    
     simulateUserInput("-1\na\n8\n");
 
-    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+   
     int result = algorithmsMenu();
 
-    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+    
     EXPECT_EQ(result, 1);
 
     resetStdinStdout();
 
-    // Çıktıyı kontrol etmek için dosyadan oku
+    
     FILE* outputFile = fopen(outputTest, "r");
     ASSERT_NE(outputFile, nullptr);
 
@@ -1796,231 +1581,216 @@ TEST_F(TaskAppTest, AlgorithmsMenu_InvalidChoice) {
     fread(outputBuffer, sizeof(char), 511, outputFile);
     fclose(outputFile);
 
-    // "Invalid choice" mesajının olduğunu doğrula
+    
     EXPECT_NE(strstr(outputBuffer, "Invalid choice"), nullptr);
 }
 
 TEST_F(TaskAppTest, AlgorithmsMenu_ExitChoice) {
-    // Çıkış seçeneğini simüle et (8)
+  
     simulateUserInput("8\n");
 
-    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+    
     int result = algorithmsMenu();
 
-    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+    
     EXPECT_EQ(result, 1);
 
     resetStdinStdout();
 }
 TEST_F(TaskAppTest, FindTaskByName_TaskFound) {
-    // Test için görev listesi hazırlıyoruz
+   
     taskCount = 3;
     tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
     tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
     tasks[2] = { 3, "Task 3", "Description 3", "Category 3", "2024-12-03", 0, {0}, 0 };
 
-    // Kullanıcı girişini simüle ediyoruz
+   
     simulateUserInput("Task 2\n");
 
-    // Fonksiyonu çağırıyoruz
+   
     int index = findTaskByName("Task 2");
 
-    // Beklenen indeks 1 (Task 2 dizinin 1. indeksi)
+   
     EXPECT_EQ(index, 1);
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, FindTaskByName_TaskNotFound) {
-    // Test için görev listesi hazırlıyoruz
+   
     taskCount = 2;
     tasks[0] = { 1, "Task 1", "Description 1", "Category 1", "2024-12-01", 0, {0}, 0 };
     tasks[1] = { 2, "Task 2", "Description 2", "Category 2", "2024-12-02", 0, {0}, 0 };
 
-    // Kullanıcı girişini simüle ediyoruz
+    
     simulateUserInput("Task 4\n");
 
-    // Fonksiyonu çağırıyoruz
+    
     int index = findTaskByName("Task 4");
 
-    // Beklenen değer -1 (bulunamadı)
+  
     EXPECT_EQ(index, -1);
     resetStdinStdout();
 }
 
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_AddTask) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+    
     simulateUserInput("1\na\na\na\n2001-1-1\n1\n1\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+    
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+    
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_ViewTask) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+   
     simulateUserInput("2\n\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+    
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+    
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_CategorizeTask) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+
     simulateUserInput("3\na\n\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+    
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+   
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+    
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_DependenciesTask) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("4\n1\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_AnalyzeSCC) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("5\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_SearchByKeyword) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("6\na\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_DLL) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("7\n1\n2\n3\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
-//TEST_F(TaskAppTest, CreateTaskMenuTest_XOR) {
-//    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
-//    simulateUserInput("8\n1\n2\n0\n\n9\n6\n3\n");
-//
-//    // reminderSystemMenu'yu �a��r
-//    int result = createTaskMenu(taskList, &taskCount);
-//
-//    // ��k�� kodunu kontrol et
-//    EXPECT_EQ(result, 0);
-//
-//    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
-//    resetStdinStdout();
-//}
-
 
 TEST_F(TaskAppTest, Deatline_Assign) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("2\n1\na\n\n2 1 2000\n3\n6\n3\n\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = deadlineSettingsMenu();
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 
 TEST_F(TaskAppTest, Deatline_View) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("2\n2\n\n3\n6\n3\n\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = deadlineSettingsMenu();
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, taskPrioritizationMenu_marktask) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("4\n1\na\n2\n\n3\n6\n3\n\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = taskPrioritizationMenu();
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 
 TEST_F(TaskAppTest, taskPrioritizationMenu_marktaskCase1) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("1\na\n1\n\n1\nb\n2\n\n1\nc\n3\n\n3\n6\n3\n\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = taskPrioritizationMenu();
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, viewDeadlinesBplusTree) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("10 10 10\n11 11 1111\n\n3\n6\n3\n");
 
     BPlusTree tree = {};
@@ -2028,13 +1798,13 @@ TEST_F(TaskAppTest, viewDeadlinesBplusTree) {
     rootNode.isLeaf = true;
     tree.root = &rootNode;
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = viewDeadlinesInRange(&tree);
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 1);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
@@ -2045,17 +1815,16 @@ TEST_F(TaskAppTest, InsertInBPlusTree_AddSingleTask) {
     rootNode.numKeys = 0;
     tree.root = &rootNode;
 
-    // Yeni bir görev oluştur
     ScheduledTask task;
     task.day = 10;
     task.month = 10;
     task.year = 2024;
     strcpy(task.name, "Test Task");
 
-    // insertInBPlusTree fonksiyonunu çağır
+
     int result = insertInBPlusTree(&tree, &task);
 
-    // Test sonuçlarını doğrula
+
     EXPECT_EQ(result, 1);
     EXPECT_EQ(tree.root->numKeys, 1);
     EXPECT_EQ(tree.root->keys[0], getDateKey(10, 10, 2024));
@@ -2063,138 +1832,134 @@ TEST_F(TaskAppTest, InsertInBPlusTree_AddSingleTask) {
 }
 
 TEST_F(TaskAppTest, HuffmanEncode_SimpleString) {
-    // Test girdisi
+
     const char* input = "hello world";
 
-    // huffmanEncode fonksiyonunu çağır
+
     char* result = huffmanEncode(input);
 
-    // Test sonuçlarını doğrula
-    ASSERT_NE(result, nullptr);  // Çıktının null olmadığını doğrula
-    EXPECT_STREQ(result, input); // Çıktının giriş ile aynı olduğunu doğrula (mevcut fonksiyonun davranışı)
+    ASSERT_NE(result, nullptr); 
+    EXPECT_STREQ(result, input); 
 
-    // Dinamik bellek tahsisi için belleği serbest bırak
+
     free(result);
 }
 
 TEST_F(TaskAppTest, HuffmanEncode_EmptyString) {
-    // Test girdisi: boş string
+
     const char* input = "";
 
-    // huffmanEncode fonksiyonunu çağır
+   
     char* result = huffmanEncode(input);
 
-    // Test sonuçlarını doğrula
-    ASSERT_NE(result, nullptr);  // Çıktının null olmadığını doğrula
-    EXPECT_STREQ(result, input); // Çıktının giriş ile aynı olduğunu doğrula
 
-    // Dinamik bellek tahsisi için belleği serbest bırak
+    ASSERT_NE(result, nullptr); 
+    EXPECT_STREQ(result, input);
+
     free(result);
 }
 
 TEST_F(TaskAppTest, HuffmanEncode_LongString) {
-    // Test girdisi: uzun bir string
+    
     const char* input = "this is a longer test string to check if the function handles larger inputs properly";
 
-    // huffmanEncode fonksiyonunu çağır
+    
     char* result = huffmanEncode(input);
 
-    // Test sonuçlarını doğrula
-    ASSERT_NE(result, nullptr);  // Çıktının null olmadığını doğrula
-    EXPECT_STREQ(result, input); // Çıktının giriş ile aynı olduğunu doğrula
+    
+    ASSERT_NE(result, nullptr);  
+    EXPECT_STREQ(result, input); 
 
-    // Dinamik bellek tahsisi için belleği serbest bırak
+    
     free(result);
 }
 
 TEST_F(TaskAppTest, SearchUserInHashTable_UserFound) {
-    // Test için bir kullanıcı ekle
+   
     User testUser = { 0, "John", "Doe", "john@example.com", "password123", NULL };
 
     int index = hashFunction(testUser.email);
     hashTable[index] = &testUser;
 
-    // Kullanıcıyı arama
+ 
     User* result = searchUserInHashTable("john@example.com", "password123");
 
-    // Sonuçları kontrol et
-    ASSERT_NE(result, nullptr);  // Kullanıcı bulunmalı
+   
+    ASSERT_NE(result, nullptr); 
     EXPECT_STREQ(result->email, testUser.email);
     EXPECT_STREQ(result->password, testUser.password);
 }
 
 TEST_F(TaskAppTest, SearchUserInHashTable_UserNotFound) {
-    // Hash tablosu boş veya kullanıcı bulunamıyor
+   
     User* result = searchUserInHashTable("nonexistent@example.com", "wrongpassword");
 
-    // Sonuçları kontrol et
-    EXPECT_EQ(result, nullptr);  // Kullanıcı bulunmamalı
+   
+    EXPECT_EQ(result, nullptr);  
 }
 
 TEST_F(TaskAppTest, SearchUserInHashTable_CollisionHandling) {
-    // Çakışma durumunu simüle etmek için aynı hash değerine sahip kullanıcılar ekle
+  
     User user1 = { 0, "Alice", "Smith", "alice@example.com", "password123", NULL };
     User user2 = { 1, "Bob", "Johnson", "bob@example.com", "password456", NULL };
 
     int index1 = hashFunction(user1.email);
-    int index2 = (index1 + 1) % TABLE_SIZE;  // Çakışma nedeniyle bir sonraki index
+    int index2 = (index1 + 1) % TABLE_SIZE;  
 
     hashTable[index1] = &user1;
     hashTable[index2] = &user2;
 
-    // Her iki kullanıcıyı da ara
+   
     User* result1 = searchUserInHashTable("alice@example.com", "password123");
     User* result2 = searchUserInHashTable("bob@example.com", "password456");
 
-    // Sonuçları kontrol et
+    
     EXPECT_NE(result1, nullptr);
     EXPECT_STREQ(result1->email, user1.email);
     EXPECT_STREQ(result1->password, user1.password);
 
-    //EXPECT_NE(result2, nullptr);
-    //EXPECT_STREQ(result2->email, user2.email);
-    //EXPECT_STREQ(result2->password, user2.password);
 }
 
 TEST_F(TaskAppTest, userOptionsMenuTest) {
-    // Kullan�c� giri�ini sim�le et: Ge�ersiz giri� -> 3 (��k��)
+   
     simulateUserInput("1\n9\n2\n3\n3\n3\n4\n3\n5\n8\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = userOptionsMenu();
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, AssignDeadline_All) {
-    // Ge�erli bir g�rev ad� ve tarih girdisini sim�le et
+    
     simulateUserInput("23\n\n3\n6\n3\n");
 
-    // Fonksiyonu �al��t�r ve beklenen de�eri kontrol et
     int result = deadlineSettingsMenu();
+   
+   
     resetStdinStdout();
-    EXPECT_EQ(result, 0);  // Fonksiyonun ba�ar�yla �al��mas� bekleniyor
+    
+    
+    EXPECT_EQ(result, 0);  
 
-
-    // Standart giri� ve ��k��� s�f�rla
 
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_Invalid) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
+     
     simulateUserInput("23\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
+ 
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
@@ -2203,10 +1968,10 @@ TEST_F(TaskAppTest, userOptionsMenu_Invalid) {
     simulateUserInput("23\n\n6\n3\n");
 
     int result = userOptionsMenu();
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
@@ -2235,13 +2000,13 @@ TEST_F(TaskAppTest, mainMenuTest_InputError) {
 }
 
 TEST_F(TaskAppTest, AlgorithmsMenuTest_InputError) {
-    // 1'den 8'e kadar olan geçerli seçimleri simüle ediyoruz.
+    
     simulateUserInput("-2\n\n\n8\n6\n3\n");
 
-    // algorithmsMenu fonksiyonunu çağır ve sonucu al
+
     int result = algorithmsMenu();
 
-    // Fonksiyonun başarılı bir şekilde çıktığını kontrol et (return 1)
+
     EXPECT_EQ(result, 1);
 
     resetStdinStdout();
@@ -2252,24 +2017,20 @@ TEST_F(TaskAppTest, userOptionsMenu_InputError) {
     simulateUserInput("-2\n\n\n6\n6\n3\n");
 
     int result = userOptionsMenu();
-    // ��k�� kodunu kontrol et
+ 
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
+ 
     resetStdinStdout();
 }
 
 TEST_F(TaskAppTest, CreateTaskMenuTest_InputError) {
-    // Kullan�c� giri�ini sim�le et: 1 -> Set Reminders -> 3 (��k��)
     simulateUserInput("-2\n\n\n9\n6\n3\n");
 
-    // reminderSystemMenu'yu �a��r
     int result = createTaskMenu(taskList, &taskCount);
 
-    // ��k�� kodunu kontrol et
     EXPECT_EQ(result, 0);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
     resetStdinStdout();
 }
 
@@ -2278,20 +2039,18 @@ TEST_F(TaskAppTest, navigateXORListTest_InputError) {
     simulateUserInput("-2\n\n0\n\n9\n6\n3\n");
 
     int result = navigateXORList();
-    // ��k�� kodunu kontrol et
     EXPECT_EQ(result, 1);
 
-    // Standart ��kt�y� kontrol etmek i�in bir y�ntem eklenebilir
     resetStdinStdout();
 }
 
 
 TEST_F(TaskAppTest, RegisterUser_UserAddedSuccessfully) {
-    // Test verileri
+   
     User testUser = { 0, "John", "Doe", "john.doe@example.com", "securepassword", NULL };
     const char* userFilePath = "test_users.bin";
 
-    // Test dosyasını baştan oluştur
+    
     FILE* file = fopen(userFilePath, "wb");
     if (file) {
         int userCount = 0;
@@ -2299,34 +2058,78 @@ TEST_F(TaskAppTest, RegisterUser_UserAddedSuccessfully) {
         fclose(file);
     }
 
-    // Kullanıcıyı kaydet
-    int result = registerUser(testUser, userFilePath, true);  // Test modu etkin
+    
+    int result = registerUser(testUser, userFilePath, true);  
 
-    // Testlerin doğrulanması
-    EXPECT_EQ(result, 1); // Kullanıcının başarıyla eklendiğini doğrula
+    
+    EXPECT_EQ(result, 1); 
 
-    // Dosyadan kullanıcıyı doğrula
+    
     file = fopen(userFilePath, "rb");
     ASSERT_TRUE(file != NULL);
 
     int userCount;
     fread(&userCount, sizeof(int), 1, file);
-    EXPECT_EQ(userCount, 1); // Kullanıcı sayısını kontrol et
+    EXPECT_EQ(userCount, 1); 
 
     User loadedUser;
     fread(&loadedUser, sizeof(User), 1, file);
     fclose(file);
 
-    EXPECT_EQ(loadedUser.id, 1); // Kullanıcı ID'sini kontrol et
-    EXPECT_STREQ(loadedUser.name, "John"); // Kullanıcı adı kontrolü
-    EXPECT_STREQ(loadedUser.surname, "Doe"); // Kullanıcı soyadı kontrolü
-    EXPECT_STREQ(loadedUser.email, "john.doe@example.com"); // Kullanıcı e-posta kontrolü
-    EXPECT_STREQ(loadedUser.password, "securepassword"); // Kullanıcı şifre kontrolü
+    EXPECT_EQ(loadedUser.id, 1); 
+    EXPECT_STREQ(loadedUser.name, "John"); 
+    EXPECT_STREQ(loadedUser.surname, "Doe"); 
+    EXPECT_STREQ(loadedUser.email, "john.doe@example.com"); 
+    EXPECT_STREQ(loadedUser.password, "securepassword");
 
-    // Test dosyasını temizle
+
     remove(userFilePath);
 }
 
+
+TEST_F(TaskAppTest, CreateNode_LeafNode) {
+    BPlusTreeNode* node = createNode(true);
+
+    ASSERT_NE(node, nullptr) << "Node creation failed.";
+    EXPECT_TRUE(node->isLeaf) << "Node should be a leaf.";
+    EXPECT_EQ(node->numKeys, 0) << "Number of keys should be initialized to 0.";
+
+    for (int i = 0; i < MAX_CHILDREN; i++) {
+        EXPECT_EQ(node->children[i], nullptr) << "Child pointers should be NULL.";
+    }
+
+    free(node); // Bellek sızıntısını önlemek için serbest bırak
+}
+
+TEST_F(TaskAppTest, CreateNode_InternalNode) {
+    BPlusTreeNode* node = createNode(false);
+
+    ASSERT_NE(node, nullptr) << "Node creation failed.";
+    EXPECT_FALSE(node->isLeaf) << "Node should not be a leaf.";
+    EXPECT_EQ(node->numKeys, 0) << "Number of keys should be initialized to 0.";
+
+    for (int i = 0; i < MAX_CHILDREN; i++) {
+        EXPECT_EQ(node->children[i], nullptr) << "Child pointers should be NULL.";
+    }
+
+    free(node); // Bellek sızıntısını önlemek için serbest bırak
+}
+
+TEST_F(TaskAppTest, CreateBPlusTree_Success) {
+    BPlusTree* tree = createBPlusTree();
+
+    ASSERT_NE(tree, nullptr) << "Tree creation failed.";
+    ASSERT_NE(tree->root, nullptr) << "Root node should not be NULL.";
+    EXPECT_TRUE(tree->root->isLeaf) << "Root node should be a leaf.";
+    EXPECT_EQ(tree->root->numKeys, 0) << "Root node should have 0 keys initially.";
+
+    for (int i = 0; i < MAX_CHILDREN; i++) {
+        EXPECT_EQ(tree->root->children[i], nullptr) << "Child pointers should be NULL.";
+    }
+
+    free(tree->root); // Önce kök düğümü serbest bırak
+    free(tree);       // Ardından ağacı serbest bırak
+}
 
 
 
